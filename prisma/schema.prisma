@@ -1,0 +1,540 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// =========================================================
+// 1. BUSINESS, TENANCY & SETTINGS
+// =========================================================
+
+model Business {
+  id                       String   @id @default(uuid())
+  name                     String
+  slug                     String   @unique
+  tagline                  String?
+  description              String?
+  industry                 String   @default("Other")
+  constitution             String?
+  countryCode              String?
+  currentStageId           Int      @default(0)
+  founderStageAssessmentId Int?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  currentStage           StageDefinition         @relation("BusinessCurrentStage", fields: [currentStageId], references: [id], onDelete: Restrict)
+  founderStageAssessment StageDefinition?        @relation("BusinessFounderStageAssessment", fields: [founderStageAssessmentId], references: [id], onDelete: SetNull)
+  settings               BusinessSettings?
+  stageProgress          BusinessStageProgress[]
+  stageTransitions       StageTransition[]
+  products               Product[]
+  customers              Customer[]
+  orders                 Order[]
+  orderItems             OrderItem[]
+  expenses               Expense[]
+  contentItems           ContentItem[]
+  contentPubs            ContentPublication[]
+  goals                  Goal[]
+  tasks                  Task[]
+  alerts                 Alert[]
+  inventoryLedger        InventoryTransaction[]
+  promotionalDispatches  PromotionalDispatch[]
+
+  @@index([slug])
+  @@index([currentStageId])
+  @@index([founderStageAssessmentId])
+}
+
+model BusinessSettings {
+  id                String   @id @default(uuid())
+  businessId        String   @unique
+  currencyCode      String   @default("INR")
+  currencySymbol    String   @default("₹")
+  fiscalYearStart   Int      @default(4)
+  orderPrefix       String   @default("PR-")
+  nextOrderNumber   Int      @default(1001)
+  supportEmail      String?
+  supportPhone      String?
+  lowStockThreshold Int      @default(20)
+  updatedAt         DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+// =========================================================
+// 2. DATA-DRIVEN STAGE ENGINE & AUDIT TRAIL
+// =========================================================
+
+enum RequirementType {
+  MANDATORY
+  RECOMMENDED
+  OPTIONAL
+}
+
+enum RequirementStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+}
+
+enum EvaluationMode {
+  MANUAL
+  METRIC_THRESHOLD
+  SYSTEM_CHECK
+}
+
+model StageDefinition {
+  id                 Int                   @id
+  name               String                @unique
+  description        String
+  requirements       StageRequirementDef[]
+  businessesInStage  Business[]            @relation("BusinessCurrentStage")
+  founderAssessments Business[]            @relation("BusinessFounderStageAssessment")
+  transitionsFrom    StageTransition[]     @relation("TransitionFromStage")
+  transitionsTo      StageTransition[]     @relation("TransitionToStage")
+}
+
+model StageRequirementDef {
+  id          String          @id @default(uuid())
+  stageId     Int
+  code        String          @unique
+  title       String
+  description String
+  type        RequirementType @default(MANDATORY)
+  evalMode    EvaluationMode  @default(MANUAL)
+  evalRuleKey String?
+  evalConfig  Json?
+  orderIndex  Int             @default(0)
+
+  stageDefinition  StageDefinition         @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  businessProgress BusinessStageProgress[]
+
+  @@index([stageId, type])
+}
+
+model BusinessStageProgress {
+  id            String            @id @default(uuid())
+  businessId    String
+  requirementId String
+  status        RequirementStatus @default(NOT_STARTED)
+  completedAt   DateTime?
+  blockerReason String?
+  notes         String?
+  updatedAt     DateTime          @updatedAt
+
+  business    Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  requirement StageRequirementDef @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, requirementId])
+  @@index([businessId, status])
+}
+
+model StageTransition {
+  id          String   @id @default(uuid())
+  businessId  String
+  fromStageId Int
+  toStageId   Int
+  reason      String
+  triggeredBy String   @default("Founder")
+  createdAt   DateTime @default(now())
+
+  business  Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  fromStage StageDefinition @relation("TransitionFromStage", fields: [fromStageId], references: [id], onDelete: Restrict)
+  toStage   StageDefinition @relation("TransitionToStage", fields: [toStageId], references: [id], onDelete: Restrict)
+
+  @@index([businessId, createdAt])
+  @@index([fromStageId])
+  @@index([toStageId])
+}
+
+// =========================================================
+// 3. PRODUCTS & COSTING
+// =========================================================
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+model Product {
+  id          String  @id @default(uuid())
+  businessId  String
+  name        String
+  sku         String
+  category    String  @default("Skincare")
+  description String?
+
+  sellingPrice  Decimal? @db.Decimal(12, 2)
+  cogs          Decimal? @db.Decimal(12, 2)
+  packagingCost Decimal? @db.Decimal(12, 2)
+  variableCost  Decimal? @db.Decimal(12, 2)
+
+  // Fast read-cache only: InventoryTransaction is the single source of truth
+  currentStock     Int @default(0)
+  promotionalStock Int @default(0)
+  reorderLevel     Int @default(20)
+
+  supplier String?
+  status   ProductStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business              Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orderItems            OrderItem[]
+  stockEntries          InventoryTransaction[]
+  promotionalDispatches PromotionalDispatch[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, sku])
+  @@index([businessId, status])
+}
+
+// =========================================================
+// 4. INVENTORY TRANSACTION LEDGER
+// =========================================================
+
+enum InventoryTransactionType {
+  INITIAL_STOCK
+  PRODUCTION_RUN
+  PURCHASE_RESTOCK
+  SALE
+  RETURN_RESTOCK
+  DAMAGED_WRITE_OFF
+  MANUAL_AUDIT
+  PROMOTIONAL_DISPATCH
+}
+
+model InventoryTransaction {
+  id          String                   @id @default(uuid())
+  businessId  String
+  productId   String
+  type        InventoryTransactionType
+  quantity    Int
+  unitCost    Decimal?                 @db.Decimal(12, 2)
+  referenceId String?
+  notes       String?
+  createdAt   DateTime                 @default(now())
+
+  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product             Product              @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Cascade)
+  promotionalDispatch PromotionalDispatch? @relation("PromotionalDispatchInventoryTransaction")
+
+  @@index([businessId, productId, createdAt])
+  @@index([businessId, type])
+}
+
+// =========================================================
+// 5. CUSTOMERS & COMMERCE
+// =========================================================
+
+enum OrderPaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum OrderFulfillmentStatus {
+  PENDING
+  PROCESSING
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  businessId String
+  name       String
+  email      String?
+  phone      String?
+  city       String?
+  state      String?
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orders   Order[]
+
+  @@unique([businessId, id])
+  @@index([businessId, phone])
+  @@index([businessId, email])
+  @@index([businessId, createdAt])
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  businessId  String
+  customerId  String
+  orderNumber String
+  orderDate   DateTime @default(now())
+
+  paymentStatus     OrderPaymentStatus     @default(PENDING)
+  fulfillmentStatus OrderFulfillmentStatus @default(PENDING)
+
+  subtotal        Decimal @db.Decimal(12, 2)
+  discountAmount  Decimal @default(0) @db.Decimal(12, 2)
+  shippingCharged Decimal @default(0) @db.Decimal(12, 2)
+  totalAmount     Decimal @db.Decimal(12, 2)
+
+  channel       String   @default("Direct")
+  paymentMethod String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  business Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer    @relation(fields: [businessId, customerId], references: [businessId, id], onDelete: Restrict)
+  items    OrderItem[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, orderNumber])
+  @@index([businessId, orderDate, paymentStatus])
+  @@index([businessId, customerId])
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  businessId String
+  orderId    String
+  productId  String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(12, 2)
+
+  costPriceSnapshot Decimal @db.Decimal(12, 2)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  order    Order    @relation(fields: [businessId, orderId], references: [businessId, id], onDelete: Cascade)
+  product  Product  @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Restrict)
+
+  @@index([businessId, orderId])
+  @@index([businessId, productId])
+}
+
+// =========================================================
+// 6. EXPENSES & FINANCE
+// =========================================================
+
+enum ExpenseCategory {
+  PRODUCT_FORMULATION
+  PACKAGING
+  PRINTING_LABELS
+  SHIPPING
+  MARKETING
+  PROMOTIONAL
+  EQUIPMENT
+  WEBSITE_SOFTWARE
+  LEGAL_COMPLIANCE
+  OPERATIONS
+  OTHER
+}
+
+model Expense {
+  id            String          @id @default(uuid())
+  businessId    String
+  expenseDate   DateTime
+  category      ExpenseCategory
+  description   String
+  amount        Decimal         @db.Decimal(12, 2)
+  vendor        String?
+  paymentMethod String?
+  isRecurring   Boolean         @default(false)
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  promotionalDispatch PromotionalDispatch? @relation("PromotionalDispatchExpense")
+
+  @@index([businessId, expenseDate])
+  @@index([businessId, category])
+}
+
+// =========================================================
+// 7. PROMOTIONAL INVENTORY
+// =========================================================
+
+model PromotionalDispatch {
+  id                     String   @id @default(uuid())
+  businessId             String
+  productId              String
+  quantity               Int
+  recipient              String
+  purpose                String
+  referenceId            String?
+  unitCost               Decimal  @db.Decimal(12, 2)
+  totalCost              Decimal  @db.Decimal(12, 2)
+  inventoryTransactionId String   @unique
+  expenseId              String   @unique
+  createdAt              DateTime @default(now())
+
+  business             Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product              Product              @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Restrict)
+  inventoryTransaction InventoryTransaction @relation("PromotionalDispatchInventoryTransaction", fields: [inventoryTransactionId], references: [id], onDelete: Restrict)
+  expense              Expense              @relation("PromotionalDispatchExpense", fields: [expenseId], references: [id], onDelete: Restrict)
+
+  @@index([businessId, createdAt])
+  @@index([businessId, productId, createdAt])
+}
+
+// =========================================================
+// 8. CONTENT ENGINE & SOCIAL PIPELINE
+// =========================================================
+
+enum ContentPlatform {
+  INSTAGRAM
+  FACEBOOK
+  YOUTUBE
+  WHATSAPP
+}
+
+enum ContentType {
+  REEL
+  POST
+  CAROUSEL
+  STORY
+  LONG_VIDEO
+}
+
+enum ContentStatus {
+  IDEA
+  SCRIPT
+  SHOT
+  EDITING
+  READY
+  SCHEDULED
+  PUBLISHED
+}
+
+model ContentItem {
+  id          String        @id @default(uuid())
+  businessId  String
+  title       String
+  contentType ContentType   @default(REEL)
+  status      ContentStatus @default(IDEA)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  business     Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  publications ContentPublication[]
+
+  @@unique([businessId, id])
+  @@index([businessId, status])
+}
+
+model ContentPublication {
+  id            String          @id @default(uuid())
+  businessId    String
+  contentItemId String
+  platform      ContentPlatform
+  plannedDate   DateTime?
+  publishedDate DateTime?
+  url           String?
+
+  views         Int @default(0)
+  reach         Int @default(0)
+  likes         Int @default(0)
+  comments      Int @default(0)
+  shares        Int @default(0)
+  saves         Int @default(0)
+  websiteClicks Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business    Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contentItem ContentItem @relation(fields: [businessId, contentItemId], references: [businessId, id], onDelete: Cascade)
+
+  @@unique([contentItemId, platform])
+  @@index([businessId, platform])
+}
+
+// =========================================================
+// 9. GOALS & TASKS
+// =========================================================
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  businessId   String
+  name         String
+  category     String
+  targetValue  Decimal  @db.Decimal(12, 2)
+  currentValue Decimal  @default(0) @db.Decimal(12, 2)
+  unit         String   @default("Units")
+  startDate    DateTime
+  endDate      DateTime
+  isCompleted  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  tasks    Task[]
+
+  @@unique([businessId, id])
+  @@index([businessId, isCompleted])
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  businessId  String
+  title       String
+  description String?
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(TODO)
+  dueDate     DateTime?
+  goalId      String?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  goal     Goal?    @relation(fields: [businessId, goalId], references: [businessId, id], onDelete: SetNull)
+
+  @@index([businessId, status, dueDate])
+  @@index([businessId, priority])
+}
+
+// =========================================================
+// 10. ATTENTION & OPERATIONAL ALERTS
+// =========================================================
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model Alert {
+  id         String        @id @default(uuid())
+  businessId String
+  title      String
+  message    String
+  severity   AlertSeverity @default(WARNING)
+  isResolved Boolean       @default(false)
+  linkUrl    String?
+  createdAt  DateTime      @default(now())
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, isResolved])
+}
