@@ -42,9 +42,13 @@ model Business {
   inventoryLedger        InventoryTransaction[]
   promotionalDispatches  PromotionalDispatch[]
 
-  rawMaterials                    RawMaterial[]
-  rawMaterialPurchases            RawMaterialPurchase[]
+  rawMaterials                     RawMaterial[]
+  rawMaterialPurchases             RawMaterialPurchase[]
   rawMaterialInventoryTransactions RawMaterialInventoryTransaction[]
+
+  packagingMaterials                     PackagingMaterial[]
+  packagingMaterialPurchases             PackagingMaterialPurchase[]
+  packagingMaterialInventoryTransactions PackagingMaterialInventoryTransaction[]
 
   @@index([slug])
   @@index([currentStageId])
@@ -224,26 +228,26 @@ enum RawMaterialInventoryTransactionType {
 }
 
 model RawMaterial {
-  id                   String             @id @default(uuid())
-  businessId           String
-  name                 String
-  category             String?
-  baseUnit              RawMaterialBaseUnit
-  supplier             String?
-  notes                String?
+  id                 String             @id @default(uuid())
+  businessId         String
+  name               String
+  category           String?
+  baseUnit           RawMaterialBaseUnit
+  supplier           String?
+  notes              String?
 
   // Cached inventory values.
   // The transaction ledger remains the historical source of truth.
-  currentQuantity       Decimal            @default(0) @db.Decimal(16, 3)
-  currentValue          Decimal            @default(0) @db.Decimal(16, 2)
-  weightedAverageCost   Decimal            @default(0) @db.Decimal(16, 6)
+  currentQuantity     Decimal @default(0) @db.Decimal(16, 3)
+  currentValue        Decimal @default(0) @db.Decimal(16, 2)
+  weightedAverageCost Decimal @default(0) @db.Decimal(16, 6)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business       Business                            @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  purchases      RawMaterialPurchase[]
-  transactions  RawMaterialInventoryTransaction[]
+  business      Business                            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  purchases     RawMaterialPurchase[]
+  transactions RawMaterialInventoryTransaction[]
 
   @@unique([businessId, id])
   @@unique([businessId, name])
@@ -252,7 +256,7 @@ model RawMaterial {
 }
 
 model RawMaterialPurchase {
-  id               String                    @id @default(uuid())
+  id               String  @id @default(uuid())
   businessId       String
   rawMaterialId    String
 
@@ -276,9 +280,9 @@ model RawMaterialPurchase {
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
 
-  business         Business                  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  rawMaterial      RawMaterial               @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
-  inventoryTransaction RawMaterialInventoryTransaction? @relation("RawMaterialPurchaseTransaction")
+  business              Business                             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  rawMaterial           RawMaterial                          @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
+  inventoryTransaction  RawMaterialInventoryTransaction?     @relation("RawMaterialPurchaseTransaction")
 
   @@index([businessId, purchaseDate])
   @@index([businessId, rawMaterialId, purchaseDate])
@@ -315,7 +319,131 @@ model RawMaterialInventoryTransaction {
 }
 
 // =========================================================
-// 5. INVENTORY TRANSACTION LEDGER
+// 5. PACKAGING MATERIALS & PACKAGING COSTING
+// =========================================================
+
+enum PackagingMaterialBaseUnit {
+  PIECE
+}
+
+enum PackagingMaterialPurchaseUnit {
+  PIECE
+  PACK
+  BOX
+  BUNDLE
+  CARTON
+}
+
+enum PackagingMaterialInventoryTransactionType {
+  PURCHASE
+  CONSUMPTION
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+}
+
+model PackagingMaterial {
+  id                  String @id @default(uuid())
+  businessId          String
+  name                String
+  category            String?
+  baseUnit            PackagingMaterialBaseUnit
+  supplier            String?
+  notes               String?
+
+  // Cached inventory values.
+  // Internal monetary precision is kept at 6 decimal places
+  // to prevent rounding drift during repeated costing operations.
+  currentQuantity     Decimal @default(0) @db.Decimal(16, 3)
+  currentValue        Decimal @default(0) @db.Decimal(16, 6)
+  weightedAverageCost Decimal @default(0) @db.Decimal(16, 6)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business      Business                               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  purchases     PackagingMaterialPurchase[]
+  transactions PackagingMaterialInventoryTransaction[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, name])
+  @@index([businessId, category])
+  @@index([businessId, supplier])
+}
+
+model PackagingMaterialPurchase {
+  id                  String @id @default(uuid())
+  businessId          String
+  packagingMaterialId String
+
+  purchaseDate         DateTime
+  quantity             Decimal @db.Decimal(16, 3)
+  purchaseUnit         PackagingMaterialPurchaseUnit
+
+  // Number of base pieces contained in one purchase unit.
+  //
+  // Examples:
+  // 1 piece = 1
+  // 1 pack of 100 = 100
+  // 1 box of 500 = 500
+  unitsPerPurchaseUnit Decimal @db.Decimal(16, 3)
+
+  // Quantity converted into base pieces.
+  baseQuantity         Decimal @db.Decimal(16, 3)
+
+  totalAmount           Decimal @db.Decimal(12, 2)
+
+  // Total amount / baseQuantity.
+  costPerBaseUnit       Decimal @db.Decimal(16, 6)
+
+  supplier              String?
+  invoiceReference      String?
+  notes                 String?
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  business              Business                                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  packagingMaterial     PackagingMaterial                       @relation(fields: [packagingMaterialId], references: [id], onDelete: Restrict)
+  inventoryTransaction  PackagingMaterialInventoryTransaction?  @relation("PackagingMaterialPurchaseTransaction")
+
+  @@index([businessId, purchaseDate])
+  @@index([businessId, packagingMaterialId, purchaseDate])
+}
+
+model PackagingMaterialInventoryTransaction {
+  id                  String                                  @id @default(uuid())
+  businessId         String
+  packagingMaterialId String
+
+  type                PackagingMaterialInventoryTransactionType
+
+  // Always stored in the packaging material's base unit: PIECE.
+  quantity            Decimal                                 @db.Decimal(16, 3)
+
+  // Cost assigned to each base piece.
+  unitCost            Decimal                                 @db.Decimal(16, 6)
+
+  // Quantity × unitCost.
+  // Kept at 6 decimal places internally to avoid
+  // cumulative rounding drift.
+  totalValue          Decimal                                 @db.Decimal(16, 6)
+
+  purchaseId          String?                                 @unique
+
+  referenceId         String?
+  notes               String?
+  createdAt           DateTime                                @default(now())
+
+  business             Business                                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  packagingMaterial    PackagingMaterial                       @relation(fields: [packagingMaterialId], references: [id], onDelete: Restrict)
+  purchase             PackagingMaterialPurchase?              @relation("PackagingMaterialPurchaseTransaction", fields: [purchaseId], references: [id], onDelete: Restrict)
+
+  @@index([businessId, packagingMaterialId, createdAt])
+  @@index([businessId, type])
+}
+
+// =========================================================
+// 6. INVENTORY TRANSACTION LEDGER
 // =========================================================
 
 enum InventoryTransactionType {
@@ -349,7 +477,7 @@ model InventoryTransaction {
 }
 
 // =========================================================
-// 6. CUSTOMERS & COMMERCE
+// 7. CUSTOMERS & COMMERCE
 // =========================================================
 
 enum OrderPaymentStatus {
@@ -438,7 +566,7 @@ model OrderItem {
 }
 
 // =========================================================
-// 7. EXPENSES & FINANCE
+// 8. EXPENSES & FINANCE
 // =========================================================
 
 enum ExpenseCategory {
@@ -478,7 +606,7 @@ model Expense {
 }
 
 // =========================================================
-// 8. PROMOTIONAL INVENTORY
+// 9. PROMOTIONAL INVENTORY
 // =========================================================
 
 model PromotionalDispatch {
@@ -505,7 +633,7 @@ model PromotionalDispatch {
 }
 
 // =========================================================
-// 9. CONTENT ENGINE & SOCIAL PIPELINE
+// 10. CONTENT ENGINE & SOCIAL PIPELINE
 // =========================================================
 
 enum ContentPlatform {
@@ -578,7 +706,7 @@ model ContentPublication {
 }
 
 // =========================================================
-// 10. GOALS & TASKS
+// 11. GOALS & TASKS
 // =========================================================
 
 enum Priority {
@@ -636,7 +764,7 @@ model Task {
 }
 
 // =========================================================
-// 11. ATTENTION & OPERATIONAL ALERTS
+// 12. ATTENTION & OPERATIONAL ALERTS
 // =========================================================
 
 enum AlertSeverity {

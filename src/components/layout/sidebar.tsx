@@ -9,7 +9,7 @@ import {
   Milestone,
   Package,
   Layers,
-  Beaker,
+  Boxes,
   ShoppingBag,
   Users,
   Wallet,
@@ -50,9 +50,9 @@ const NAV_ITEMS: NavItem[] = [
     enabled: true,
   },
   {
-    label: "Raw Materials",
-    href: "/raw-materials",
-    icon: Beaker,
+    label: "Materials",
+    href: "/materials",
+    icon: Boxes,
     enabled: true,
   },
   {
@@ -213,7 +213,9 @@ export function Sidebar({
                     <div className="flex items-center gap-3">
                       <Icon className="h-[17px] w-[17px] text-slate-300" />
 
-                      <span>{item.label}</span>
+                      <span>
+                        {item.label}
+                      </span>
                     </div>
 
                     <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-medium text-slate-400">
@@ -244,7 +246,9 @@ export function Sidebar({
                     )}
                   />
 
-                  <span>{item.label}</span>
+                  <span>
+                    {item.label}
+                  </span>
 
                   {isActive && (
                     <span className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-600" />
@@ -260,6 +264,7 @@ export function Sidebar({
           <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
+
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
 
