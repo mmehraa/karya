@@ -1,0 +1,741 @@
+import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
+import type {
+  SerializedRawMaterial,
+  SerializedRawMaterialPurchase,
+} from "./types";
+import type {
+  CreateRawMaterialInput,
+  RecordRawMaterialPurchaseInput,
+  RecordRawMaterialConsumptionInput,
+} from "./validation";
+
+type RawMaterialRecord = {
+  id: string;
+  businessId: string;
+  name: string;
+  category: string | null;
+  baseUnit: "GRAM" | "MILLILITER" | "PIECE";
+  supplier: string | null;
+  notes: string | null;
+  currentQuantity: Prisma.Decimal;
+  currentValue: Prisma.Decimal;
+  weightedAverageCost: Prisma.Decimal;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type RawMaterialPurchaseRecord = {
+  id: string;
+  businessId: string;
+  rawMaterialId: string;
+  purchaseDate: Date;
+  quantity: Prisma.Decimal;
+  purchaseUnit:
+    | "GRAM"
+    | "KILOGRAM"
+    | "MILLILITER"
+    | "LITER"
+    | "PIECE";
+  baseQuantity: Prisma.Decimal;
+  totalAmount: Prisma.Decimal;
+  costPerBaseUnit: Prisma.Decimal;
+  supplier: string | null;
+  invoiceReference: string | null;
+  notes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function decimalToNumber(value: Prisma.Decimal): number {
+  return Number(value);
+}
+
+function serializeRawMaterial(
+  material: RawMaterialRecord,
+): SerializedRawMaterial {
+  return {
+    id: material.id,
+    businessId: material.businessId,
+    name: material.name,
+    category: material.category,
+    baseUnit: material.baseUnit,
+    supplier: material.supplier,
+    notes: material.notes,
+    currentQuantity: decimalToNumber(material.currentQuantity),
+    currentValue: decimalToNumber(material.currentValue),
+    weightedAverageCost: decimalToNumber(material.weightedAverageCost),
+    createdAt: material.createdAt,
+    updatedAt: material.updatedAt,
+  };
+}
+
+function serializePurchase(
+  purchase: RawMaterialPurchaseRecord,
+): SerializedRawMaterialPurchase {
+  return {
+    id: purchase.id,
+    businessId: purchase.businessId,
+    rawMaterialId: purchase.rawMaterialId,
+    purchaseDate: purchase.purchaseDate,
+    quantity: decimalToNumber(purchase.quantity),
+    purchaseUnit: purchase.purchaseUnit,
+    baseQuantity: decimalToNumber(purchase.baseQuantity),
+    totalAmount: decimalToNumber(purchase.totalAmount),
+    costPerBaseUnit: decimalToNumber(purchase.costPerBaseUnit),
+    supplier: purchase.supplier,
+    invoiceReference: purchase.invoiceReference,
+    notes: purchase.notes,
+    createdAt: purchase.createdAt,
+    updatedAt: purchase.updatedAt,
+  };
+}
+
+/**
+ * Converts a purchase quantity into the raw material's base unit.
+ *
+ * GRAM:
+ *   GRAM -> GRAM
+ *   KILOGRAM -> GRAM
+ *
+ * MILLILITER:
+ *   MILLILITER -> MILLILITER
+ *   LITER -> MILLILITER
+ *
+ * PIECE:
+ *   PIECE -> PIECE
+ *
+ * Incompatible units are rejected.
+ */
+function convertToBaseQuantity(
+  quantity: number,
+  purchaseUnit: RecordRawMaterialPurchaseInput["purchaseUnit"],
+  baseUnit: RawMaterialRecord["baseUnit"],
+): Prisma.Decimal {
+  const quantityDecimal = new Prisma.Decimal(quantity);
+
+  if (baseUnit === "GRAM") {
+    if (purchaseUnit === "GRAM") {
+      return quantityDecimal;
+    }
+
+    if (purchaseUnit === "KILOGRAM") {
+      return quantityDecimal.mul(1000);
+    }
+  }
+
+  if (baseUnit === "MILLILITER") {
+    if (purchaseUnit === "MILLILITER") {
+      return quantityDecimal;
+    }
+
+    if (purchaseUnit === "LITER") {
+      return quantityDecimal.mul(1000);
+    }
+  }
+
+  if (baseUnit === "PIECE" && purchaseUnit === "PIECE") {
+    return quantityDecimal;
+  }
+
+  throw new Error(
+    `Purchase unit "${purchaseUnit}" is not compatible with base unit "${baseUnit}".`,
+  );
+}
+
+/**
+ * Creates a raw material without adding inventory.
+ *
+ * Inventory only changes when an actual purchase or adjustment
+ * is recorded.
+ */
+export async function createRawMaterial(
+  businessId: string,
+  input: CreateRawMaterialInput,
+): Promise<SerializedRawMaterial> {
+  const material = await db.rawMaterial.create({
+    data: {
+      businessId,
+      name: input.name,
+      category: input.category ?? null,
+      baseUnit: input.baseUnit,
+      supplier: input.supplier ?? null,
+      notes: input.notes ?? null,
+    },
+  });
+
+  return serializeRawMaterial(material);
+}
+
+/**
+ * Retrieves all raw materials for the active business.
+ */
+export async function getRawMaterials(
+  businessId: string,
+): Promise<SerializedRawMaterial[]> {
+  const materials = await db.rawMaterial.findMany({
+    where: {
+      businessId,
+    },
+    orderBy: [
+      {
+        name: "asc",
+      },
+    ],
+  });
+
+  return materials.map(serializeRawMaterial);
+}
+
+/**
+ * Retrieves purchase history for one raw material.
+ *
+ * The raw material itself is scoped to businessId first so a purchase
+ * from another business can never be accessed accidentally.
+ */
+export async function getRawMaterialPurchases(
+  businessId: string,
+  rawMaterialId: string,
+): Promise<SerializedRawMaterialPurchase[]> {
+  const material = await db.rawMaterial.findFirst({
+    where: {
+      id: rawMaterialId,
+      businessId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!material) {
+    throw new Error("Raw material not found.");
+  }
+
+  const purchases = await db.rawMaterialPurchase.findMany({
+    where: {
+      businessId,
+      rawMaterialId,
+    },
+    orderBy: [
+      {
+        purchaseDate: "desc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
+  return purchases.map(serializePurchase);
+}
+
+/**
+ * Records a raw material purchase and updates inventory atomically.
+ *
+ * Example:
+ *
+ * Existing:
+ *   1,000g worth ₹300
+ *
+ * New purchase:
+ *   1,000g worth ₹550
+ *
+ * Result:
+ *   Quantity = 2,000g
+ *   Value    = ₹850
+ *   Average  = ₹0.425/g
+ */
+export async function recordRawMaterialPurchase(
+  businessId: string,
+  input: RecordRawMaterialPurchaseInput,
+): Promise<{
+  material: SerializedRawMaterial;
+  purchase: SerializedRawMaterialPurchase;
+}> {
+  return db.$transaction(async (tx) => {
+    const material = await tx.rawMaterial.findFirst({
+      where: {
+        id: input.rawMaterialId,
+        businessId,
+      },
+    });
+
+    if (!material) {
+      throw new Error("Raw material not found.");
+    }
+
+    const baseQuantity = convertToBaseQuantity(
+      input.quantity,
+      input.purchaseUnit,
+      material.baseUnit,
+    );
+
+    const totalAmount = new Prisma.Decimal(input.totalAmount);
+
+    if (baseQuantity.lte(0)) {
+      throw new Error("Converted purchase quantity must be greater than zero.");
+    }
+
+    const costPerBaseUnit = totalAmount.div(baseQuantity);
+
+    const newQuantity = material.currentQuantity.add(baseQuantity);
+    const newValue = material.currentValue.add(totalAmount);
+    const newWeightedAverageCost = newValue.div(newQuantity);
+
+    const purchase = await tx.rawMaterialPurchase.create({
+      data: {
+        businessId,
+        rawMaterialId: material.id,
+        purchaseDate: input.purchaseDate,
+        quantity: new Prisma.Decimal(input.quantity),
+        purchaseUnit: input.purchaseUnit,
+        baseQuantity,
+        totalAmount,
+        costPerBaseUnit,
+        supplier: input.supplier ?? material.supplier ?? null,
+        invoiceReference: input.invoiceReference ?? null,
+        notes: input.notes ?? null,
+      },
+    });
+
+    await tx.rawMaterialInventoryTransaction.create({
+      data: {
+        businessId,
+        rawMaterialId: material.id,
+        type: "PURCHASE",
+        quantity: baseQuantity,
+        unitCost: costPerBaseUnit,
+        totalValue: totalAmount,
+        purchaseId: purchase.id,
+        notes: input.notes ?? null,
+      },
+    });
+
+    const updatedMaterial = await tx.rawMaterial.update({
+      where: {
+        id: material.id,
+      },
+      data: {
+        currentQuantity: newQuantity,
+        currentValue: newValue,
+        weightedAverageCost: newWeightedAverageCost,
+        supplier:
+          input.supplier !== undefined
+            ? input.supplier
+            : material.supplier,
+      },
+    });
+
+    return {
+      material: serializeRawMaterial(updatedMaterial),
+      purchase: serializePurchase(purchase),
+    };
+  });
+}
+
+
+
+/**
+ * Records raw-material consumption using the material's current
+ * weighted-average cost.
+ *
+ * Example:
+ *   Stock = 1,000g
+ *   Value = ₹300
+ *   Weighted average = ₹0.30/g
+ *   Consume 400g
+ *
+ * Result:
+ *   Stock = 600g
+ *   Value = ₹180
+ *   Weighted average = ₹0.30/g
+ */
+export async function recordRawMaterialConsumption(
+  businessId: string,
+  input: RecordRawMaterialConsumptionInput,
+): Promise<SerializedRawMaterial> {
+  return db.$transaction(async (tx) => {
+    const material = await tx.rawMaterial.findFirst({
+      where: {
+        id: input.rawMaterialId,
+        businessId,
+      },
+    });
+
+    if (!material) {
+      throw new Error("Raw material not found.");
+    }
+
+    const quantity = new Prisma.Decimal(input.quantity);
+
+    if (quantity.lte(0)) {
+      throw new Error("Consumption quantity must be greater than zero.");
+    }
+
+    if (material.currentQuantity.lt(quantity)) {
+      throw new Error(
+        `Insufficient stock. Available quantity is ${material.currentQuantity.toString()}.`,
+      );
+    }
+
+    if (material.currentQuantity.lte(0)) {
+      throw new Error("Raw material has no available inventory.");
+    }
+
+    const unitCost = material.weightedAverageCost;
+    const totalValue = quantity.mul(unitCost);
+    const newQuantity = material.currentQuantity.sub(quantity);
+    const newValue = material.currentValue.sub(totalValue);
+
+    const normalizedValue = newValue.lt(0)
+      ? new Prisma.Decimal(0)
+      : newValue;
+
+    const newWeightedAverageCost = newQuantity.gt(0)
+      ? normalizedValue.div(newQuantity)
+      : new Prisma.Decimal(0);
+
+    await tx.rawMaterialInventoryTransaction.create({
+      data: {
+        businessId,
+        rawMaterialId: material.id,
+        type: "CONSUMPTION",
+        quantity,
+        unitCost,
+        totalValue,
+        referenceId: input.referenceId ?? null,
+        notes: input.notes ?? null,
+      },
+    });
+
+    const updatedMaterial = await tx.rawMaterial.update({
+      where: {
+        id: material.id,
+      },
+      data: {
+        currentQuantity: newQuantity,
+        currentValue: normalizedValue,
+        weightedAverageCost: newWeightedAverageCost,
+      },
+    });
+
+    return serializeRawMaterial(updatedMaterial);
+  });
+}
+
+
+/**
+ * Retrieves the complete raw-material inventory ledger for a material.
+ * Purchases and consumption are both returned so the History dialog
+ * represents actual inventory movement rather than purchases only.
+ */
+export type RawMaterialInventoryHistoryItem = {
+  id: string;
+  type: "PURCHASE" | "CONSUMPTION" | "ADJUSTMENT_IN" | "ADJUSTMENT_OUT";
+  quantity: number;
+  unitCost: number;
+  totalValue: number;
+  referenceId: string | null;
+  notes: string | null;
+  createdAt: Date;
+  purchaseId: string | null;
+  purchaseQuantity: number | null;
+  purchaseUnit:
+    | "GRAM"
+    | "KILOGRAM"
+    | "MILLILITER"
+    | "LITER"
+    | "PIECE"
+    | null;
+  purchaseDate: Date | null;
+};
+
+export async function getRawMaterialInventoryHistory(
+  businessId: string,
+  rawMaterialId: string,
+): Promise<RawMaterialInventoryHistoryItem[]> {
+  const material = await db.rawMaterial.findFirst({
+    where: {
+      id: rawMaterialId,
+      businessId,
+    },
+    select: { id: true },
+  });
+
+  if (!material) {
+    throw new Error("Raw material not found.");
+  }
+
+  const transactions = await db.rawMaterialInventoryTransaction.findMany({
+    where: {
+      businessId,
+      rawMaterialId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      purchase: {
+        select: {
+          quantity: true,
+          purchaseUnit: true,
+          purchaseDate: true,
+        },
+      },
+    },
+  });
+
+  return transactions.map((transaction) => ({
+    id: transaction.id,
+    type: transaction.type,
+    quantity: Number(transaction.quantity),
+    unitCost: Number(transaction.unitCost),
+    totalValue: Number(transaction.totalValue),
+    referenceId: transaction.referenceId,
+    notes: transaction.notes,
+    createdAt: transaction.createdAt,
+    purchaseId: transaction.purchaseId,
+    purchaseQuantity: transaction.purchase
+      ? Number(transaction.purchase.quantity)
+      : null,
+    purchaseUnit: transaction.purchase?.purchaseUnit ?? null,
+    purchaseDate: transaction.purchase?.purchaseDate ?? null,
+  }));
+}
+
+/**
+ * Deletes a raw-material purchase and rebuilds the material's
+ * purchase-based inventory valuation from the remaining purchases.
+ *
+ * A purchase is intentionally not deletable once the material has
+ * consumption or adjustment transactions. At that point, removing
+ * one historical purchase would require a proper inventory-cost
+ * reconciliation rather than silently rewriting inventory history.
+ */
+export async function deleteRawMaterialPurchase(
+  businessId: string,
+  purchaseId: string,
+): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const purchase = await tx.rawMaterialPurchase.findFirst({
+      where: {
+        id: purchaseId,
+        businessId,
+      },
+      select: {
+        id: true,
+        rawMaterialId: true,
+      },
+    });
+
+    if (!purchase) {
+      throw new Error("Raw material purchase not found.");
+    }
+
+    const material = await tx.rawMaterial.findFirst({
+      where: {
+        id: purchase.rawMaterialId,
+        businessId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!material) {
+      throw new Error("Raw material not found.");
+    }
+
+    const nonPurchaseTransaction = await tx.rawMaterialInventoryTransaction.findFirst({
+      where: {
+        businessId,
+        rawMaterialId: purchase.rawMaterialId,
+        type: {
+          not: "PURCHASE",
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (nonPurchaseTransaction) {
+      throw new Error(
+        "This purchase cannot be deleted after inventory has been consumed or adjusted.",
+      );
+    }
+
+    const purchaseTransaction =
+      await tx.rawMaterialInventoryTransaction.findFirst({
+        where: {
+          businessId,
+          rawMaterialId: purchase.rawMaterialId,
+          purchaseId: purchase.id,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    if (!purchaseTransaction) {
+      throw new Error(
+        "Purchase inventory transaction not found.",
+      );
+    }
+
+    // The inventory transaction owns a Restrict FK to the purchase,
+    // so remove the transaction before removing the purchase record.
+    await tx.rawMaterialInventoryTransaction.delete({
+      where: {
+        id: purchaseTransaction.id,
+      },
+    });
+
+    await tx.rawMaterialPurchase.delete({
+      where: {
+        id: purchase.id,
+      },
+    });
+
+    const remaining = await tx.rawMaterialPurchase.aggregate({
+      where: {
+        businessId,
+        rawMaterialId: purchase.rawMaterialId,
+      },
+      _sum: {
+        baseQuantity: true,
+        totalAmount: true,
+      },
+    });
+
+    const remainingQuantity =
+      remaining._sum.baseQuantity ?? new Prisma.Decimal(0);
+
+    const remainingValue =
+      remaining._sum.totalAmount ?? new Prisma.Decimal(0);
+
+    const remainingWeightedAverageCost =
+      remainingQuantity.gt(0)
+        ? remainingValue.div(remainingQuantity)
+        : new Prisma.Decimal(0);
+
+    await tx.rawMaterial.update({
+      where: {
+        id: material.id,
+      },
+      data: {
+        currentQuantity: remainingQuantity,
+        currentValue: remainingValue,
+        weightedAverageCost: remainingWeightedAverageCost,
+      },
+    });
+  });
+}
+
+
+/**
+ * Deletes a raw-material consumption transaction and rebuilds the
+ * material's inventory state from the remaining inventory ledger.
+ *
+ * This intentionally rebuilds from the ledger instead of simply adding
+ * the deleted consumption value back to the current balance. That keeps
+ * the material correct even when purchases or other inventory movements
+ * occurred after the consumption being deleted.
+ */
+export async function deleteRawMaterialConsumption(
+  businessId: string,
+  transactionId: string,
+): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const transaction =
+      await tx.rawMaterialInventoryTransaction.findFirst({
+        where: {
+          id: transactionId,
+          businessId,
+          type: "CONSUMPTION",
+        },
+        select: {
+          id: true,
+          rawMaterialId: true,
+        },
+      });
+
+    if (!transaction) {
+      throw new Error("Raw material consumption not found.");
+    }
+
+    const material = await tx.rawMaterial.findFirst({
+      where: {
+        id: transaction.rawMaterialId,
+        businessId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!material) {
+      throw new Error("Raw material not found.");
+    }
+
+    await tx.rawMaterialInventoryTransaction.delete({
+      where: {
+        id: transaction.id,
+      },
+    });
+
+    const remainingTransactions =
+      await tx.rawMaterialInventoryTransaction.findMany({
+        where: {
+          businessId,
+          rawMaterialId: transaction.rawMaterialId,
+        },
+        orderBy: [
+          { createdAt: "asc" },
+          { id: "asc" },
+        ],
+        select: {
+          type: true,
+          quantity: true,
+          totalValue: true,
+        },
+      });
+
+    let quantity = new Prisma.Decimal(0);
+    let value = new Prisma.Decimal(0);
+
+    for (const movement of remainingTransactions) {
+      if (
+        movement.type === "PURCHASE" ||
+        movement.type === "ADJUSTMENT_IN"
+      ) {
+        quantity = quantity.add(movement.quantity);
+        value = value.add(movement.totalValue);
+      } else {
+        quantity = quantity.sub(movement.quantity);
+        value = value.sub(movement.totalValue);
+      }
+    }
+
+    if (quantity.lt(0) || value.lt(0)) {
+      throw new Error(
+        "Deleting this consumption would leave the material inventory in an invalid state.",
+      );
+    }
+
+    const weightedAverageCost = quantity.gt(0)
+      ? value.div(quantity)
+      : new Prisma.Decimal(0);
+
+    await tx.rawMaterial.update({
+      where: {
+        id: material.id,
+      },
+      data: {
+        currentQuantity: quantity,
+        currentValue: value,
+        weightedAverageCost,
+      },
+    });
+  });
+}

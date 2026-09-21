@@ -14,7 +14,9 @@ import type {
 function decimalToNumber(
   value: Prisma.Decimal | null | undefined
 ): number {
-  return value === null || value === undefined ? 0 : Number(value);
+  return value === null || value === undefined
+    ? 0
+    : Number(value);
 }
 
 function serializeExpense(expense: {
@@ -153,6 +155,42 @@ export async function updateExpense(
   return serializeExpense(updated);
 }
 
+export async function deleteExpense(
+  businessId: string,
+  expenseId: string
+): Promise<void> {
+  const existing = await db.expense.findFirst({
+    where: {
+      id: expenseId,
+      businessId,
+    },
+    select: {
+      id: true,
+      promotionalDispatch: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error("Expense not found.");
+  }
+
+  if (existing.promotionalDispatch) {
+    throw new Error(
+      "This expense is linked to a promotional dispatch and cannot be deleted."
+    );
+  }
+
+  await db.expense.delete({
+    where: {
+      id: expenseId,
+    },
+  });
+}
+
 export async function getFinanceSummary(
   businessId: string
 ): Promise<FinanceSummary> {
@@ -198,7 +236,9 @@ export async function getFinanceSummary(
   ]);
 
   return {
-    totalExpenses: decimalToNumber(aggregate._sum.amount),
+    totalExpenses: decimalToNumber(
+      aggregate._sum.amount
+    ),
     expenseCount,
     recurringExpenseCount,
     currentMonthExpenses: decimalToNumber(

@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
+
 import {
   LayoutDashboard,
   Milestone,
   Package,
   Layers,
+  Beaker,
   ShoppingBag,
   Users,
   Wallet,
@@ -18,6 +20,7 @@ import {
   Settings,
   X,
 } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -44,6 +47,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Products",
     href: "/products",
     icon: Package,
+    enabled: true,
+  },
+  {
+    label: "Raw Materials",
+    href: "/raw-materials",
+    icon: Beaker,
     enabled: true,
   },
   {
@@ -125,7 +134,7 @@ export function Sidebar({
           "fixed inset-0 z-40 bg-slate-950/20 backdrop-blur-[2px] transition-opacity duration-200",
           isOpen
             ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
+            : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
         aria-hidden="true"
@@ -135,7 +144,9 @@ export function Sidebar({
       <aside
         className={cn(
           "fixed right-0 top-0 z-50 flex h-full w-[min(360px,88vw)] flex-col border-l border-slate-200 bg-[#fbfaf7] shadow-2xl transition-transform duration-300 ease-out",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isOpen
+            ? "translate-x-0"
+            : "translate-x-full",
         )}
         aria-hidden={!isOpen}
       >
@@ -189,7 +200,9 @@ export function Sidebar({
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/dashboard" &&
-                  pathname.startsWith(item.href));
+                  pathname.startsWith(
+                    item.href,
+                  ));
 
               if (!item.enabled) {
                 return (
@@ -199,6 +212,7 @@ export function Sidebar({
                   >
                     <div className="flex items-center gap-3">
                       <Icon className="h-[17px] w-[17px] text-slate-300" />
+
                       <span>{item.label}</span>
                     </div>
 
@@ -218,7 +232,7 @@ export function Sidebar({
                     "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                     isActive
                       ? "bg-emerald-50 font-semibold text-emerald-900"
-                      : "text-slate-600 hover:bg-white hover:text-slate-950"
+                      : "text-slate-600 hover:bg-white hover:text-slate-950",
                   )}
                 >
                   <Icon
@@ -226,7 +240,7 @@ export function Sidebar({
                       "h-[17px] w-[17px] transition-colors",
                       isActive
                         ? "text-emerald-700"
-                        : "text-slate-400 group-hover:text-slate-600"
+                        : "text-slate-400 group-hover:text-slate-600",
                     )}
                   />
 
@@ -253,6 +267,7 @@ export function Sidebar({
               <p className="text-[11px] font-semibold text-slate-700">
                 Local database connected
               </p>
+
               <p className="text-[10px] text-slate-400">
                 PostgreSQL
               </p>

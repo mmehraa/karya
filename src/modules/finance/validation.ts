@@ -47,6 +47,7 @@ const expenseCategorySchema = z.enum([
   "SHIPPING",
   "MARKETING",
   "PROMOTIONAL",
+  "FRIENDS_FAMILY",
   "EQUIPMENT",
   "WEBSITE_SOFTWARE",
   "LEGAL_COMPLIANCE",
@@ -119,6 +120,12 @@ export const UpdateExpenseSchema = z
     },
   );
 
+export const DeleteExpenseSchema = z.object({
+  id: z.string().uuid(),
+});
+
 export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>;
 
 export type UpdateExpenseInput = z.infer<typeof UpdateExpenseSchema>;
+
+export type DeleteExpenseInput = z.infer<typeof DeleteExpenseSchema>;

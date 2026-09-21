@@ -136,12 +136,13 @@ export default async function DashboardPage({
   const params = await searchParams;
 
   const period =
-    params?.period === "7D" ||
+    params?.period === "ALL" ||
+      params?.period === "7D" ||
       params?.period === "30D" ||
       params?.period === "3M" ||
       params?.period === "1Y"
       ? params.period
-      : "30D";
+      : "ALL";
 
   const customFrom = params?.from
     ? new Date(`${params.from}T00:00:00`)
@@ -562,17 +563,23 @@ export default async function DashboardPage({
 
           <div className="flex items-center gap-2">
             <div className="flex items-center rounded-full border border-slate-200 bg-white p-1">
-              {["7D", "30D", "3M", "1Y"].map(
+              {[
+                { value: "ALL", label: "All Time" },
+                { value: "7D", label: "7D" },
+                { value: "30D", label: "30D" },
+                { value: "3M", label: "3M" },
+                { value: "1Y", label: "1Y" },
+              ].map(
                 (item) => (
                   <Link
-                    key={item}
-                    href={`/dashboard?period=${item}`}
-                    className={`rounded-full px-3 py-1.5 text-[10px] font-medium transition ${period === item
+                    key={item.value}
+                    href={`/dashboard?period=${item.value}`}
+                    className={`rounded-full px-3 py-1.5 text-[10px] font-medium transition ${period === item.value
                         ? "bg-slate-100 text-slate-900"
                         : "text-slate-500 hover:text-slate-900"
                       }`}
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 ),
               )}

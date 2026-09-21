@@ -5,14 +5,17 @@ import { Prisma } from "@prisma/client";
 import { getDashboardContext } from "@/modules/business/dashboard-context";
 import {
   createExpense,
+  deleteExpense,
   updateExpense,
 } from "./services";
 import {
   CreateExpenseSchema,
+  DeleteExpenseSchema,
   UpdateExpenseSchema,
 } from "./validation";
 import type {
   CreateExpenseInput,
+  DeleteExpenseInput,
   UpdateExpenseInput,
 } from "./validation";
 import type { SerializedExpense } from "./types";
@@ -34,7 +37,9 @@ export async function createExpenseAction(
     if (!parsed.success) {
       return {
         success: false,
-        error: parsed.error.issues[0]?.message ?? "Invalid expense data.",
+        error:
+          parsed.error.issues[0]?.message ??
+          "Invalid expense data.",
       };
     }
 
@@ -74,7 +79,9 @@ export async function updateExpenseAction(
     if (!parsed.success) {
       return {
         success: false,
-        error: parsed.error.issues[0]?.message ?? "Invalid expense data.",
+        error:
+          parsed.error.issues[0]?.message ??
+          "Invalid expense data.",
       };
     }
 
@@ -116,6 +123,76 @@ export async function updateExpenseAction(
         error instanceof Error
           ? error.message
           : "Unable to update expense.",
+    };
+  }
+}
+
+export async function deleteExpenseAction(
+  input: DeleteExpenseInput
+): Promise<ActionResponse> {
+  try {
+    const { businessId } = await getDashboardContext();
+
+    const parsed = DeleteExpenseSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ??
+          "Invalid expense data.",
+      };
+    }
+
+    await deleteExpense(
+      businessId,
+      parsed.data.id
+    );
+
+    revalidatePath("/finance");
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("deleteExpenseAction error:", error);
+
+    if (
+      error instanceof Error &&
+      error.message === "Expense not found."
+    ) {
+      return {
+        success: false,
+        error: "Expense not found or access denied.",
+      };
+    }
+
+    if (
+      error instanceof Error &&
+      error.message ===
+        "This expense is linked to a promotional dispatch and cannot be deleted."
+    ) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return {
+        success: false,
+        error:
+          "Unable to delete the expense because it is being used by another record.",
+      };
+    }
+
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to delete expense.",
     };
   }
 }
