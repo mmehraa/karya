@@ -6,10 +6,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// =========================================================
-// 1. BUSINESS, TENANCY & SETTINGS
-// =========================================================
-
 model Business {
   id                       String   @id @default(uuid())
   name                     String
@@ -24,23 +20,27 @@ model Business {
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt
 
-  currentStage           StageDefinition         @relation("BusinessCurrentStage", fields: [currentStageId], references: [id], onDelete: Restrict)
-  founderStageAssessment StageDefinition?        @relation("BusinessFounderStageAssessment", fields: [founderStageAssessmentId], references: [id], onDelete: SetNull)
-  settings               BusinessSettings?
-  stageProgress          BusinessStageProgress[]
-  stageTransitions       StageTransition[]
-  products               Product[]
-  customers              Customer[]
-  orders                 Order[]
-  orderItems             OrderItem[]
-  expenses               Expense[]
-  contentItems           ContentItem[]
-  contentPubs            ContentPublication[]
-  goals                  Goal[]
-  tasks                  Task[]
-  alerts                 Alert[]
-  inventoryLedger        InventoryTransaction[]
-  promotionalDispatches  PromotionalDispatch[]
+  currentStage                     StageDefinition                    @relation("BusinessCurrentStage", fields: [currentStageId], references: [id], onDelete: Restrict)
+  founderStageAssessment           StageDefinition?                   @relation("BusinessFounderStageAssessment", fields: [founderStageAssessmentId], references: [id], onDelete: SetNull)
+  settings                         BusinessSettings?
+  stageProgress                    BusinessStageProgress[]
+  stageTransitions                 StageTransition[]
+  products                         Product[]
+  productFormulations              ProductFormulation[]
+  productFormulationItems          ProductFormulationItem[]
+  productPackagingConfigurations   ProductPackagingConfiguration[]
+  productPackagingConfigurationItems ProductPackagingConfigurationItem[]
+  customers                        Customer[]
+  orders                           Order[]
+  orderItems                       OrderItem[]
+  expenses                         Expense[]
+  contentItems                     ContentItem[]
+  contentPubs                      ContentPublication[]
+  goals                            Goal[]
+  tasks                            Task[]
+  alerts                           Alert[]
+  inventoryLedger                  InventoryTransaction[]
+  promotionalDispatches            PromotionalDispatch[]
 
   rawMaterials                     RawMaterial[]
   rawMaterialPurchases             RawMaterialPurchase[]
@@ -49,6 +49,10 @@ model Business {
   packagingMaterials                     PackagingMaterial[]
   packagingMaterialPurchases             PackagingMaterialPurchase[]
   packagingMaterialInventoryTransactions PackagingMaterialInventoryTransaction[]
+
+  productionBatches                    ProductionBatch[]
+  productionBatchRawMaterialConsumptions ProductionBatchRawMaterialConsumption[]
+  productionBatchPackagingConsumptions   ProductionBatchPackagingConsumption[]
 
   @@index([slug])
   @@index([currentStageId])
@@ -70,10 +74,6 @@ model BusinessSettings {
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 }
-
-// =========================================================
-// 2. DATA-DRIVEN STAGE ENGINE & AUDIT TRAIL
-// =========================================================
 
 enum RequirementType {
   MANDATORY
@@ -158,10 +158,6 @@ model StageTransition {
   @@index([toStageId])
 }
 
-// =========================================================
-// 3. PRODUCTS & COSTING
-// =========================================================
-
 enum ProductStatus {
   DRAFT
   ACTIVE
@@ -181,7 +177,6 @@ model Product {
   packagingCost Decimal? @db.Decimal(12, 2)
   variableCost  Decimal? @db.Decimal(12, 2)
 
-  // Fast read-cache only: InventoryTransaction is the single source of truth
   currentStock     Int @default(0)
   promotionalStock Int @default(0)
   reorderLevel     Int @default(20)
@@ -192,19 +187,112 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business              Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  orderItems            OrderItem[]
-  stockEntries          InventoryTransaction[]
-  promotionalDispatches PromotionalDispatch[]
+  business                Business                         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  orderItems              OrderItem[]
+  stockEntries            InventoryTransaction[]
+  promotionalDispatches   PromotionalDispatch[]
+  formulations            ProductFormulation[]
+  packagingConfigurations ProductPackagingConfiguration[]
+  productionBatches       ProductionBatch[]
 
   @@unique([businessId, id])
   @@unique([businessId, sku])
   @@index([businessId, status])
 }
 
-// =========================================================
-// 4. RAW MATERIALS & RAW MATERIAL COSTING
-// =========================================================
+model ProductFormulation {
+  id         String  @id @default(uuid())
+  businessId String
+  productId  String
+
+  name     String  @default("Default Formulation")
+  version  Int     @default(1)
+  isActive Boolean @default(true)
+  notes    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business          Business                   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product           Product                    @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Cascade)
+  items             ProductFormulationItem[]
+  productionBatches ProductionBatch[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, productId, version])
+  @@index([businessId, productId])
+  @@index([businessId, isActive])
+}
+
+model ProductFormulationItem {
+  id            String  @id @default(uuid())
+  businessId    String
+  formulationId String
+  rawMaterialId String
+
+  quantity Decimal @db.Decimal(16, 6)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business    Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  formulation ProductFormulation @relation(fields: [formulationId], references: [id], onDelete: Cascade)
+  rawMaterial RawMaterial        @relation(fields: [businessId, rawMaterialId], references: [businessId, id], onDelete: Restrict)
+
+  @@unique([businessId, formulationId, rawMaterialId])
+  @@unique([businessId, id])
+  @@index([businessId, formulationId])
+  @@index([businessId, rawMaterialId])
+}
+
+model ProductPackagingConfiguration {
+  id         String  @id @default(uuid())
+  businessId String
+  productId  String
+
+  name     String  @default("Default Packaging")
+  version  Int     @default(1)
+  isActive Boolean @default(true)
+  notes    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business          Business                           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product           Product                            @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Cascade)
+  items             ProductPackagingConfigurationItem[]
+  productionBatches ProductionBatch[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, productId, version])
+  @@index([businessId, productId])
+  @@index([businessId, isActive])
+}
+
+model ProductPackagingConfigurationItem {
+  id                  String  @id @default(uuid())
+  businessId          String
+  configurationId     String
+  packagingMaterialId String
+
+  quantity Decimal @db.Decimal(16, 6)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business          Business                      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  configuration     ProductPackagingConfiguration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+  packagingMaterial PackagingMaterial             @relation(fields: [businessId, packagingMaterialId], references: [businessId, id], onDelete: Restrict)
+
+  @@unique([businessId, configurationId, packagingMaterialId])
+  @@unique([businessId, id])
+  @@index([businessId, configurationId])
+  @@index([businessId, packagingMaterialId])
+}
 
 enum RawMaterialBaseUnit {
   GRAM
@@ -228,16 +316,14 @@ enum RawMaterialInventoryTransactionType {
 }
 
 model RawMaterial {
-  id                 String             @id @default(uuid())
-  businessId         String
-  name               String
-  category           String?
-  baseUnit           RawMaterialBaseUnit
-  supplier           String?
-  notes              String?
+  id         String             @id @default(uuid())
+  businessId String
+  name       String
+  category   String?
+  baseUnit   RawMaterialBaseUnit
+  supplier   String?
+  notes      String?
 
-  // Cached inventory values.
-  // The transaction ledger remains the historical source of truth.
   currentQuantity     Decimal @default(0) @db.Decimal(16, 3)
   currentValue        Decimal @default(0) @db.Decimal(16, 2)
   weightedAverageCost Decimal @default(0) @db.Decimal(16, 6)
@@ -245,9 +331,11 @@ model RawMaterial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business      Business                            @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  purchases     RawMaterialPurchase[]
-  transactions RawMaterialInventoryTransaction[]
+  business                Business                              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  purchases               RawMaterialPurchase[]
+  transactions            RawMaterialInventoryTransaction[]
+  formulationItems        ProductFormulationItem[]
+  productionConsumptions  ProductionBatchRawMaterialConsumption[]
 
   @@unique([businessId, id])
   @@unique([businessId, name])
@@ -256,71 +344,55 @@ model RawMaterial {
 }
 
 model RawMaterialPurchase {
-  id               String  @id @default(uuid())
-  businessId       String
-  rawMaterialId    String
+  id            String  @id @default(uuid())
+  businessId    String
+  rawMaterialId String
 
-  purchaseDate     DateTime
-  quantity         Decimal                   @db.Decimal(16, 3)
-  purchaseUnit     RawMaterialPurchaseUnit
-
-  // Quantity converted into the raw material's base unit.
-  baseQuantity     Decimal                   @db.Decimal(16, 3)
-
-  totalAmount      Decimal                   @db.Decimal(12, 2)
-
-  // Total amount / baseQuantity.
-  // Example: ₹550 / 1000g = ₹0.55/g.
-  costPerBaseUnit  Decimal                   @db.Decimal(16, 6)
+  purchaseDate    DateTime
+  quantity        Decimal                   @db.Decimal(16, 3)
+  purchaseUnit    RawMaterialPurchaseUnit
+  baseQuantity    Decimal                   @db.Decimal(16, 3)
+  totalAmount     Decimal                   @db.Decimal(12, 2)
+  costPerBaseUnit Decimal                   @db.Decimal(16, 6)
 
   supplier         String?
   invoiceReference String?
   notes            String?
 
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  business              Business                             @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  rawMaterial           RawMaterial                          @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
-  inventoryTransaction  RawMaterialInventoryTransaction?     @relation("RawMaterialPurchaseTransaction")
+  business             Business                         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  rawMaterial          RawMaterial                      @relation(fields: [businessId, rawMaterialId], references: [businessId, id], onDelete: Restrict)
+  inventoryTransaction RawMaterialInventoryTransaction? @relation("RawMaterialPurchaseTransaction")
 
   @@index([businessId, purchaseDate])
   @@index([businessId, rawMaterialId, purchaseDate])
 }
 
 model RawMaterialInventoryTransaction {
-  id              String                              @id @default(uuid())
-  businessId      String
-  rawMaterialId   String
+  id            String                              @id @default(uuid())
+  businessId    String
+  rawMaterialId String
 
-  type            RawMaterialInventoryTransactionType
+  type       RawMaterialInventoryTransactionType
+  quantity   Decimal @db.Decimal(16, 3)
+  unitCost   Decimal @db.Decimal(16, 6)
+  totalValue Decimal @db.Decimal(16, 2)
 
-  // Always stored in the raw material's base unit.
-  quantity        Decimal                             @db.Decimal(16, 3)
+  purchaseId String? @unique
 
-  // Cost assigned to the transaction's base unit.
-  unitCost        Decimal                             @db.Decimal(16, 6)
+  referenceId String?
+  notes       String?
+  createdAt   DateTime @default(now())
 
-  // Quantity × unitCost.
-  totalValue      Decimal                             @db.Decimal(16, 2)
-
-  purchaseId      String?                             @unique
-
-  referenceId     String?
-  notes           String?
-  createdAt       DateTime                            @default(now())
-
-  business        Business                            @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  rawMaterial     RawMaterial                         @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
-  purchase        RawMaterialPurchase?               @relation("RawMaterialPurchaseTransaction", fields: [purchaseId], references: [id], onDelete: Restrict)
+  business    Business                            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  rawMaterial RawMaterial                         @relation(fields: [businessId, rawMaterialId], references: [businessId, id], onDelete: Restrict)
+  purchase    RawMaterialPurchase?                @relation("RawMaterialPurchaseTransaction", fields: [purchaseId], references: [id], onDelete: Restrict)
 
   @@index([businessId, rawMaterialId, createdAt])
   @@index([businessId, type])
 }
-
-// =========================================================
-// 5. PACKAGING MATERIALS & PACKAGING COSTING
-// =========================================================
 
 enum PackagingMaterialBaseUnit {
   PIECE
@@ -342,17 +414,14 @@ enum PackagingMaterialInventoryTransactionType {
 }
 
 model PackagingMaterial {
-  id                  String @id @default(uuid())
-  businessId          String
-  name                String
-  category            String?
-  baseUnit            PackagingMaterialBaseUnit
-  supplier            String?
-  notes               String?
+  id         String @id @default(uuid())
+  businessId String
+  name       String
+  category   String?
+  baseUnit   PackagingMaterialBaseUnit
+  supplier   String?
+  notes      String?
 
-  // Cached inventory values.
-  // Internal monetary precision is kept at 6 decimal places
-  // to prevent rounding drift during repeated costing operations.
   currentQuantity     Decimal @default(0) @db.Decimal(16, 3)
   currentValue        Decimal @default(0) @db.Decimal(16, 6)
   weightedAverageCost Decimal @default(0) @db.Decimal(16, 6)
@@ -360,9 +429,11 @@ model PackagingMaterial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business      Business                               @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  purchases     PackagingMaterialPurchase[]
-  transactions PackagingMaterialInventoryTransaction[]
+  business                    Business                                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  purchases                   PackagingMaterialPurchase[]
+  transactions                PackagingMaterialInventoryTransaction[]
+  packagingConfigurationItems ProductPackagingConfigurationItem[]
+  productionConsumptions      ProductionBatchPackagingConsumption[]
 
   @@unique([businessId, id])
   @@unique([businessId, name])
@@ -376,35 +447,23 @@ model PackagingMaterialPurchase {
   packagingMaterialId String
 
   purchaseDate         DateTime
-  quantity             Decimal @db.Decimal(16, 3)
+  quantity             Decimal                   @db.Decimal(16, 3)
   purchaseUnit         PackagingMaterialPurchaseUnit
+  unitsPerPurchaseUnit Decimal                   @db.Decimal(16, 3)
+  baseQuantity         Decimal                   @db.Decimal(16, 3)
+  totalAmount          Decimal                   @db.Decimal(12, 2)
+  costPerBaseUnit      Decimal                   @db.Decimal(16, 6)
 
-  // Number of base pieces contained in one purchase unit.
-  //
-  // Examples:
-  // 1 piece = 1
-  // 1 pack of 100 = 100
-  // 1 box of 500 = 500
-  unitsPerPurchaseUnit Decimal @db.Decimal(16, 3)
+  supplier         String?
+  invoiceReference String?
+  notes            String?
 
-  // Quantity converted into base pieces.
-  baseQuantity         Decimal @db.Decimal(16, 3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  totalAmount           Decimal @db.Decimal(12, 2)
-
-  // Total amount / baseQuantity.
-  costPerBaseUnit       Decimal @db.Decimal(16, 6)
-
-  supplier              String?
-  invoiceReference      String?
-  notes                 String?
-
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  business              Business                                @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  packagingMaterial     PackagingMaterial                       @relation(fields: [packagingMaterialId], references: [id], onDelete: Restrict)
-  inventoryTransaction  PackagingMaterialInventoryTransaction?  @relation("PackagingMaterialPurchaseTransaction")
+  business             Business                               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  packagingMaterial    PackagingMaterial                      @relation(fields: [businessId, packagingMaterialId], references: [businessId, id], onDelete: Restrict)
+  inventoryTransaction PackagingMaterialInventoryTransaction? @relation("PackagingMaterialPurchaseTransaction")
 
   @@index([businessId, purchaseDate])
   @@index([businessId, packagingMaterialId, purchaseDate])
@@ -412,39 +471,118 @@ model PackagingMaterialPurchase {
 
 model PackagingMaterialInventoryTransaction {
   id                  String                                  @id @default(uuid())
-  businessId         String
+  businessId          String
   packagingMaterialId String
 
-  type                PackagingMaterialInventoryTransactionType
+  type       PackagingMaterialInventoryTransactionType
+  quantity   Decimal @db.Decimal(16, 3)
+  unitCost   Decimal @db.Decimal(16, 6)
+  totalValue Decimal @db.Decimal(16, 6)
 
-  // Always stored in the packaging material's base unit: PIECE.
-  quantity            Decimal                                 @db.Decimal(16, 3)
+  purchaseId String? @unique
 
-  // Cost assigned to each base piece.
-  unitCost            Decimal                                 @db.Decimal(16, 6)
+  referenceId String?
+  notes       String?
+  createdAt   DateTime @default(now())
 
-  // Quantity × unitCost.
-  // Kept at 6 decimal places internally to avoid
-  // cumulative rounding drift.
-  totalValue          Decimal                                 @db.Decimal(16, 6)
-
-  purchaseId          String?                                 @unique
-
-  referenceId         String?
-  notes               String?
-  createdAt           DateTime                                @default(now())
-
-  business             Business                                @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  packagingMaterial    PackagingMaterial                       @relation(fields: [packagingMaterialId], references: [id], onDelete: Restrict)
-  purchase             PackagingMaterialPurchase?              @relation("PackagingMaterialPurchaseTransaction", fields: [purchaseId], references: [id], onDelete: Restrict)
+  business          Business                    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  packagingMaterial PackagingMaterial           @relation(fields: [businessId, packagingMaterialId], references: [businessId, id], onDelete: Restrict)
+  purchase          PackagingMaterialPurchase?  @relation("PackagingMaterialPurchaseTransaction", fields: [purchaseId], references: [id], onDelete: Restrict)
 
   @@index([businessId, packagingMaterialId, createdAt])
   @@index([businessId, type])
 }
 
-// =========================================================
-// 6. INVENTORY TRANSACTION LEDGER
-// =========================================================
+enum ProductionBatchStatus {
+  DRAFT
+  COMPLETED
+  CANCELLED
+}
+
+model ProductionBatch {
+  id                       String               @id @default(uuid())
+  businessId               String
+  productId                String
+  formulationId            String
+  packagingConfigurationId String
+
+  batchNumber    String
+  plannedQuantity Int
+  producedQuantity Int?
+  status         ProductionBatchStatus @default(DRAFT)
+
+  rawMaterialCost       Decimal? @db.Decimal(16, 6)
+  packagingMaterialCost Decimal? @db.Decimal(16, 6)
+  totalCost             Decimal? @db.Decimal(16, 6)
+  costPerUnit           Decimal? @db.Decimal(16, 6)
+
+  completedAt DateTime?
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business               Business                         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product                Product                          @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Restrict)
+  formulation            ProductFormulation              @relation(fields: [businessId, formulationId], references: [businessId, id], onDelete: Restrict)
+  packagingConfiguration ProductPackagingConfiguration   @relation(fields: [businessId, packagingConfigurationId], references: [businessId, id], onDelete: Restrict)
+
+  rawMaterialConsumptions ProductionBatchRawMaterialConsumption[]
+  packagingConsumptions   ProductionBatchPackagingConsumption[]
+
+  @@unique([businessId, id])
+  @@unique([businessId, batchNumber])
+  @@index([businessId, productId, createdAt])
+  @@index([businessId, status, createdAt])
+  @@index([businessId, formulationId])
+  @@index([businessId, packagingConfigurationId])
+}
+
+model ProductionBatchRawMaterialConsumption {
+  id            String @id @default(uuid())
+  businessId    String
+  batchId       String
+  rawMaterialId String
+
+  quantity  Decimal @db.Decimal(16, 6)
+  unitCost  Decimal @db.Decimal(16, 6)
+  totalCost Decimal @db.Decimal(16, 6)
+  notes     String?
+
+  createdAt DateTime @default(now())
+
+  business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  batch       ProductionBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  rawMaterial RawMaterial    @relation(fields: [businessId, rawMaterialId], references: [businessId, id], onDelete: Restrict)
+
+  @@unique([businessId, id])
+  @@unique([businessId, batchId, rawMaterialId])
+  @@index([businessId, batchId])
+  @@index([businessId, rawMaterialId, createdAt])
+}
+
+model ProductionBatchPackagingConsumption {
+  id                  String @id @default(uuid())
+  businessId          String
+  batchId             String
+  packagingMaterialId String
+
+  quantity  Decimal @db.Decimal(16, 6)
+  unitCost  Decimal @db.Decimal(16, 6)
+  totalCost Decimal @db.Decimal(16, 6)
+  notes     String?
+
+  createdAt DateTime @default(now())
+
+  business          Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  batch             ProductionBatch  @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  packagingMaterial PackagingMaterial @relation(fields: [businessId, packagingMaterialId], references: [businessId, id], onDelete: Restrict)
+
+  @@unique([businessId, id])
+  @@unique([businessId, batchId, packagingMaterialId])
+  @@index([businessId, batchId])
+  @@index([businessId, packagingMaterialId, createdAt])
+}
 
 enum InventoryTransactionType {
   INITIAL_STOCK
@@ -463,7 +601,7 @@ model InventoryTransaction {
   productId   String
   type        InventoryTransactionType
   quantity    Int
-  unitCost    Decimal?                 @db.Decimal(12, 2)
+  unitCost    Decimal?                 @db.Decimal(16, 6)
   referenceId String?
   notes       String?
   createdAt   DateTime                 @default(now())
@@ -475,10 +613,6 @@ model InventoryTransaction {
   @@index([businessId, productId, createdAt])
   @@index([businessId, type])
 }
-
-// =========================================================
-// 7. CUSTOMERS & COMMERCE
-// =========================================================
 
 enum OrderPaymentStatus {
   PENDING
@@ -537,8 +671,8 @@ model Order {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  business Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer Customer    @relation(fields: [businessId, customerId], references: [businessId, id], onDelete: Restrict)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [businessId, customerId], references: [businessId, id], onDelete: Restrict)
   items    OrderItem[]
 
   @@unique([businessId, id])
@@ -564,10 +698,6 @@ model OrderItem {
   @@index([businessId, orderId])
   @@index([businessId, productId])
 }
-
-// =========================================================
-// 8. EXPENSES & FINANCE
-// =========================================================
 
 enum ExpenseCategory {
   PRODUCT_FORMULATION
@@ -605,10 +735,6 @@ model Expense {
   @@index([businessId, category])
 }
 
-// =========================================================
-// 9. PROMOTIONAL INVENTORY
-// =========================================================
-
 model PromotionalDispatch {
   id                     String   @id @default(uuid())
   businessId             String
@@ -631,10 +757,6 @@ model PromotionalDispatch {
   @@index([businessId, createdAt])
   @@index([businessId, productId, createdAt])
 }
-
-// =========================================================
-// 10. CONTENT ENGINE & SOCIAL PIPELINE
-// =========================================================
 
 enum ContentPlatform {
   INSTAGRAM
@@ -705,10 +827,6 @@ model ContentPublication {
   @@index([businessId, platform])
 }
 
-// =========================================================
-// 11. GOALS & TASKS
-// =========================================================
-
 enum Priority {
   LOW
   MEDIUM
@@ -762,10 +880,6 @@ model Task {
   @@index([businessId, status, dueDate])
   @@index([businessId, priority])
 }
-
-// =========================================================
-// 12. ATTENTION & OPERATIONAL ALERTS
-// =========================================================
 
 enum AlertSeverity {
   INFO
