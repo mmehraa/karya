@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useTransition, useEffect, useMemo, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ProductStatus } from "@prisma/client";
-import { X, Loader2, AlertCircle, TrendingUp } from "lucide-react";
+import {
+  X,
+  Loader2,
+  AlertCircle,
+  TrendingUp,
+  Calculator,
+} from "lucide-react";
+
 import {
   createProductAction,
   updateProductAction,
@@ -14,11 +21,13 @@ import {
 } from "@/modules/products/validation";
 import { formatINR } from "@/lib/formatters";
 import type { SerializedProduct } from "@/modules/products/types";
+import type { ProductEconomics } from "@/modules/product-economics/types";
 
 interface ProductFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
   productToEdit?: SerializedProduct | null;
+  productEconomics?: ProductEconomics | null;
 }
 
 interface FormState {
@@ -30,9 +39,6 @@ interface FormState {
   status: ProductStatus;
   reorderLevel: string;
   sellingPrice: string;
-  cogs: string;
-  packagingCost: string;
-  variableCost: string;
 }
 
 const DEFAULT_FORM_STATE: FormState = {
@@ -44,19 +50,33 @@ const DEFAULT_FORM_STATE: FormState = {
   status: ProductStatus.DRAFT,
   reorderLevel: "20",
   sellingPrice: "",
-  cogs: "",
-  packagingCost: "",
-  variableCost: "",
 };
 
 function isValidProductStatus(val: string): val is ProductStatus {
   return Object.values(ProductStatus).includes(val as ProductStatus);
 }
 
+function parseMoneyInput(value: string): number | null {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  return parsed;
+}
+
 export function ProductFormDialog({
   isOpen,
   onClose,
   productToEdit,
+  productEconomics,
 }: ProductFormDialogProps) {
   const router = useRouter();
   const isEditMode = Boolean(productToEdit);
@@ -65,112 +85,110 @@ export function ProductFormDialog({
   const [formData, setFormData] =
     useState<FormState>(DEFAULT_FORM_STATE);
 
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>(
-    {},
-  );
-  const [generalError, setGeneralError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] =
+    useState<Record<string, string>>({});
+
+  const [generalError, setGeneralError] =
+    useState<string | null>(null);
 
   const dialogRef = useRef<HTMLDivElement>(null);
   const initialInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      if (productToEdit) {
-        setFormData({
-          name: productToEdit.name,
-          sku: productToEdit.sku.toUpperCase(),
-          category: productToEdit.category || "Skincare",
-          description: productToEdit.description || "",
-          supplier: productToEdit.supplier || "",
-          status: productToEdit.status,
-          reorderLevel: productToEdit.reorderLevel.toString(),
-          sellingPrice:
-            productToEdit.sellingPrice !== null
-              ? productToEdit.sellingPrice.toString()
-              : "",
-          cogs:
-            productToEdit.cogs !== null
-              ? productToEdit.cogs.toString()
-              : "",
-          packagingCost:
-            productToEdit.packagingCost !== null
-              ? productToEdit.packagingCost.toString()
-              : "",
-          variableCost:
-            productToEdit.variableCost !== null
-              ? productToEdit.variableCost.toString()
-              : "",
-        });
-      } else {
-        setFormData(DEFAULT_FORM_STATE);
-      }
-
-      setFieldErrors({});
-      setGeneralError(null);
-
-      const timer = setTimeout(() => {
-        initialInputRef.current?.focus();
-      }, 50);
-
-      return () => clearTimeout(timer);
+    if (!isOpen) {
+      return;
     }
+
+    if (productToEdit) {
+      setFormData({
+        name: productToEdit.name,
+        sku: productToEdit.sku.toUpperCase(),
+        category: productToEdit.category || "Skincare",
+        description: productToEdit.description || "",
+        supplier: productToEdit.supplier || "",
+        status: productToEdit.status,
+        reorderLevel: productToEdit.reorderLevel.toString(),
+        sellingPrice:
+          productToEdit.sellingPrice !== null
+            ? productToEdit.sellingPrice.toString()
+            : "",
+      });
+    } else {
+      setFormData(DEFAULT_FORM_STATE);
+    }
+
+    setFieldErrors({});
+    setGeneralError(null);
+
+    const timer = setTimeout(() => {
+      initialInputRef.current?.focus();
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, [isOpen, productToEdit]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (!isPending) {
           onClose();
         }
+
         return;
       }
 
-      if (event.key === "Tab") {
-        const dialogElement = dialogRef.current;
+      if (event.key !== "Tab") {
+        return;
+      }
 
-        if (!dialogElement) return;
+      const dialogElement = dialogRef.current;
 
-        const focusableElements =
-          dialogElement.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-          );
+      if (!dialogElement) {
+        return;
+      }
 
-        if (focusableElements.length === 0) return;
+      const focusableElements =
+        dialogElement.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
 
-        const firstElement = focusableElements[0];
-        const lastElement =
-          focusableElements[focusableElements.length - 1];
+      if (focusableElements.length === 0) {
+        return;
+      }
 
-        const currentFocused = document.activeElement;
+      const firstElement = focusableElements[0];
+      const lastElement =
+        focusableElements[focusableElements.length - 1];
 
-        if (
-          !currentFocused ||
-          !dialogElement.contains(currentFocused)
-        ) {
-          event.preventDefault();
+      const currentFocused = document.activeElement;
 
-          if (event.shiftKey) {
-            lastElement.focus();
-          } else {
-            firstElement.focus();
-          }
-
-          return;
-        }
+      if (
+        !currentFocused ||
+        !dialogElement.contains(currentFocused)
+      ) {
+        event.preventDefault();
 
         if (event.shiftKey) {
-          if (currentFocused === firstElement) {
-            event.preventDefault();
-            lastElement.focus();
-          }
+          lastElement.focus();
         } else {
-          if (currentFocused === lastElement) {
-            event.preventDefault();
-            firstElement.focus();
-          }
+          firstElement.focus();
         }
+
+        return;
+      }
+
+      if (event.shiftKey) {
+        if (currentFocused === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else if (currentFocused === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
       }
     };
 
@@ -180,51 +198,57 @@ export function ProductFormDialog({
       window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, isPending, onClose]);
 
+  const economics = productEconomics ?? null;
+
   const liveEconomics = useMemo(() => {
-    const parseMoney = (val: string): number | null => {
-      const trimmed = val.trim();
-
-      if (!trimmed) return null;
-
-      const num = Number(trimmed);
-
-      return Number.isNaN(num) ? null : num;
-    };
-
-    const sp = parseMoney(formData.sellingPrice);
-    const cogs = parseMoney(formData.cogs);
-    const pack = parseMoney(formData.packagingCost);
-    const vc = parseMoney(formData.variableCost);
-
-    let totalCost: number | null = null;
-    let grossProfit: number | null = null;
-    let grossMarginPct: number | null = null;
-
-    if (cogs !== null && pack !== null && vc !== null) {
-      totalCost = cogs + pack + vc;
-
-      if (sp !== null) {
-        grossProfit = sp - totalCost;
-
-        if (sp > 0) {
-          grossMarginPct = (grossProfit / sp) * 100;
-        }
-      }
+    if (!economics) {
+      return {
+        rawMaterialCost: null,
+        packagingCost: null,
+        preShippingCost: null,
+        sellingPrice: parseMoneyInput(formData.sellingPrice),
+        contributionProfit: null,
+        contributionMarginPct: null,
+      };
     }
 
-    return {
-      totalCost,
-      grossProfit,
-      grossMarginPct,
-    };
-  }, [
-    formData.sellingPrice,
-    formData.cogs,
-    formData.packagingCost,
-    formData.variableCost,
-  ]);
+    const rawMaterialCost = economics.rawMaterialCostPerUnit;
+    const packagingCost = economics.packagingCostPerUnit;
 
-  if (!isOpen) return null;
+    const preShippingCost =
+      rawMaterialCost !== null && packagingCost !== null
+        ? rawMaterialCost + packagingCost
+        : null;
+
+    const sellingPrice = parseMoneyInput(formData.sellingPrice);
+
+    const contributionProfit =
+      preShippingCost !== null &&
+      sellingPrice !== null &&
+      sellingPrice > 0
+        ? sellingPrice - preShippingCost
+        : null;
+
+    const contributionMarginPct =
+      contributionProfit !== null &&
+      sellingPrice !== null &&
+      sellingPrice > 0
+        ? (contributionProfit / sellingPrice) * 100
+        : null;
+
+    return {
+      rawMaterialCost,
+      packagingCost,
+      preShippingCost,
+      sellingPrice,
+      contributionProfit,
+      contributionMarginPct,
+    };
+  }, [economics, formData.sellingPrice]);
+
+  if (!isOpen) {
+    return null;
+  }
 
   const handleChange = (
     field: keyof FormState,
@@ -274,12 +298,6 @@ export function ProductFormDialog({
     setFieldErrors({});
     setGeneralError(null);
 
-    const parseMoneyInput = (val: string): number | null => {
-      const trimmed = val.trim();
-
-      return trimmed === "" ? null : Number(trimmed);
-    };
-
     const payload = {
       name: formData.name.trim(),
       sku: formData.sku.trim(),
@@ -298,9 +316,23 @@ export function ProductFormDialog({
           ? 20
           : Number(formData.reorderLevel),
       sellingPrice: parseMoneyInput(formData.sellingPrice),
-      cogs: parseMoneyInput(formData.cogs),
-      packagingCost: parseMoneyInput(formData.packagingCost),
-      variableCost: parseMoneyInput(formData.variableCost),
+
+      /*
+       * Legacy product-cost fields are intentionally no longer
+       * editable from this UI.
+       *
+       * Product economics are now calculated dynamically from:
+       *
+       *   Active Formulation
+       *        +
+       *   Active Packaging Configuration
+       *
+       * These legacy fields remain temporarily for backwards
+       * compatibility and will be removed during Phase 6 cleanup.
+       */
+      cogs: null,
+      packagingCost: null,
+      variableCost: null,
     };
 
     if (productToEdit) {
@@ -369,6 +401,8 @@ export function ProductFormDialog({
     }
   };
 
+  const hasEconomics = economics !== null;
+
   return (
     <div
       role="dialog"
@@ -396,8 +430,8 @@ export function ProductFormDialog({
 
             <p className="mt-0.5 text-xs text-slate-500">
               {isEditMode
-                ? `Updating product details and cost model for SKU: ${productToEdit?.sku}`
-                : "Register a core offering with baseline unit economics."}
+                ? `Updating product details for SKU: ${productToEdit?.sku}`
+                : "Register a core offering with pricing and product details."}
             </p>
           </div>
 
@@ -546,9 +580,11 @@ export function ProductFormDialog({
                   <option value={ProductStatus.DRAFT}>
                     Draft
                   </option>
+
                   <option value={ProductStatus.ACTIVE}>
                     Active
                   </option>
+
                   <option value={ProductStatus.ARCHIVED}>
                     Archived
                   </option>
@@ -646,224 +682,205 @@ export function ProductFormDialog({
             </div>
           </div>
 
-          {/* Financial Inputs */}
+          {/* Pricing */}
           <div className="space-y-4 border-t border-slate-100 pt-4">
-            <div className="flex items-center justify-between">
+            <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Unit Economics & Pricing (INR)
+                Pricing
               </h3>
 
-              <span className="text-[10px] text-slate-400">
-                Leave blank if unrecorded
-              </span>
+              <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                Selling price is the only product-level pricing input.
+                Product costs are calculated automatically from your
+                formulation and packaging configuration.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Selling Price */}
-              <div className="space-y-1">
-                <label
-                  htmlFor="product-sp"
-                  className="block text-xs font-semibold text-slate-700"
-                >
-                  Target Selling Price (₹)
-                </label>
+            <div className="max-w-sm space-y-1">
+              <label
+                htmlFor="product-sp"
+                className="block text-xs font-semibold text-slate-700"
+              >
+                Target Selling Price (₹)
+              </label>
 
-                <input
-                  id="product-sp"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.sellingPrice}
-                  onChange={(e) =>
-                    handleChange(
-                      "sellingPrice",
-                      e.target.value,
-                    )
-                  }
-                  placeholder="e.g., 650.00"
-                  disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
-                    fieldErrors.sellingPrice
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
-                  }`}
-                />
+              <input
+                id="product-sp"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.sellingPrice}
+                onChange={(e) =>
+                  handleChange(
+                    "sellingPrice",
+                    e.target.value,
+                  )
+                }
+                placeholder="e.g., 650.00"
+                disabled={isPending}
+                className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
+                  fieldErrors.sellingPrice
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                    : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                }`}
+              />
 
-                {fieldErrors.sellingPrice && (
-                  <p className="text-[11px] text-red-600">
-                    {fieldErrors.sellingPrice}
-                  </p>
-                )}
-              </div>
-
-              {/* COGS */}
-              <div className="space-y-1">
-                <label
-                  htmlFor="product-cogs"
-                  className="block text-xs font-semibold text-slate-700"
-                >
-                  Raw Material COGS (₹)
-                </label>
-
-                <input
-                  id="product-cogs"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.cogs}
-                  onChange={(e) =>
-                    handleChange("cogs", e.target.value)
-                  }
-                  placeholder="e.g., 180.00"
-                  disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
-                    fieldErrors.cogs
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
-                  }`}
-                />
-
-                {fieldErrors.cogs && (
-                  <p className="text-[11px] text-red-600">
-                    {fieldErrors.cogs}
-                  </p>
-                )}
-              </div>
-
-              {/* Packaging Cost */}
-              <div className="space-y-1">
-                <label
-                  htmlFor="product-pack"
-                  className="block text-xs font-semibold text-slate-700"
-                >
-                  Packaging Cost (₹)
-                </label>
-
-                <input
-                  id="product-pack"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.packagingCost}
-                  onChange={(e) =>
-                    handleChange(
-                      "packagingCost",
-                      e.target.value,
-                    )
-                  }
-                  placeholder="e.g., 45.00"
-                  disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
-                    fieldErrors.packagingCost
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
-                  }`}
-                />
-
-                {fieldErrors.packagingCost && (
-                  <p className="text-[11px] text-red-600">
-                    {fieldErrors.packagingCost}
-                  </p>
-                )}
-              </div>
-
-              {/* Variable Cost */}
-              <div className="space-y-1">
-                <label
-                  htmlFor="product-vc"
-                  className="block text-xs font-semibold text-slate-700"
-                >
-                  Direct Variable Handling (₹)
-                </label>
-
-                <input
-                  id="product-vc"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.variableCost}
-                  onChange={(e) =>
-                    handleChange(
-                      "variableCost",
-                      e.target.value,
-                    )
-                  }
-                  placeholder="e.g., 25.00"
-                  disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
-                    fieldErrors.variableCost
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
-                  }`}
-                />
-
-                {fieldErrors.variableCost && (
-                  <p className="text-[11px] text-red-600">
-                    {fieldErrors.variableCost}
-                  </p>
-                )}
-              </div>
+              {fieldErrors.sellingPrice && (
+                <p className="text-[11px] text-red-600">
+                  {fieldErrors.sellingPrice}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Live Derived Unit Economics Preview */}
-          <div className="space-y-2.5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
-              Live Unit Economics Preview
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 pt-1">
-              <div>
-                <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                  Total Unit Cost
-                </span>
-
-                <span className="text-xs font-bold text-slate-900">
-                  {liveEconomics.totalCost !== null
-                    ? formatINR(liveEconomics.totalCost)
-                    : "Not recorded"}
-                </span>
+          {/* Dynamic Product Economics */}
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-start gap-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+                <Calculator className="h-4 w-4" />
               </div>
 
               <div>
-                <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                  Gross Profit
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
 
-                <span
-                  className={`text-xs font-bold ${
-                    liveEconomics.grossProfit !== null &&
-                    liveEconomics.grossProfit < 0
-                      ? "text-amber-700"
-                      : "text-emerald-700"
-                  }`}
-                >
-                  {liveEconomics.grossProfit !== null
-                    ? formatINR(liveEconomics.grossProfit)
-                    : "Not recorded"}
-                </span>
-              </div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Product Economics
+                  </h3>
+                </div>
 
-              <div>
-                <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                  Gross Margin
-                </span>
-
-                <span
-                  className={`text-xs font-bold ${
-                    liveEconomics.grossMarginPct !== null &&
-                    liveEconomics.grossMarginPct < 0
-                      ? "text-amber-700"
-                      : "text-emerald-700"
-                  }`}
-                >
-                  {liveEconomics.grossMarginPct !== null
-                    ? `${liveEconomics.grossMarginPct.toFixed(1)}%`
-                    : "Not recorded"}
-                </span>
+                <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                  Costs are calculated automatically from the active
+                  formulation and active packaging configuration.
+                </p>
               </div>
             </div>
+
+            {!hasEconomics ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+
+                  <div>
+                    <p className="text-xs font-semibold text-amber-800">
+                      Product economics not available yet
+                    </p>
+
+                    <p className="mt-1 text-[11px] leading-5 text-amber-700">
+                      Save the product first, then configure its active
+                      formulation and packaging. The economics will be
+                      calculated automatically from current inventory
+                      costs.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <EconomicsValue
+                    label="Raw material"
+                    value={liveEconomics.rawMaterialCost}
+                    missingReason={
+                      economics.rawMaterialComponent.missingReason
+                    }
+                  />
+
+                  <EconomicsValue
+                    label="Packaging"
+                    value={liveEconomics.packagingCost}
+                    missingReason={
+                      economics.packagingComponent.missingReason
+                    }
+                  />
+
+                  <EconomicsValue
+                    label="Pre-shipping cost"
+                    value={liveEconomics.preShippingCost}
+                    emphasis
+                    missingReason={
+                      economics.preShippingUnitCost === null
+                        ? economics.incompleteReason
+                        : null
+                    }
+                  />
+
+                  <EconomicsValue
+                    label="Selling price"
+                    value={liveEconomics.sellingPrice}
+                    missingReason={
+                      liveEconomics.sellingPrice === null
+                        ? "Selling price not set"
+                        : null
+                    }
+                  />
+
+                  <EconomicsValue
+                    label="Contribution profit"
+                    value={liveEconomics.contributionProfit}
+                    emphasis
+                    tone={
+                      liveEconomics.contributionProfit === null
+                        ? "neutral"
+                        : liveEconomics.contributionProfit < 0
+                          ? "negative"
+                          : "positive"
+                    }
+                    missingReason={
+                      liveEconomics.contributionProfit === null
+                        ? liveEconomics.preShippingCost === null
+                          ? economics.incompleteReason
+                          : "Enter a selling price above ₹0"
+                        : null
+                    }
+                  />
+
+                  <EconomicsValue
+                    label="Contribution margin"
+                    value={liveEconomics.contributionMarginPct}
+                    suffix="%"
+                    emphasis
+                    tone={
+                      liveEconomics.contributionMarginPct === null
+                        ? "neutral"
+                        : liveEconomics.contributionMarginPct < 0
+                          ? "negative"
+                          : "positive"
+                    }
+                    missingReason={
+                      liveEconomics.contributionMarginPct === null
+                        ? liveEconomics.preShippingCost === null
+                          ? economics.incompleteReason
+                          : "Enter a selling price above ₹0"
+                        : null
+                    }
+                  />
+                </div>
+
+                <div className="border-t border-slate-200 pt-3">
+                  <div className="grid gap-2 text-[10px] text-slate-500 sm:grid-cols-2">
+                    <div>
+                      <span className="font-semibold text-slate-600">
+                        Formulation:
+                      </span>{" "}
+                      {economics.activeFormulationVersion !== null
+                        ? `Version ${economics.activeFormulationVersion}`
+                        : "Not configured"}
+                    </div>
+
+                    <div>
+                      <span className="font-semibold text-slate-600">
+                        Packaging:
+                      </span>{" "}
+                      {economics.activePackagingConfigurationVersion !==
+                      null
+                        ? `Version ${economics.activePackagingConfigurationVersion}`
+                        : "Not configured"}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -897,6 +914,55 @@ export function ProductFormDialog({
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+function EconomicsValue({
+  label,
+  value,
+  suffix,
+  emphasis = false,
+  tone = "neutral",
+  missingReason,
+}: {
+  label: string;
+  value: number | null;
+  suffix?: string;
+  emphasis?: boolean;
+  tone?: "neutral" | "positive" | "negative";
+  missingReason?: string | null;
+}) {
+  const valueClass =
+    tone === "negative"
+      ? "text-amber-700"
+      : tone === "positive"
+        ? "text-emerald-700"
+        : "text-slate-900";
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-3">
+      <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        {label}
+      </span>
+
+      <span
+        className={`mt-1 block ${
+          emphasis ? "text-sm" : "text-xs"
+        } font-bold ${valueClass}`}
+      >
+        {value !== null
+          ? suffix === "%"
+            ? `${value.toFixed(1)}%`
+            : formatINR(value)
+          : "Not ready"}
+      </span>
+
+      {value === null && missingReason && (
+        <span className="mt-1 block text-[9px] leading-4 text-slate-400">
+          {missingReason}
+        </span>
+      )}
     </div>
   );
 }

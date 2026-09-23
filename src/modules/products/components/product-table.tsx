@@ -1,20 +1,22 @@
 import type { ProductStatus } from "@prisma/client";
 import { formatINR } from "@/lib/formatters";
+import type { ProductEconomics } from "@/modules/product-economics/types";
 import type { SerializedProduct } from "@/modules/products/types";
 import {
   CheckCircle2,
   Package,
   Pencil,
-  TriangleAlert,
 } from "lucide-react";
 
 interface ProductTableProps {
   products: SerializedProduct[];
+  productEconomics: Array<ProductEconomics | null>;
   onEditProduct: (product: SerializedProduct) => void;
 }
 
 export function ProductTable({
   products,
+  productEconomics,
   onEditProduct,
 }: ProductTableProps) {
   if (products.length === 0) {
@@ -35,9 +37,21 @@ export function ProductTable({
     );
   }
 
+  const economicsByProductId = new Map(
+    productEconomics
+      .filter(
+        (economics): economics is ProductEconomics =>
+          economics !== null,
+      )
+      .map((economics) => [
+        economics.productId,
+        economics,
+      ]),
+  );
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[1180px] border-collapse text-left">
+      <table className="w-full min-w-[1120px] border-collapse text-left">
         <thead>
           <tr className="border-b border-slate-100 bg-slate-50/60">
             <th
@@ -55,7 +69,7 @@ export function ProductTable({
             </th>
 
             <th
-              colSpan={6}
+              colSpan={5}
               className="border-r border-slate-100 px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400"
             >
               Unit economics
@@ -95,23 +109,19 @@ export function ProductTable({
             </th>
 
             <th className="px-4 py-3 text-right text-[10px] font-semibold text-slate-600">
-              COGS
+              Raw material
             </th>
 
             <th className="px-4 py-3 text-right text-[10px] font-semibold text-slate-600">
               Packaging
             </th>
 
-            <th className="px-4 py-3 text-right text-[10px] font-semibold text-slate-600">
-              Variable
+            <th className="bg-slate-50/50 px-4 py-3 text-right text-[10px] font-bold text-slate-700">
+              Pre-shipping cost
             </th>
 
             <th className="bg-slate-50/50 px-4 py-3 text-right text-[10px] font-bold text-slate-700">
-              Unit cost
-            </th>
-
-            <th className="bg-slate-50/50 px-4 py-3 text-right text-[10px] font-bold text-slate-700">
-              Gross profit
+              Contribution
             </th>
 
             <th className="border-r border-slate-100 bg-slate-50/50 px-4 py-3 text-right text-[10px] font-bold text-slate-700">
@@ -133,94 +143,109 @@ export function ProductTable({
         </thead>
 
         <tbody className="divide-y divide-slate-100">
-          {products.map((product) => (
-            <tr
-              key={product.id}
-              className="group transition-colors hover:bg-slate-50/50"
-            >
-              <td className="px-5 py-4">
-                <div className="min-w-[210px]">
-                  <p className="text-xs font-semibold text-slate-900">
-                    {product.name}
-                  </p>
+          {products.map((product) => {
+            const economics = economicsByProductId.get(product.id);
 
-                  {product.description && (
-                    <p className="mt-1 max-w-[250px] truncate text-[10px] leading-4 text-slate-400">
-                      {product.description}
+            return (
+              <tr
+                key={product.id}
+                className="group transition-colors hover:bg-slate-50/50"
+              >
+                <td className="px-5 py-4">
+                  <div className="min-w-[210px]">
+                    <p className="text-xs font-semibold text-slate-900">
+                      {product.name}
                     </p>
-                  )}
-                </div>
-              </td>
 
-              <td className="px-4 py-4">
-                <span className="font-mono text-[10px] text-slate-500">
-                  {product.sku}
-                </span>
-              </td>
+                    {product.description && (
+                      <p className="mt-1 max-w-[250px] truncate text-[10px] leading-4 text-slate-400">
+                        {product.description}
+                      </p>
+                    )}
+                  </div>
+                </td>
 
-              <td className="px-4 py-4 text-[11px] text-slate-500">
-                {product.category}
-              </td>
-
-              <td className="border-r border-slate-100 px-4 py-4">
-                {getStatusBadge(product.status)}
-              </td>
-
-              <td className="border-r border-slate-100 px-4 py-4 text-right text-xs font-semibold text-slate-900">
-                {formatCurrencyCell(product.sellingPrice)}
-              </td>
-
-              <td className="px-4 py-4 text-right text-[11px] text-slate-600">
-                {formatCurrencyCell(product.cogs)}
-              </td>
-
-              <td className="px-4 py-4 text-right text-[11px] text-slate-600">
-                {formatCurrencyCell(product.packagingCost)}
-              </td>
-
-              <td className="px-4 py-4 text-right text-[11px] text-slate-600">
-                {formatCurrencyCell(product.variableCost)}
-              </td>
-
-              <td className="bg-slate-50/40 px-4 py-4 text-right text-[11px] font-semibold text-slate-900">
-                {formatCurrencyCell(product.totalUnitCost)}
-              </td>
-
-              <td className="bg-slate-50/40 px-4 py-4 text-right text-[11px] font-semibold">
-                {formatProfitCell(product.unitGrossProfit)}
-              </td>
-
-              <td className="border-r border-slate-100 bg-slate-50/40 px-4 py-4 text-right text-[11px] font-semibold">
-                {formatMarginCell(product.unitGrossMarginPct)}
-              </td>
-
-              <td className="px-4 py-4 text-right">
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-xs font-semibold text-slate-800">
-                    {product.currentStock}
+                <td className="px-4 py-4">
+                  <span className="font-mono text-[10px] text-slate-500">
+                    {product.sku}
                   </span>
+                </td>
 
-                  {getStockStatus(product.currentStock, product.reorderLevel)}
-                </div>
-              </td>
+                <td className="px-4 py-4 text-[11px] text-slate-500">
+                  {product.category}
+                </td>
 
-              <td className="border-r border-slate-100 px-4 py-4 text-right text-[11px] text-slate-500">
-                {product.reorderLevel}
-              </td>
+                <td className="border-r border-slate-100 px-4 py-4">
+                  {getStatusBadge(product.status)}
+                </td>
 
-              <td className="px-4 py-4 text-center">
-                <button
-                  type="button"
-                  onClick={() => onEditProduct(product)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-                  aria-label={`Edit ${product.name}`}
-                >
-                  <Pencil className="h-3 w-3" />
-                  Edit
-                </button>
-              </td>
-            </tr>
-          ))}
+                <td className="border-r border-slate-100 px-4 py-4 text-right text-xs font-semibold text-slate-900">
+                  {formatCurrencyCell(
+                    economics?.sellingPrice ?? null,
+                  )}
+                </td>
+
+                <td className="px-4 py-4 text-right text-[11px] text-slate-600">
+                  {formatCurrencyCell(
+                    economics?.rawMaterialCostPerUnit ?? null,
+                  )}
+                </td>
+
+                <td className="px-4 py-4 text-right text-[11px] text-slate-600">
+                  {formatCurrencyCell(
+                    economics?.packagingCostPerUnit ?? null,
+                  )}
+                </td>
+
+                <td className="bg-slate-50/40 px-4 py-4 text-right text-[11px] font-semibold text-slate-900">
+                  {formatCurrencyCell(
+                    economics?.preShippingUnitCost ?? null,
+                  )}
+                </td>
+
+                <td className="bg-slate-50/40 px-4 py-4 text-right text-[11px] font-semibold">
+                  {formatProfitCell(
+                    economics?.contributionProfitPerUnit ?? null,
+                  )}
+                </td>
+
+                <td className="border-r border-slate-100 bg-slate-50/40 px-4 py-4 text-right text-[11px] font-semibold">
+                  {formatMarginCell(
+                    economics?.contributionMarginPct ?? null,
+                  )}
+                </td>
+
+                <td className="px-4 py-4 text-right">
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-xs font-semibold text-slate-800">
+                      {product.currentStock}
+                    </span>
+
+                    {getStockStatus(
+                      product.currentStock,
+                      product.reorderLevel,
+                    )}
+                  </div>
+                </td>
+
+                <td className="border-r border-slate-100 px-4 py-4 text-right text-[11px] text-slate-500">
+                  {product.reorderLevel}
+                </td>
+
+                <td className="px-4 py-4 text-center">
+                  <button
+                    type="button"
+                    onClick={() => onEditProduct(product)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                    aria-label={`Edit ${product.name}`}
+                  >
+                    <Pencil className="h-3 w-3" />
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -288,7 +313,7 @@ function formatCurrencyCell(val: number | null) {
   if (val === null) {
     return (
       <span className="font-normal italic text-slate-400">
-        Not recorded
+        Not ready
       </span>
     );
   }
@@ -300,7 +325,7 @@ function formatProfitCell(val: number | null) {
   if (val === null) {
     return (
       <span className="font-normal italic text-slate-400">
-        Not recorded
+        Not ready
       </span>
     );
   }
@@ -322,7 +347,7 @@ function formatMarginCell(val: number | null) {
   if (val === null) {
     return (
       <span className="font-normal italic text-slate-400">
-        Not recorded
+        Not ready
       </span>
     );
   }

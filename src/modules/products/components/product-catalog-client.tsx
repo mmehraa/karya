@@ -9,30 +9,42 @@ import {
   Plus,
 } from "lucide-react";
 
+import type { ProductEconomics } from "@/modules/product-economics/types";
 import type { SerializedProduct } from "@/modules/products/types";
 import { ProductTable } from "@/modules/products/components/product-table";
 import { ProductFormDialog } from "@/modules/products/components/product-form-dialog";
 
 interface ProductCatalogClientProps {
   initialProducts: SerializedProduct[];
+  initialProductEconomics: Array<ProductEconomics | null>;
 }
 
 export function ProductCatalogClient({
   initialProducts,
+  initialProductEconomics,
 }: ProductCatalogClientProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] =
     useState<SerializedProduct | null>(null);
 
+  const selectedProductEconomics = useMemo(() => {
+    if (!selectedProduct) {
+      return null;
+    }
+
+    return (
+      initialProductEconomics.find(
+        (economics) =>
+          economics?.productId === selectedProduct.id,
+      ) ?? null
+    );
+  }, [selectedProduct, initialProductEconomics]);
+
   const summary = useMemo(() => {
     const totalProducts = initialProducts.length;
 
-    const completeUnitEconomics = initialProducts.filter(
-      (product) =>
-        product.sellingPrice !== null &&
-        product.cogs !== null &&
-        product.packagingCost !== null &&
-        product.variableCost !== null,
+    const completeUnitEconomics = initialProductEconomics.filter(
+      (economics) => economics?.isComplete === true,
     ).length;
 
     const outOfStock = initialProducts.filter(
@@ -51,7 +63,7 @@ export function ProductCatalogClient({
       outOfStock,
       lowStock,
     };
-  }, [initialProducts]);
+  }, [initialProducts, initialProductEconomics]);
 
   const handleOpenCreate = () => {
     setSelectedProduct(null);
@@ -82,7 +94,7 @@ export function ProductCatalogClient({
         <SummaryCard
           label="Unit economics"
           value={summary.completeUnitEconomics}
-          description="Complete cost inputs"
+          description="Products with complete costing"
           icon={BarChart3}
         />
 
@@ -118,8 +130,8 @@ export function ProductCatalogClient({
             </div>
 
             <p className="mt-1 text-xs text-slate-500">
-              Pricing and unit economics are maintained here. Inventory values
-              are display-only.
+              Selling price is maintained here. Product costs are calculated
+              dynamically from active formulation and packaging configuration.
             </p>
           </div>
 
@@ -135,6 +147,7 @@ export function ProductCatalogClient({
 
         <ProductTable
           products={initialProducts}
+          productEconomics={initialProductEconomics}
           onEditProduct={handleOpenEdit}
         />
       </section>
@@ -143,6 +156,7 @@ export function ProductCatalogClient({
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
         productToEdit={selectedProduct}
+        productEconomics={selectedProductEconomics}
       />
     </div>
   );

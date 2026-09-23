@@ -1,8 +1,19 @@
+import { getDashboardContext } from "@/modules/business/dashboard-context";
+import { getProductEconomics } from "@/modules/product-economics/services";
 import { getActiveBusinessProducts } from "@/modules/products/services";
 import { ProductCatalogClient } from "@/modules/products/components/product-catalog-client";
 
 export default async function ProductsPage() {
-  const products = await getActiveBusinessProducts();
+  const [{ businessId }, products] = await Promise.all([
+    getDashboardContext(),
+    getActiveBusinessProducts(),
+  ]);
+
+  const productEconomics = await Promise.all(
+    products.map((product) =>
+      getProductEconomics(businessId, product.id),
+    ),
+  );
 
   return (
     <div className="space-y-6">
@@ -18,14 +29,17 @@ export default async function ProductsPage() {
           </h1>
 
           <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
-            Manage your registered offerings, pricing, unit economics, and
-            inventory thresholds.
+            Manage your registered offerings, pricing, dynamic unit economics,
+            and inventory thresholds.
           </p>
         </div>
       </div>
 
       {/* Product Catalog */}
-      <ProductCatalogClient initialProducts={products} />
+      <ProductCatalogClient
+        initialProducts={products}
+        initialProductEconomics={productEconomics}
+      />
     </div>
   );
 }

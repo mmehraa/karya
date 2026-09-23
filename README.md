@@ -1890,9 +1890,40 @@ Business
    └── Backup
 ```
 
-V2 should build on these foundations.
+# V2 Development Roadmap
 
-The goal is not to restart the application, but to continue developing Karya into a more complete Business Operating System while preserving the core architectural principles established in V1.
+V2 extends the V1 foundation into a more complete Business Operating System with a stronger focus on:
+
+- accurate product costing
+- raw-material costing
+- packaging costing
+- production costing
+- product economics
+- order economics
+- cash flow
+- business intelligence
+- investor metrics
+
+The V2 development process is divided into the following phases:
+
+```text
+PHASE 1 | ✅ Complete |
+Product Economics & Cost Engine
+        ↓
+PHASE 2
+Production & Product UI Integration
+        ↓
+PHASE 3
+Order Economics & Cash Flow
+        ↓
+PHASE 4
+Business Intelligence
+        ↓
+PHASE 5
+Investor Metrics & Decision Layer
+        ↓
+PHASE 6
+Cleanup, Hardening & Launch
 
 ---
 
