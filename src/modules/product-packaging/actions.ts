@@ -7,6 +7,7 @@ import { getDashboardContext } from "@/modules/business/dashboard-context";
 
 import {
   createProductPackagingConfiguration,
+  deleteProductPackagingConfiguration,
   getActiveProductPackagingConfiguration,
   getProductPackagingConfiguration,
   getProductPackagingConfigurations,
@@ -277,6 +278,65 @@ export async function getActiveProductPackagingConfigurationAction(
       success: false,
       error:
         "Unable to load the active packaging configuration.",
+    };
+  }
+}
+
+/**
+ * Deletes a packaging configuration version.
+ *
+ * The service layer prevents deletion when the version
+ * is referenced by a production batch.
+ */
+export async function deleteProductPackagingConfigurationAction(
+  input: ProductPackagingConfigurationIdInput
+): Promise<ActionResponse> {
+  try {
+    const { businessId } =
+      await getDashboardContext();
+
+    const parsed =
+      ProductPackagingConfigurationIdSchema.safeParse(
+        input
+      );
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ??
+          "Invalid configuration ID.",
+      };
+    }
+
+    await deleteProductPackagingConfiguration(
+      businessId,
+      parsed.data.id
+    );
+
+    revalidatePath("/products");
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(
+      "deleteProductPackagingConfigurationAction error:",
+      error
+    );
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error:
+        "Unable to delete packaging configuration.",
     };
   }
 }

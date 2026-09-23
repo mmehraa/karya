@@ -1202,3 +1202,41 @@ export async function cancelProductionBatch(
     );
   });
 }
+
+export async function deleteProductionBatch(
+  businessId: string,
+  batchId: string,
+): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const batch =
+      await tx.productionBatch.findFirst({
+        where: {
+          id: batchId,
+          businessId,
+        },
+
+        select: {
+          id: true,
+          status: true,
+        },
+      });
+
+    if (!batch) {
+      throw new Error(
+        "Production batch not found.",
+      );
+    }
+
+    if (batch.status !== "CANCELLED") {
+      throw new Error(
+        "Only cancelled production batches can be deleted.",
+      );
+    }
+
+    await tx.productionBatch.delete({
+      where: {
+        id: batch.id,
+      },
+    });
+  });
+}

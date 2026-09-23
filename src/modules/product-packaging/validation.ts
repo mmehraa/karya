@@ -1,19 +1,5 @@
 import { z } from "zod";
 
-/**
- * Packaging configuration item.
- *
- * Quantity represents the number of packaging pieces required
- * to produce ONE finished product unit.
- *
- * Examples:
- *   Tamper-proof bag = 1
- *   Flash card       = 1
- *   Wrapping sheet   = 1
- *   Cardboard box    = 1
- *
- * Packaging materials currently use PIECE as their base unit.
- */
 const ProductPackagingConfigurationItemSchema =
   z.object({
     packagingMaterialId: z
@@ -96,7 +82,9 @@ export const CreateProductPackagingConfigurationSchema =
 
         items.forEach((item, index) => {
           if (
-            materialIds.has(item.packagingMaterialId)
+            materialIds.has(
+              item.packagingMaterialId
+            )
           ) {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -118,12 +106,16 @@ export const CreateProductPackagingConfigurationSchema =
 
 export const ProductPackagingConfigurationIdSchema =
   z.object({
-    id: z.string().uuid("Invalid configuration ID."),
+    id: z
+      .string()
+      .uuid("Invalid configuration ID."),
   });
 
 export const ProductPackagingConfigurationProductIdSchema =
   z.object({
-    productId: z.string().uuid("Invalid product ID."),
+    productId: z
+      .string()
+      .uuid("Invalid product ID."),
   });
 
 export type CreateProductPackagingConfigurationInput =

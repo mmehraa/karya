@@ -8,6 +8,7 @@ import {
   cancelProductionBatch,
   completeProductionBatch,
   createProductionBatch,
+  deleteProductionBatch,
   getProductionBatch,
   getProductionBatches,
 } from "./services";
@@ -15,11 +16,13 @@ import {
 import {
   CompleteProductionBatchSchema,
   CreateProductionBatchSchema,
+  DeleteProductionBatchSchema,
   GetProductionBatchSchema,
   GetProductionBatchesSchema,
   ProductionBatchIdSchema,
   type CompleteProductionBatchInput,
   type CreateProductionBatchInput,
+  type DeleteProductionBatchInput,
   type GetProductionBatchInput,
   type GetProductionBatchesInput,
   type ProductionBatchIdInput,
@@ -341,6 +344,68 @@ export async function cancelProductionBatchAction(
       success: false,
       error:
         "An unexpected error occurred while cancelling the production batch.",
+    };
+  }
+}
+
+export async function deleteProductionBatchAction(
+  input: DeleteProductionBatchInput,
+): Promise<ActionResponse> {
+  try {
+    const { businessId } =
+      await getDashboardContext();
+
+    const parsed =
+      DeleteProductionBatchSchema.safeParse(
+        input,
+      );
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ||
+          "Invalid production batch ID.",
+      };
+    }
+
+    await deleteProductionBatch(
+      businessId,
+      parsed.data.batchId,
+    );
+
+    revalidatePath(
+      "/production-batches",
+    );
+
+    revalidatePath(
+      "/products",
+    );
+
+    revalidatePath(
+      "/dashboard",
+    );
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(
+      "Failed to delete production batch:",
+      error,
+    );
+
+    if (error instanceof Error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
+    return {
+      success: false,
+      error:
+        "An unexpected error occurred while deleting the production batch.",
     };
   }
 }

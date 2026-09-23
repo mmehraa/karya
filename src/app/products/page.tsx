@@ -1,5 +1,6 @@
 import { getDashboardContext } from "@/modules/business/dashboard-context";
 import { getProductEconomics } from "@/modules/product-economics/services";
+import { getProductionBatches } from "@/modules/production-batches/services";
 import { getActiveBusinessProducts } from "@/modules/products/services";
 import { ProductCatalogClient } from "@/modules/products/components/product-catalog-client";
 
@@ -9,11 +10,42 @@ export default async function ProductsPage() {
     getActiveBusinessProducts(),
   ]);
 
-  const productEconomics = await Promise.all(
-    products.map((product) =>
-      getProductEconomics(businessId, product.id),
-    ),
-  );
+  const [productEconomics, productionBatchResults] =
+    await Promise.all([
+      Promise.all(
+        products.map((product) =>
+          getProductEconomics(
+            businessId,
+            product.id,
+          ),
+        ),
+      ),
+
+      Promise.all(
+        products.map(async (product) => {
+          const batches =
+            await getProductionBatches(
+              businessId,
+              product.id,
+            );
+
+          return {
+            productId: product.id,
+            batches,
+          };
+        }),
+      ),
+    ]);
+
+  const productionBatchesByProductId =
+    Object.fromEntries(
+      productionBatchResults.map(
+        ({ productId, batches }) => [
+          productId,
+          batches,
+        ],
+      ),
+    );
 
   return (
     <div className="space-y-6">
@@ -30,7 +62,7 @@ export default async function ProductsPage() {
 
           <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
             Manage your registered offerings, pricing, dynamic unit economics,
-            and inventory thresholds.
+            inventory thresholds, and production history.
           </p>
         </div>
       </div>
@@ -39,6 +71,9 @@ export default async function ProductsPage() {
       <ProductCatalogClient
         initialProducts={products}
         initialProductEconomics={productEconomics}
+        initialProductionBatchesByProductId={
+          productionBatchesByProductId
+        }
       />
     </div>
   );

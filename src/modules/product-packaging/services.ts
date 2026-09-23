@@ -74,15 +74,11 @@ function serializePackagingConfiguration(
 ): SerializedProductPackagingConfiguration {
   const items: SerializedProductPackagingConfigurationItem[] =
     configuration.items.map((item) => {
-      const quantity = decimalToNumber(
-        item.quantity
-      );
+      const quantity = decimalToNumber(item.quantity);
 
-      const weightedAverageCost =
-        decimalToNumber(
-          item.packagingMaterial
-            .weightedAverageCost
-        );
+      const weightedAverageCost = decimalToNumber(
+        item.packagingMaterial.weightedAverageCost
+      );
 
       const lineCost =
         quantity * weightedAverageCost;
@@ -103,8 +99,7 @@ function serializePackagingConfiguration(
     });
 
   const totalPackagingCost = items.reduce(
-    (total, item) =>
-      total + item.lineCost,
+    (total, item) => total + item.lineCost,
     0
   );
 
@@ -143,10 +138,6 @@ export async function createProductPackagingConfiguration(
   input: CreateProductPackagingConfigurationInput
 ): Promise<SerializedProductPackagingConfiguration> {
   return db.$transaction(async (tx) => {
-    // -------------------------------------------------------
-    // 1. Verify product belongs to this business
-    // -------------------------------------------------------
-
     const product =
       await tx.product.findFirst({
         where: {
@@ -161,14 +152,8 @@ export async function createProductPackagingConfiguration(
       });
 
     if (!product) {
-      throw new Error(
-        "Product not found."
-      );
+      throw new Error("Product not found.");
     }
-
-    // -------------------------------------------------------
-    // 2. Verify packaging materials
-    // -------------------------------------------------------
 
     const requestedMaterialIds =
       input.items.map(
@@ -215,10 +200,6 @@ export async function createProductPackagingConfiguration(
       );
     }
 
-    // -------------------------------------------------------
-    // 3. Determine next formulation version
-    // -------------------------------------------------------
-
     const latestVersion =
       await tx.productPackagingConfiguration.findFirst({
         where: {
@@ -236,26 +217,16 @@ export async function createProductPackagingConfiguration(
     const nextVersion =
       (latestVersion?.version ?? 0) + 1;
 
-    // -------------------------------------------------------
-    // 4. Deactivate previous active configuration
-    // -------------------------------------------------------
-
-    await tx.productPackagingConfiguration.updateMany(
-      {
-        where: {
-          businessId,
-          productId: product.id,
-          isActive: true,
-        },
-        data: {
-          isActive: false,
-        },
-      }
-    );
-
-    // -------------------------------------------------------
-    // 5. Create configuration
-    // -------------------------------------------------------
+    await tx.productPackagingConfiguration.updateMany({
+      where: {
+        businessId,
+        productId: product.id,
+        isActive: true,
+      },
+      data: {
+        isActive: false,
+      },
+    });
 
     const configuration =
       await tx.productPackagingConfiguration.create({
@@ -341,9 +312,7 @@ export async function getProductPackagingConfigurations(
     });
 
   if (!product) {
-    throw new Error(
-      "Product not found."
-    );
+    throw new Error("Product not found.");
   }
 
   const configurations =
@@ -488,4 +457,95 @@ export async function getActiveProductPackagingConfiguration(
   return serializePackagingConfiguration(
     configuration
   );
+}
+
+/**
+ * Deletes a packaging configuration version.
+ *
+ * Rules:
+ * - Configuration must belong to the active business.
+ * - A configuration referenced by a production batch
+ *   cannot be deleted.
+ * - Active configurations may be deleted.
+ * - If the deleted configuration was active and another
+ *   version remains, the latest remaining version becomes
+ *   active.
+ * - If the deleted configuration was the only version,
+ *   the product is left without a packaging configuration.
+ *
+ * This operation never changes inventory.
+ */
+export async function deleteProductPackagingConfiguration(
+  businessId: string,
+  configurationId: string
+): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const configuration =
+      await tx.productPackagingConfiguration.findFirst({
+        where: {
+          id: configurationId,
+          businessId,
+        },
+        select: {
+          id: true,
+          productId: true,
+          version: true,
+          isActive: true,
+        },
+      });
+
+    if (!configuration) {
+      throw new Error(
+        "Packaging configuration not found."
+      );
+    }
+
+    const productionBatchCount =
+      await tx.productionBatch.count({
+        where: {
+          businessId,
+          packagingConfigurationId:
+            configurationId,
+        },
+      });
+
+    if (productionBatchCount > 0) {
+      throw new Error(
+        "This packaging configuration is used by a production batch and cannot be deleted."
+      );
+    }
+
+    await tx.productPackagingConfiguration.delete({
+      where: {
+        id: configuration.id,
+      },
+    });
+
+    if (configuration.isActive) {
+      const fallback =
+        await tx.productPackagingConfiguration.findFirst({
+          where: {
+            businessId,
+            productId: configuration.productId,
+          },
+          orderBy: {
+            version: "desc",
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (fallback) {
+        await tx.productPackagingConfiguration.update({
+          where: {
+            id: fallback.id,
+          },
+          data: {
+            isActive: true,
+          },
+        });
+      }
+    }
+  });
 }

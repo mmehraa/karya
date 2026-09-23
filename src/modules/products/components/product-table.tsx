@@ -6,18 +6,21 @@ import {
   CheckCircle2,
   Package,
   Pencil,
+  Settings2,
 } from "lucide-react";
 
 interface ProductTableProps {
   products: SerializedProduct[];
   productEconomics: Array<ProductEconomics | null>;
   onEditProduct: (product: SerializedProduct) => void;
+  onConfigureProduct: (product: SerializedProduct) => void;
 }
 
 export function ProductTable({
   products,
   productEconomics,
   onEditProduct,
+  onConfigureProduct,
 }: ProductTableProps) {
   if (products.length === 0) {
     return (
@@ -51,7 +54,7 @@ export function ProductTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[1120px] border-collapse text-left">
+      <table className="w-full min-w-[1240px] border-collapse text-left">
         <thead>
           <tr className="border-b border-slate-100 bg-slate-50/60">
             <th
@@ -144,7 +147,8 @@ export function ProductTable({
 
         <tbody className="divide-y divide-slate-100">
           {products.map((product) => {
-            const economics = economicsByProductId.get(product.id);
+            const economics =
+              economicsByProductId.get(product.id);
 
             return (
               <tr
@@ -232,16 +236,32 @@ export function ProductTable({
                   {product.reorderLevel}
                 </td>
 
-                <td className="px-4 py-4 text-center">
-                  <button
-                    type="button"
-                    onClick={() => onEditProduct(product)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
-                    aria-label={`Edit ${product.name}`}
-                  >
-                    <Pencil className="h-3 w-3" />
-                    Edit
-                  </button>
+                <td className="px-4 py-4">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onConfigureProduct(product)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                      aria-label={`Configure ${product.name}`}
+                    >
+                      <Settings2 className="h-3 w-3" />
+                      Configure
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onEditProduct(product)
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                      aria-label={`Edit ${product.name}`}
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit
+                    </button>
+                  </div>
                 </td>
               </tr>
             );

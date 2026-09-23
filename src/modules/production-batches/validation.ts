@@ -68,6 +68,10 @@ export const GetProductionBatchesSchema = z.object({
   productId: uuidSchema.optional(),
 });
 
+export const DeleteProductionBatchSchema = z.object({
+  batchId: uuidSchema,
+});
+
 export type CreateProductionBatchInput =
   z.infer<typeof CreateProductionBatchSchema>;
 
@@ -82,3 +86,6 @@ export type GetProductionBatchInput =
 
 export type GetProductionBatchesInput =
   z.infer<typeof GetProductionBatchesSchema>;
+
+export type DeleteProductionBatchInput =
+  z.infer<typeof DeleteProductionBatchSchema>;

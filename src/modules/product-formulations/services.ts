@@ -1,20 +1,24 @@
 import { Prisma } from "@prisma/client";
+
 import { db } from "@/lib/db";
+
 import type {
   CreateProductFormulationInput,
 } from "./validation";
+
 import type {
   SerializedProductFormulation,
   SerializedProductFormulationItem,
   ProductFormulationSummary,
 } from "./types";
 
-/**
- * Safely converts a Prisma Decimal / number / string
- * into a JavaScript number.
- */
 function decimalToNumber(
-  value: Prisma.Decimal | number | string | null | undefined
+  value:
+    | Prisma.Decimal
+    | number
+    | string
+    | null
+    | undefined
 ): number {
   if (value === null || value === undefined) {
     return 0;
@@ -25,13 +29,6 @@ function decimalToNumber(
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-/**
- * Converts a formulation item into the serialized representation
- * used by the application/UI.
- *
- * Cost is calculated from the raw material's CURRENT weighted
- * average cost.
- */
 function serializeFormulationItem(item: {
   id: string;
   rawMaterialId: string;
@@ -51,10 +48,6 @@ function serializeFormulationItem(item: {
     item.rawMaterial.weightedAverageCost
   );
 
-  /**
-   * Do the calculation using Decimal rather than JavaScript
-   * floating-point arithmetic.
-   */
   const lineCostDecimal = new Prisma.Decimal(
     item.quantity.toString()
   ).mul(item.rawMaterial.weightedAverageCost);
@@ -75,9 +68,6 @@ function serializeFormulationItem(item: {
   };
 }
 
-/**
- * Serializes a complete formulation.
- */
 function serializeFormulation(formulation: {
   id: string;
   businessId: string;
@@ -102,11 +92,17 @@ function serializeFormulation(formulation: {
     };
   }>;
 }): SerializedProductFormulation {
-  const items = formulation.items.map(serializeFormulationItem);
+  const items = formulation.items.map(
+    serializeFormulationItem
+  );
 
   const totalCostDecimal = items.reduce(
     (total, item) =>
-      total.add(new Prisma.Decimal(item.lineCost.toString())),
+      total.add(
+        new Prisma.Decimal(
+          item.lineCost.toString()
+        )
+      ),
     new Prisma.Decimal(0)
   );
 
@@ -119,17 +115,13 @@ function serializeFormulation(formulation: {
     isActive: formulation.isActive,
     notes: formulation.notes,
     items,
-    totalRawMaterialCost: decimalToNumber(totalCostDecimal),
+    totalRawMaterialCost:
+      decimalToNumber(totalCostDecimal),
     createdAt: formulation.createdAt,
     updatedAt: formulation.updatedAt,
   };
 }
 
-/**
- * Retrieves all formulations for a product.
- *
- * Tenant isolation is enforced through businessId.
- */
 export async function getProductFormulations(
   businessId: string,
   productId: string
@@ -148,40 +140,38 @@ export async function getProductFormulations(
     throw new Error("Product not found.");
   }
 
-  const formulations = await db.productFormulation.findMany({
-    where: {
-      businessId,
-      productId,
-    },
-    include: {
-      items: {
-        include: {
-          rawMaterial: {
-            select: {
-              name: true,
-              baseUnit: true,
-              weightedAverageCost: true,
+  const formulations =
+    await db.productFormulation.findMany({
+      where: {
+        businessId,
+        productId,
+      },
+      include: {
+        items: {
+          include: {
+            rawMaterial: {
+              select: {
+                name: true,
+                baseUnit: true,
+                weightedAverageCost: true,
+              },
             },
           },
-        },
-        orderBy: {
-          createdAt: "asc",
+          orderBy: {
+            createdAt: "asc",
+          },
         },
       },
-    },
-    orderBy: {
-      version: "desc",
-    },
-  });
+      orderBy: {
+        version: "desc",
+      },
+    });
 
-  return formulations.map(serializeFormulation);
+  return formulations.map(
+    serializeFormulation
+  );
 }
 
-/**
- * Retrieves the currently active formulation for a product.
- *
- * Returns null when the product has no formulation yet.
- */
 export async function getActiveProductFormulation(
   businessId: string,
   productId: string
@@ -200,172 +190,13 @@ export async function getActiveProductFormulation(
     throw new Error("Product not found.");
   }
 
-  const formulation = await db.productFormulation.findFirst({
-    where: {
-      businessId,
-      productId,
-      isActive: true,
-    },
-    include: {
-      items: {
-        include: {
-          rawMaterial: {
-            select: {
-              name: true,
-              baseUnit: true,
-              weightedAverageCost: true,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
-    },
-    orderBy: {
-      version: "desc",
-    },
-  });
-
-  if (!formulation) {
-    return null;
-  }
-
-  return serializeFormulation(formulation);
-}
-
-/**
- * Creates a new formulation version.
- *
- * If the product already has an active formulation:
- * - the existing active version is deactivated
- * - a new version number is created
- * - the new version becomes active
- *
- * The entire operation occurs inside one database transaction.
- *
- * IMPORTANT:
- * Creating a formulation NEVER consumes raw-material inventory.
- */
-export async function createProductFormulation(
-  businessId: string,
-  input: CreateProductFormulationInput
-): Promise<SerializedProductFormulation> {
-  /**
-   * Validate that the submitted raw materials belong to the
-   * same business and that no cross-tenant material IDs are used.
-   */
-  const rawMaterialIds = input.items.map(
-    (item) => item.rawMaterialId
-  );
-
-  const uniqueRawMaterialIds = [...new Set(rawMaterialIds)];
-
-  if (uniqueRawMaterialIds.length !== rawMaterialIds.length) {
-    throw new Error(
-      "A raw material can only appear once in a formulation."
-    );
-  }
-
-  const formulation = await db.$transaction(async (tx) => {
-    /**
-     * Verify product ownership inside the transaction.
-     */
-    const product = await tx.product.findFirst({
-      where: {
-        id: input.productId,
-        businessId,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (!product) {
-      throw new Error("Product not found.");
-    }
-
-    /**
-     * Verify every raw material belongs to this business.
-     */
-    const rawMaterials = await tx.rawMaterial.findMany({
+  const formulation =
+    await db.productFormulation.findFirst({
       where: {
         businessId,
-        id: {
-          in: uniqueRawMaterialIds,
-        },
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    if (rawMaterials.length !== uniqueRawMaterialIds.length) {
-      throw new Error(
-        "One or more selected raw materials were not found in this business."
-      );
-    }
-
-    /**
-     * Find the latest formulation version.
-     */
-    const latestFormulation =
-      await tx.productFormulation.findFirst({
-        where: {
-          businessId,
-          productId: input.productId,
-        },
-        orderBy: {
-          version: "desc",
-        },
-        select: {
-          version: true,
-        },
-      });
-
-    const nextVersion = (latestFormulation?.version ?? 0) + 1;
-
-    /**
-     * Deactivate any previous active formulation.
-     */
-    await tx.productFormulation.updateMany({
-      where: {
-        businessId,
-        productId: input.productId,
+        productId,
         isActive: true,
       },
-      data: {
-        isActive: false,
-      },
-    });
-
-    /**
-     * Create the new formulation and all of its items.
-     *
-     * Quantities are stored only.
-     * Costs remain derived from the raw-material inventory.
-     */
-    return tx.productFormulation.create({
-      data: {
-        businessId,
-        productId: input.productId,
-        name: input.name,
-        version: nextVersion,
-        isActive: true,
-        notes: input.notes ?? null,
-
-        items: {
-          create: input.items.map((item) => ({
-            businessId,
-            rawMaterialId: item.rawMaterialId,
-            quantity: new Prisma.Decimal(
-              item.quantity.toFixed(6)
-            ),
-            notes: item.notes ?? null,
-          })),
-        },
-      },
-
       include: {
         items: {
           include: {
@@ -382,18 +213,239 @@ export async function createProductFormulation(
           },
         },
       },
+      orderBy: {
+        version: "desc",
+      },
     });
-  });
+
+  if (!formulation) {
+    return null;
+  }
+
+  return serializeFormulation(formulation);
+}
+
+export async function createProductFormulation(
+  businessId: string,
+  input: CreateProductFormulationInput
+): Promise<SerializedProductFormulation> {
+  const rawMaterialIds = input.items.map(
+    (item) => item.rawMaterialId
+  );
+
+  const uniqueRawMaterialIds = [
+    ...new Set(rawMaterialIds),
+  ];
+
+  if (
+    uniqueRawMaterialIds.length !==
+    rawMaterialIds.length
+  ) {
+    throw new Error(
+      "A raw material can only appear once in a formulation."
+    );
+  }
+
+  const formulation = await db.$transaction(
+    async (tx) => {
+      const product = await tx.product.findFirst({
+        where: {
+          id: input.productId,
+          businessId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!product) {
+        throw new Error("Product not found.");
+      }
+
+      const rawMaterials =
+        await tx.rawMaterial.findMany({
+          where: {
+            businessId,
+            id: {
+              in: uniqueRawMaterialIds,
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (
+        rawMaterials.length !==
+        uniqueRawMaterialIds.length
+      ) {
+        throw new Error(
+          "One or more selected raw materials were not found in this business."
+        );
+      }
+
+      const latestFormulation =
+        await tx.productFormulation.findFirst({
+          where: {
+            businessId,
+            productId: input.productId,
+          },
+          orderBy: {
+            version: "desc",
+          },
+          select: {
+            version: true,
+          },
+        });
+
+      const nextVersion =
+        (latestFormulation?.version ?? 0) + 1;
+
+      await tx.productFormulation.updateMany({
+        where: {
+          businessId,
+          productId: input.productId,
+          isActive: true,
+        },
+        data: {
+          isActive: false,
+        },
+      });
+
+      return tx.productFormulation.create({
+        data: {
+          businessId,
+          productId: input.productId,
+          name: input.name,
+          version: nextVersion,
+          isActive: true,
+          notes: input.notes ?? null,
+
+          items: {
+            create: input.items.map((item) => ({
+              businessId,
+              rawMaterialId:
+                item.rawMaterialId,
+              quantity: new Prisma.Decimal(
+                item.quantity.toFixed(6)
+              ),
+              notes: item.notes ?? null,
+            })),
+          },
+        },
+
+        include: {
+          items: {
+            include: {
+              rawMaterial: {
+                select: {
+                  name: true,
+                  baseUnit: true,
+                  weightedAverageCost: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
+        },
+      });
+    }
+  );
 
   return serializeFormulation(formulation);
 }
 
 /**
- * Retrieves lightweight summaries for a product's formulations.
+ * Deletes a formulation version.
  *
- * Useful for selectors/history displays where the complete
- * formulation item list is not required.
+ * Rules:
+ * - Tenant isolation is enforced through businessId.
+ * - A formulation referenced by ANY production batch cannot
+ *   be deleted because production history depends on it.
+ * - If the deleted version was active and another version
+ *   remains, the latest remaining version becomes active.
+ * - If no versions remain, the product has no active
+ *   formulation.
+ *
+ * The operation is transactional.
  */
+export async function deleteProductFormulation(
+  businessId: string,
+  formulationId: string
+): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const formulation =
+      await tx.productFormulation.findFirst({
+        where: {
+          id: formulationId,
+          businessId,
+        },
+        select: {
+          id: true,
+          productId: true,
+          version: true,
+          isActive: true,
+        },
+      });
+
+    if (!formulation) {
+      throw new Error(
+        "Formulation version not found."
+      );
+    }
+
+    const productionBatchCount =
+      await tx.productionBatch.count({
+        where: {
+          businessId,
+          formulationId,
+        },
+      });
+
+    if (productionBatchCount > 0) {
+      throw new Error(
+        "This formulation version is used by a production batch and cannot be deleted."
+      );
+    }
+
+    await tx.productFormulation.delete({
+      where: {
+        id: formulation.id,
+      },
+    });
+
+    if (formulation.isActive) {
+      const fallback =
+        await tx.productFormulation.findFirst({
+          where: {
+            businessId,
+            productId:
+              formulation.productId,
+          },
+          orderBy: {
+            version: "desc",
+          },
+          select: {
+            id: true,
+          },
+        });
+
+      if (fallback) {
+        await tx.productFormulation.update({
+          where: {
+            id: fallback.id,
+          },
+          data: {
+            isActive: true,
+          },
+        });
+      }
+    }
+  });
+}
+
 export async function getProductFormulationSummaries(
   businessId: string,
   productId: string
@@ -412,48 +464,62 @@ export async function getProductFormulationSummaries(
     throw new Error("Product not found.");
   }
 
-  const formulations = await db.productFormulation.findMany({
-    where: {
-      businessId,
-      productId,
-    },
-    include: {
-      items: {
-        include: {
-          rawMaterial: {
-            select: {
-              weightedAverageCost: true,
+  const formulations =
+    await db.productFormulation.findMany({
+      where: {
+        businessId,
+        productId,
+      },
+      include: {
+        items: {
+          include: {
+            rawMaterial: {
+              select: {
+                weightedAverageCost: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: {
-      version: "desc",
-    },
-  });
-
-  return formulations.map((formulation) => {
-    const totalCost = formulation.items.reduce(
-      (total, item) => {
-        const lineCost = new Prisma.Decimal(
-          item.quantity.toString()
-        ).mul(item.rawMaterial.weightedAverageCost);
-
-        return total.add(lineCost);
+      orderBy: {
+        version: "desc",
       },
-      new Prisma.Decimal(0)
-    );
+    });
 
-    return {
-      id: formulation.id,
-      productId: formulation.productId,
-      name: formulation.name,
-      version: formulation.version,
-      isActive: formulation.isActive,
-      totalRawMaterialCost: decimalToNumber(totalCost),
-      createdAt: formulation.createdAt,
-      updatedAt: formulation.updatedAt,
-    };
-  });
+  return formulations.map(
+    (formulation) => {
+      const totalCost =
+        formulation.items.reduce(
+          (total, item) => {
+            const lineCost =
+              new Prisma.Decimal(
+                item.quantity.toString()
+              ).mul(
+                item.rawMaterial
+                  .weightedAverageCost
+              );
+
+            return total.add(lineCost);
+          },
+          new Prisma.Decimal(0)
+        );
+
+      return {
+        id: formulation.id,
+        productId:
+          formulation.productId,
+        name: formulation.name,
+        version:
+          formulation.version,
+        isActive:
+          formulation.isActive,
+        totalRawMaterialCost:
+          decimalToNumber(totalCost),
+        createdAt:
+          formulation.createdAt,
+        updatedAt:
+          formulation.updatedAt,
+      };
+    }
+  );
 }

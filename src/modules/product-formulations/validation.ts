@@ -61,8 +61,10 @@ const formulationQuantity = z.preprocess(
     )
     .refine(
       (value) =>
-        Math.abs(Math.round(value * 1_000_000) - value * 1_000_000) <
-        1e-5,
+        Math.abs(
+          Math.round(value * 1_000_000) -
+            value * 1_000_000
+        ) < 1e-5,
       "Quantity can have at most 6 decimal places"
     )
 );
@@ -83,12 +85,6 @@ const formulationItemSchema = z.object({
 
 /**
  * Create a new formulation/version.
- *
- * Every saved formulation is treated as a version.
- *
- * Versioning is handled by the service layer, not supplied
- * by the client, so clients cannot arbitrarily overwrite
- * or manipulate formulation history.
  */
 export const CreateProductFormulationSchema = z
   .object({
@@ -99,18 +95,32 @@ export const CreateProductFormulationSchema = z
         error: "Formulation name is required",
       })
       .trim()
-      .min(2, "Formulation name must be at least 2 characters")
-      .max(120, "Formulation name cannot exceed 120 characters"),
+      .min(
+        2,
+        "Formulation name must be at least 2 characters"
+      )
+      .max(
+        120,
+        "Formulation name cannot exceed 120 characters"
+      ),
 
     notes: nullableString(500).optional(),
 
     items: z
       .array(formulationItemSchema)
-      .min(1, "A formulation must contain at least one raw material")
-      .max(100, "A formulation cannot contain more than 100 raw materials"),
+      .min(
+        1,
+        "A formulation must contain at least one raw material"
+      )
+      .max(
+        100,
+        "A formulation cannot contain more than 100 raw materials"
+      ),
   })
   .superRefine((data, ctx) => {
-    const rawMaterialIds = data.items.map((item) => item.rawMaterialId);
+    const rawMaterialIds = data.items.map(
+      (item) => item.rawMaterialId
+    );
 
     const uniqueIds = new Set(rawMaterialIds);
 
@@ -138,6 +148,13 @@ export const GetActiveProductFormulationSchema = z.object({
   productId: z.string().uuid("Invalid product ID format"),
 });
 
+/**
+ * Delete one formulation version.
+ */
+export const DeleteProductFormulationSchema = z.object({
+  id: z.string().uuid("Invalid formulation ID format"),
+});
+
 export type CreateProductFormulationInput = z.infer<
   typeof CreateProductFormulationSchema
 >;
@@ -148,4 +165,8 @@ export type GetProductFormulationsInput = z.infer<
 
 export type GetActiveProductFormulationInput = z.infer<
   typeof GetActiveProductFormulationSchema
+>;
+
+export type DeleteProductFormulationInput = z.infer<
+  typeof DeleteProductFormulationSchema
 >;

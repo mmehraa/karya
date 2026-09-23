@@ -10,21 +10,38 @@ import {
 } from "lucide-react";
 
 import type { ProductEconomics } from "@/modules/product-economics/types";
+import type { SerializedProductionBatch } from "@/modules/production-batches/types";
 import type { SerializedProduct } from "@/modules/products/types";
+
 import { ProductTable } from "@/modules/products/components/product-table";
 import { ProductFormDialog } from "@/modules/products/components/product-form-dialog";
+import { ProductConfigurationDialog } from "@/modules/products/components/product-configuration-dialog";
+import { ProductProductionHistory } from "@/modules/products/components/product-production-history";
 
 interface ProductCatalogClientProps {
   initialProducts: SerializedProduct[];
   initialProductEconomics: Array<ProductEconomics | null>;
+  initialProductionBatchesByProductId: Record<
+    string,
+    SerializedProductionBatch[]
+  >;
 }
 
 export function ProductCatalogClient({
   initialProducts,
   initialProductEconomics,
+  initialProductionBatchesByProductId,
 }: ProductCatalogClientProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] =
+    useState(false);
+
+  const [isConfigurationOpen, setIsConfigurationOpen] =
+    useState(false);
+
   const [selectedProduct, setSelectedProduct] =
+    useState<SerializedProduct | null>(null);
+
+  const [configurationProduct, setConfigurationProduct] =
     useState<SerializedProduct | null>(null);
 
   const selectedProductEconomics = useMemo(() => {
@@ -35,27 +52,38 @@ export function ProductCatalogClient({
     return (
       initialProductEconomics.find(
         (economics) =>
-          economics?.productId === selectedProduct.id,
+          economics?.productId ===
+          selectedProduct.id,
       ) ?? null
     );
-  }, [selectedProduct, initialProductEconomics]);
+  }, [
+    selectedProduct,
+    initialProductEconomics,
+  ]);
 
   const summary = useMemo(() => {
-    const totalProducts = initialProducts.length;
+    const totalProducts =
+      initialProducts.length;
 
-    const completeUnitEconomics = initialProductEconomics.filter(
-      (economics) => economics?.isComplete === true,
-    ).length;
+    const completeUnitEconomics =
+      initialProductEconomics.filter(
+        (economics) =>
+          economics?.isComplete === true,
+      ).length;
 
-    const outOfStock = initialProducts.filter(
-      (product) => product.currentStock <= 0,
-    ).length;
+    const outOfStock =
+      initialProducts.filter(
+        (product) =>
+          product.currentStock <= 0,
+      ).length;
 
-    const lowStock = initialProducts.filter(
-      (product) =>
-        product.currentStock > 0 &&
-        product.currentStock <= product.reorderLevel,
-    ).length;
+    const lowStock =
+      initialProducts.filter(
+        (product) =>
+          product.currentStock > 0 &&
+          product.currentStock <=
+            product.reorderLevel,
+      ).length;
 
     return {
       totalProducts,
@@ -63,21 +91,38 @@ export function ProductCatalogClient({
       outOfStock,
       lowStock,
     };
-  }, [initialProducts, initialProductEconomics]);
+  }, [
+    initialProducts,
+    initialProductEconomics,
+  ]);
 
   const handleOpenCreate = () => {
     setSelectedProduct(null);
     setIsDialogOpen(true);
   };
 
-  const handleOpenEdit = (product: SerializedProduct) => {
+  const handleOpenEdit = (
+    product: SerializedProduct,
+  ) => {
     setSelectedProduct(product);
     setIsDialogOpen(true);
+  };
+
+  const handleOpenConfiguration = (
+    product: SerializedProduct,
+  ) => {
+    setConfigurationProduct(product);
+    setIsConfigurationOpen(true);
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setSelectedProduct(null);
+  };
+
+  const handleCloseConfiguration = () => {
+    setIsConfigurationOpen(false);
+    setConfigurationProduct(null);
   };
 
   return (
@@ -103,7 +148,11 @@ export function ProductCatalogClient({
           value={summary.outOfStock}
           description="Products with no stock"
           icon={AlertTriangle}
-          tone={summary.outOfStock > 0 ? "warning" : "default"}
+          tone={
+            summary.outOfStock > 0
+              ? "warning"
+              : "default"
+          }
         />
 
         <SummaryCard
@@ -111,7 +160,11 @@ export function ProductCatalogClient({
           value={summary.lowStock}
           description="Below reorder level"
           icon={AlertTriangle}
-          tone={summary.lowStock > 0 ? "warning" : "default"}
+          tone={
+            summary.lowStock > 0
+              ? "warning"
+              : "default"
+          }
         />
       </div>
 
@@ -130,8 +183,9 @@ export function ProductCatalogClient({
             </div>
 
             <p className="mt-1 text-xs text-slate-500">
-              Selling price is maintained here. Product costs are calculated
-              dynamically from active formulation and packaging configuration.
+              Selling price is maintained here. Product
+              costs are calculated dynamically from active
+              formulation and packaging configuration.
             </p>
           </div>
 
@@ -147,16 +201,43 @@ export function ProductCatalogClient({
 
         <ProductTable
           products={initialProducts}
-          productEconomics={initialProductEconomics}
+          productEconomics={
+            initialProductEconomics
+          }
           onEditProduct={handleOpenEdit}
+          onConfigureProduct={
+            handleOpenConfiguration
+          }
         />
       </section>
+
+      {/* Production History */}
+      <ProductProductionHistory
+        products={initialProducts.map(
+          (product) => ({
+            id: product.id,
+            name: product.name,
+            sku: product.sku,
+          }),
+        )}
+        productionBatchesByProductId={
+          initialProductionBatchesByProductId
+        }
+      />
 
       <ProductFormDialog
         isOpen={isDialogOpen}
         onClose={handleCloseDialog}
         productToEdit={selectedProduct}
-        productEconomics={selectedProductEconomics}
+        productEconomics={
+          selectedProductEconomics
+        }
+      />
+
+      <ProductConfigurationDialog
+        isOpen={isConfigurationOpen}
+        onClose={handleCloseConfiguration}
+        product={configurationProduct}
       />
     </div>
   );
@@ -200,7 +281,8 @@ function SummaryCard({
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${iconClasses}`}
         >
-          {tone === "warning" && value === 0 ? (
+          {tone === "warning" &&
+          value === 0 ? (
             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
           ) : (
             <Icon className="h-4 w-4" />
