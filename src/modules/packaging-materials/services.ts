@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 
+import { createCashTransactionInTransaction } from "@/modules/cash-flow/services";
+
 import type {
   CreatePackagingMaterialInput,
   RecordPackagingMaterialConsumptionInput,
@@ -172,6 +174,23 @@ export async function getPackagingMaterialPurchases(
   }));
 }
 
+/**
+ * Records a packaging-material purchase and updates
+ * inventory atomically.
+ *
+ * Phase 3B:
+ * The purchase also creates a cash outflow in the
+ * same database transaction.
+ *
+ * Therefore:
+ *
+ * PackagingMaterialPurchase
+ * + InventoryTransaction
+ * + PackagingMaterial update
+ * + CashTransaction
+ *
+ * all succeed or all roll back together.
+ */
 export async function recordPackagingMaterialPurchase(
   businessId: string,
   input: RecordPackagingMaterialPurchaseInput,
@@ -210,6 +229,12 @@ export async function recordPackagingMaterialPurchase(
         input.totalAmount,
       );
 
+    if (totalAmount.lte(0)) {
+      throw new Error(
+        "Purchase amount must be greater than zero.",
+      );
+    }
+
     const costPerBaseUnit =
       totalAmount.div(
         baseQuantity,
@@ -221,12 +246,12 @@ export async function recordPackagingMaterialPurchase(
       );
 
     /*
-     * Purchase amounts are entered as currency and stored
-     * with 2 decimal places in the purchase record.
+     * Purchase amounts are entered as currency and
+     * stored with 2 decimal places in the purchase
+     * record.
      *
-     * The inventory value itself remains at 6-decimal
-     * precision so later consumption calculations do not
-     * introduce unnecessary rounding drift.
+     * Inventory value remains at higher precision
+     * internally.
      */
     const newValue =
       material.currentValue.add(
@@ -312,6 +337,38 @@ export async function recordPackagingMaterialPurchase(
             : material.supplier,
       },
     });
+
+    /**
+     * Phase 3B:
+     *
+     * Packaging purchases are inventory, not P&L
+     * expenses. However, because the purchase is
+     * treated as paid, it creates a real cash
+     * outflow.
+     */
+    await createCashTransactionInTransaction(
+      tx,
+      {
+        businessId,
+        transactionDate:
+          input.purchaseDate,
+        type: "OUTFLOW",
+        category:
+          "PACKAGING_MATERIAL_PURCHASE",
+        amount: totalAmount,
+        paymentMethod: null,
+        description:
+          `Packaging material purchase — ${material.name}`,
+        referenceId: purchase.id,
+        sourceType:
+          "PACKAGING_MATERIAL_PURCHASE",
+        sourceId: purchase.id,
+        notes:
+          input.invoiceReference
+            ? `Invoice: ${input.invoiceReference}`
+            : input.notes ?? null,
+      },
+    );
 
     return {
       id: purchase.id,
@@ -405,18 +462,6 @@ export async function recordPackagingMaterialConsumption(
       );
     }
 
-    /*
-     * Use the current weighted-average cost without
-     * rounding it first.
-     *
-     * This is critical for accurate costing:
-     *
-     * 100 × ₹4.333333333... =
-     * ₹433.333333...
-     *
-     * The database keeps this internal value at
-     * 6-decimal precision. The UI can display ₹433.33.
-     */
     const unitCost =
       material.weightedAverageCost;
 
@@ -639,6 +684,19 @@ export async function deletePackagingMaterialPurchase(
           },
         },
       );
+
+      /**
+       * Remove the cash transaction created
+       * by this packaging purchase.
+       */
+      await tx.cashTransaction.deleteMany({
+        where: {
+          businessId,
+          sourceType:
+            "PACKAGING_MATERIAL_PURCHASE",
+          sourceId: purchase.id,
+        },
+      });
 
       await tx.packagingMaterialPurchase.delete(
         {

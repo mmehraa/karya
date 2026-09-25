@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Download,
   Loader2,
+  Pencil,
   Plus,
   ShoppingCart,
   Trash2,
@@ -19,7 +20,10 @@ import {
 } from "lucide-react";
 import { ProductStatus } from "@prisma/client";
 
-import { createOrderAction } from "@/modules/orders/actions";
+import {
+  createOrderAction,
+  updateOrderAction,
+} from "@/modules/orders/actions";
 import type { OrderListItem } from "@/modules/orders/types";
 import type { SerializedCustomer } from "@/modules/customers/types";
 import type { SerializedProduct } from "@/modules/products/types";
@@ -148,6 +152,16 @@ export function OrdersClient({
 
   const [activeTab, setActiveTab] = useState<OrderTab>("ALL");
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
+  const [editingOrder, setEditingOrder] = useState<OrderListItem | null>(
+    null,
+  );
+  const [editPaymentStatus, setEditPaymentStatus] =
+    useState<"PENDING" | "PAID" | "REFUNDED">("PENDING");
+  const [editFulfillmentStatus, setEditFulfillmentStatus] =
+    useState<
+      "PENDING" | "PROCESSING" | "PACKED" | "SHIPPED" | "DELIVERED"
+    >("PENDING");
+  const [editError, setEditError] = useState<string | null>(null);
   const [formData, setFormData] = useState<OrderFormState>(
     getDefaultFormState(),
   );
@@ -305,6 +319,56 @@ export function OrdersClient({
           (_, itemIndex) => itemIndex !== index,
         ),
       };
+    });
+  }
+
+
+  function openEditOrder(order: OrderListItem) {
+    setEditingOrder(order);
+    setEditPaymentStatus(order.paymentStatus);
+    setEditFulfillmentStatus(
+      order.fulfillmentStatus === "CANCELLED"
+        ? "PENDING"
+        : order.fulfillmentStatus,
+    );
+    setEditError(null);
+  }
+
+  function closeEditOrder() {
+    if (isPending) {
+      return;
+    }
+
+    setEditingOrder(null);
+    setEditError(null);
+  }
+
+  function handleEditSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!editingOrder) {
+      return;
+    }
+
+    setEditError(null);
+
+    startTransition(async () => {
+      const result = await updateOrderAction({
+        id: editingOrder.id,
+        paymentStatus: editPaymentStatus,
+        fulfillmentStatus: editFulfillmentStatus,
+      });
+
+      if (!result.success) {
+        setEditError(
+          result.error ?? "Unable to update the order.",
+        );
+        return;
+      }
+
+      setEditingOrder(null);
+      setEditError(null);
+      router.refresh();
     });
   }
 
@@ -627,9 +691,156 @@ export function OrdersClient({
             onAddOrder={openNewOrder}
           />
         ) : (
-          <OrdersTable orders={visibleOrders} />
+          <OrdersTable orders={visibleOrders} onEditOrder={openEditOrder} />
         )}
       </section>
+
+
+      {/* Edit Order Modal */}
+      {editingOrder && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeEditOrder();
+            }
+          }}
+        >
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  Order Management
+                </p>
+                <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950">
+                  Edit {editingOrder.orderNumber}
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Update payment and fulfillment status for this order.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeEditOrder}
+                disabled={isPending}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 disabled:opacity-40"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-6 px-6 py-6">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                      Order
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-950">
+                      {editingOrder.orderNumber}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {editingOrder.customerName} -{" "}
+                      {formatCurrency(editingOrder.totalAmount)}
+                    </p>
+                  </div>
+
+                  <StatusBadge
+                    label={formatStatus(editingOrder.paymentStatus)}
+                    tone={
+                      editingOrder.paymentStatus === "PAID"
+                        ? "success"
+                        : editingOrder.paymentStatus === "REFUNDED"
+                          ? "danger"
+                          : "neutral"
+                    }
+                  />
+                </div>
+              </div>
+
+              {editError && (
+                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField label="Payment Status">
+                  <select
+                    value={editPaymentStatus}
+                    onChange={(event) =>
+                      setEditPaymentStatus(
+                        event.target.value as typeof editPaymentStatus,
+                      )
+                    }
+                    disabled={isPending}
+                    className={inputClass}
+                  >
+                    <option value="PENDING">Pending</option>
+                    <option value="PAID">Paid</option>
+                    <option value="REFUNDED">Refunded</option>
+                  </select>
+                </FormField>
+
+                <FormField label="Fulfillment Status">
+                  <select
+                    value={editFulfillmentStatus}
+                    onChange={(event) =>
+                      setEditFulfillmentStatus(
+                        event.target.value as typeof editFulfillmentStatus,
+                      )
+                    }
+                    disabled={isPending}
+                    className={inputClass}
+                  >
+                    <option value="PENDING">Pending</option>
+                    <option value="PROCESSING">Processing</option>
+                    <option value="PACKED">Packed</option>
+                    <option value="SHIPPED">Shipped</option>
+                    <option value="DELIVERED">Delivered</option>
+                  </select>
+                </FormField>
+              </div>
+
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-xs font-semibold text-amber-900">
+                  Cash flow is updated automatically
+                </p>
+                <p className="mt-1 text-[11px] leading-5 text-amber-800">
+                  Moving an order from Pending to Paid records the customer
+                  payment as cash inflow. Refunding a paid order records a
+                  separate customer refund as cash outflow.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-5">
+                <button
+                  type="button"
+                  onClick={closeEditOrder}
+                  disabled={isPending}
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[#0f3d35] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0b302a] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isPending && (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  )}
+                  {isPending ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* New Order Modal */}
       {isNewOrderOpen && (
@@ -1288,8 +1499,10 @@ function EmptyOrdersState({
 
 function OrdersTable({
   orders,
+  onEditOrder,
 }: {
   orders: OrderListItem[];
+  onEditOrder: (order: OrderListItem) => void;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -1303,6 +1516,7 @@ function OrdersTable({
             <TableHeader>Total</TableHeader>
             <TableHeader>Payment</TableHeader>
             <TableHeader>Fulfillment</TableHeader>
+            <TableHeader>Actions</TableHeader>
           </tr>
         </thead>
 
@@ -1365,6 +1579,18 @@ function OrdersTable({
                         : "neutral"
                   }
                 />
+              </td>
+
+              <td className="px-5 py-4 text-right">
+                <button
+                  type="button"
+                  onClick={() => onEditOrder(order)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                  aria-label={`Edit ${order.orderNumber}`}
+                  title={`Edit ${order.orderNumber}`}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
               </td>
             </tr>
           ))}

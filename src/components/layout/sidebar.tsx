@@ -9,9 +9,11 @@ import {
   Package,
   Factory,
   Layers,
+  Boxes,
   ShoppingBag,
   Users,
   Wallet,
+  ArrowLeftRight,
   Megaphone,
   Target,
   CheckSquare,
@@ -60,6 +62,12 @@ const NAV_ITEMS: NavItem[] = [
     enabled: true,
   },
   {
+    label: "Materials",
+    href: "/materials",
+    icon: Boxes,
+    enabled: true,
+  },
+  {
     label: "Orders",
     href: "/orders",
     icon: ShoppingBag,
@@ -75,6 +83,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Finance",
     href: "/finance",
     icon: Wallet,
+    enabled: true,
+  },
+  {
+    label: "Cash Flow",
+    href: "/cash-flow",
+    icon: ArrowLeftRight,
     enabled: true,
   },
   {
@@ -260,6 +274,7 @@ export function Sidebar({
               <p className="text-[11px] font-semibold text-slate-700">
                 Local database connected
               </p>
+
               <p className="text-[10px] text-slate-400">
                 PostgreSQL
               </p>

@@ -1,10 +1,14 @@
 import { Prisma } from "@prisma/client";
 import type { ExpenseCategory } from "@prisma/client";
 import { db } from "@/lib/db";
+
+import { createCashTransactionInTransaction } from "@/modules/cash-flow/services";
+
 import type {
   CreateExpenseInput,
   UpdateExpenseInput,
 } from "./validation";
+
 import type {
   ExpenseCategorySummary,
   FinanceSummary,
@@ -12,7 +16,7 @@ import type {
 } from "./types";
 
 function decimalToNumber(
-  value: Prisma.Decimal | null | undefined
+  value: Prisma.Decimal | null | undefined,
 ): number {
   return value === null || value === undefined
     ? 0
@@ -50,13 +54,19 @@ function serializeExpense(expense: {
 }
 
 export async function getExpenses(
-  businessId: string
+  businessId: string,
 ): Promise<SerializedExpense[]> {
   const expenses = await db.expense.findMany({
-    where: { businessId },
+    where: {
+      businessId,
+    },
     orderBy: [
-      { expenseDate: "desc" },
-      { createdAt: "desc" },
+      {
+        expenseDate: "desc",
+      },
+      {
+        createdAt: "desc",
+      },
     ],
   });
 
@@ -65,7 +75,7 @@ export async function getExpenses(
 
 export async function getExpenseById(
   businessId: string,
-  expenseId: string
+  expenseId: string,
 ): Promise<SerializedExpense | null> {
   const expense = await db.expense.findFirst({
     where: {
@@ -74,132 +84,311 @@ export async function getExpenseById(
     },
   });
 
-  return expense ? serializeExpense(expense) : null;
+  return expense
+    ? serializeExpense(expense)
+    : null;
 }
 
+/**
+ * Creates an expense and its corresponding cash outflow
+ * atomically.
+ *
+ * Expenses remain P&L expenses.
+ *
+ * CashTransaction records the actual money movement.
+ */
 export async function createExpense(
   businessId: string,
-  input: CreateExpenseInput
+  input: CreateExpenseInput,
 ): Promise<SerializedExpense> {
-  const expense = await db.expense.create({
-    data: {
-      businessId,
-      expenseDate: input.expenseDate,
-      category: input.category,
-      description: input.description,
-      amount: new Prisma.Decimal(input.amount),
-      vendor: input.vendor ?? null,
-      paymentMethod: input.paymentMethod ?? null,
-      isRecurring: input.isRecurring,
-      notes: input.notes ?? null,
-    },
-  });
+  return db.$transaction(async (tx) => {
+    const amount = new Prisma.Decimal(
+      input.amount,
+    );
 
-  return serializeExpense(expense);
+    const expense =
+      await tx.expense.create({
+        data: {
+          businessId,
+          expenseDate:
+            input.expenseDate,
+          category:
+            input.category,
+          description:
+            input.description,
+          amount,
+          vendor:
+            input.vendor ?? null,
+          paymentMethod:
+            input.paymentMethod ?? null,
+          isRecurring:
+            input.isRecurring,
+          notes:
+            input.notes ?? null,
+        },
+      });
+
+    await createCashTransactionInTransaction(
+      tx,
+      {
+        businessId,
+        transactionDate:
+          input.expenseDate,
+        type: "OUTFLOW",
+        category: "OPERATING_EXPENSE",
+        amount,
+        paymentMethod:
+          input.paymentMethod ?? null,
+        description:
+          input.description,
+        referenceId:
+          expense.id,
+        sourceType: "EXPENSE",
+        sourceId: expense.id,
+        notes:
+          input.vendor
+            ? `Vendor: ${input.vendor}`
+            : input.notes ?? null,
+      },
+    );
+
+    return serializeExpense(expense);
+  });
 }
 
+/**
+ * Updates an expense and keeps its linked cash transaction
+ * synchronized.
+ *
+ * The cash transaction is identified using:
+ *
+ * sourceType = EXPENSE
+ * sourceId   = expense.id
+ */
 export async function updateExpense(
   businessId: string,
-  input: UpdateExpenseInput
+  input: UpdateExpenseInput,
 ): Promise<SerializedExpense> {
-  const existing = await db.expense.findFirst({
-    where: {
-      id: input.id,
-      businessId,
-    },
+  return db.$transaction(async (tx) => {
+    const existing =
+      await tx.expense.findFirst({
+        where: {
+          id: input.id,
+          businessId,
+        },
+      });
+
+    if (!existing) {
+      throw new Error(
+        "Expense not found.",
+      );
+    }
+
+    const data: Prisma.ExpenseUpdateInput =
+      {};
+
+    if (
+      input.expenseDate !== undefined
+    ) {
+      data.expenseDate =
+        input.expenseDate;
+    }
+
+    if (input.category !== undefined) {
+      data.category =
+        input.category;
+    }
+
+    if (
+      input.description !== undefined
+    ) {
+      data.description =
+        input.description;
+    }
+
+    if (input.amount !== undefined) {
+      data.amount =
+        new Prisma.Decimal(
+          input.amount,
+        );
+    }
+
+    if (input.vendor !== undefined) {
+      data.vendor =
+        input.vendor;
+    }
+
+    if (
+      input.paymentMethod !==
+      undefined
+    ) {
+      data.paymentMethod =
+        input.paymentMethod;
+    }
+
+    if (
+      input.isRecurring !==
+      undefined
+    ) {
+      data.isRecurring =
+        input.isRecurring;
+    }
+
+    if (input.notes !== undefined) {
+      data.notes =
+        input.notes;
+    }
+
+    const updated =
+      await tx.expense.update({
+        where: {
+          id: input.id,
+        },
+        data,
+      });
+
+    /**
+     * Find the automatically generated
+     * cash transaction for this expense.
+     */
+    const cashTransaction =
+      await tx.cashTransaction.findFirst({
+        where: {
+          businessId,
+          sourceType: "EXPENSE",
+          sourceId: existing.id,
+        },
+      });
+
+    /**
+     * Existing expenses created before Phase 3B
+     * may not have a cash transaction.
+     *
+     * In that case, create one now so the ledger
+     * becomes complete.
+     */
+    if (!cashTransaction) {
+      await createCashTransactionInTransaction(
+        tx,
+        {
+          businessId,
+          transactionDate:
+            updated.expenseDate,
+          type: "OUTFLOW",
+          category:
+            "OPERATING_EXPENSE",
+          amount:
+            updated.amount,
+          paymentMethod:
+            updated.paymentMethod,
+          description:
+            updated.description,
+          referenceId:
+            updated.id,
+          sourceType:
+            "EXPENSE",
+          sourceId:
+            updated.id,
+          notes:
+            updated.vendor
+              ? `Vendor: ${updated.vendor}`
+              : updated.notes,
+        },
+      );
+    } else {
+      await tx.cashTransaction.update({
+        where: {
+          id: cashTransaction.id,
+        },
+        data: {
+          transactionDate:
+            updated.expenseDate,
+          amount:
+            updated.amount,
+          paymentMethod:
+            updated.paymentMethod,
+          description:
+            updated.description,
+          notes:
+            updated.vendor
+              ? `Vendor: ${updated.vendor}`
+              : updated.notes,
+        },
+      });
+    }
+
+    return serializeExpense(
+      updated,
+    );
   });
-
-  if (!existing) {
-    throw new Error("Expense not found.");
-  }
-
-  const data: Prisma.ExpenseUpdateInput = {};
-
-  if (input.expenseDate !== undefined) {
-    data.expenseDate = input.expenseDate;
-  }
-
-  if (input.category !== undefined) {
-    data.category = input.category;
-  }
-
-  if (input.description !== undefined) {
-    data.description = input.description;
-  }
-
-  if (input.amount !== undefined) {
-    data.amount = new Prisma.Decimal(input.amount);
-  }
-
-  if (input.vendor !== undefined) {
-    data.vendor = input.vendor;
-  }
-
-  if (input.paymentMethod !== undefined) {
-    data.paymentMethod = input.paymentMethod;
-  }
-
-  if (input.isRecurring !== undefined) {
-    data.isRecurring = input.isRecurring;
-  }
-
-  if (input.notes !== undefined) {
-    data.notes = input.notes;
-  }
-
-  const updated = await db.expense.update({
-    where: { id: input.id },
-    data,
-  });
-
-  return serializeExpense(updated);
 }
 
+/**
+ * Deletes an expense and its automatically generated
+ * cash transaction atomically.
+ */
 export async function deleteExpense(
   businessId: string,
-  expenseId: string
+  expenseId: string,
 ): Promise<void> {
-  const existing = await db.expense.findFirst({
-    where: {
-      id: expenseId,
-      businessId,
-    },
-    select: {
-      id: true,
-      promotionalDispatch: {
+  await db.$transaction(async (tx) => {
+    const existing =
+      await tx.expense.findFirst({
+        where: {
+          id: expenseId,
+          businessId,
+        },
         select: {
           id: true,
+          promotionalDispatch: {
+            select: {
+              id: true,
+            },
+          },
         },
+      });
+
+    if (!existing) {
+      throw new Error(
+        "Expense not found.",
+      );
+    }
+
+    if (existing.promotionalDispatch) {
+      throw new Error(
+        "This expense is linked to a promotional dispatch and cannot be deleted.",
+      );
+    }
+
+    /**
+     * Remove the generated cash movement
+     * before removing the source expense.
+     */
+    await tx.cashTransaction.deleteMany({
+      where: {
+        businessId,
+        sourceType: "EXPENSE",
+        sourceId: existing.id,
       },
-    },
-  });
+    });
 
-  if (!existing) {
-    throw new Error("Expense not found.");
-  }
-
-  if (existing.promotionalDispatch) {
-    throw new Error(
-      "This expense is linked to a promotional dispatch and cannot be deleted."
-    );
-  }
-
-  await db.expense.delete({
-    where: {
-      id: expenseId,
-    },
+    await tx.expense.delete({
+      where: {
+        id: expenseId,
+      },
+    });
   });
 }
 
 export async function getFinanceSummary(
-  businessId: string
+  businessId: string,
 ): Promise<FinanceSummary> {
   const now = new Date();
 
   const startOfMonth = new Date(
     now.getFullYear(),
     now.getMonth(),
-    1
+    1,
   );
 
   const [
@@ -209,12 +398,18 @@ export async function getFinanceSummary(
     currentMonthAggregate,
   ] = await Promise.all([
     db.expense.aggregate({
-      where: { businessId },
-      _sum: { amount: true },
+      where: {
+        businessId,
+      },
+      _sum: {
+        amount: true,
+      },
     }),
 
     db.expense.count({
-      where: { businessId },
+      where: {
+        businessId,
+      },
     }),
 
     db.expense.count({
@@ -231,42 +426,57 @@ export async function getFinanceSummary(
           gte: startOfMonth,
         },
       },
-      _sum: { amount: true },
+      _sum: {
+        amount: true,
+      },
     }),
   ]);
 
   return {
-    totalExpenses: decimalToNumber(
-      aggregate._sum.amount
-    ),
+    totalExpenses:
+      decimalToNumber(
+        aggregate._sum.amount,
+      ),
+
     expenseCount,
+
     recurringExpenseCount,
-    currentMonthExpenses: decimalToNumber(
-      currentMonthAggregate._sum.amount
-    ),
+
+    currentMonthExpenses:
+      decimalToNumber(
+        currentMonthAggregate
+          ._sum.amount,
+      ),
   };
 }
 
 export async function getExpenseCategorySummary(
-  businessId: string
+  businessId: string,
 ): Promise<ExpenseCategorySummary[]> {
-  const grouped = await db.expense.groupBy({
-    by: ["category"],
-    where: { businessId },
-    _sum: { amount: true },
-    _count: {
-      _all: true,
-    },
-    orderBy: {
-      _sum: {
-        amount: "desc",
+  const grouped =
+    await db.expense.groupBy({
+      by: ["category"],
+      where: {
+        businessId,
       },
-    },
-  });
+      _sum: {
+        amount: true,
+      },
+      _count: {
+        _all: true,
+      },
+      orderBy: {
+        _sum: {
+          amount: "desc",
+        },
+      },
+    });
 
   return grouped.map((row) => ({
     category: row.category,
-    amount: decimalToNumber(row._sum.amount),
+    amount: decimalToNumber(
+      row._sum.amount,
+    ),
     count: row._count._all,
   }));
 }

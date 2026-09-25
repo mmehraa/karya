@@ -324,8 +324,18 @@ export function FinanceClient({
             </p>
           </div>
 
-          {/* Period Selector */}
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsDialogOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#0f4a40] px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0c3e36]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Record Expense
+            </button>
+
+            {/* Period Selector */}
+            <div className="relative">
             <button
               type="button"
               onClick={() =>
@@ -385,6 +395,7 @@ export function FinanceClient({
                 ))}
               </div>
             )}
+            </div>
           </div>
         </section>
 
@@ -469,22 +480,19 @@ export function FinanceClient({
         </section>
 
         {/* Expense Ledger */}
-        {displayExpenseRecords.length >
-          0 && (
-          <ExpenseLedger
-            expenses={
-              displayExpenseRecords
-            }
-            onAddTransaction={() =>
-              setIsDialogOpen(true)
-            }
-            onShowAll={() =>
-              setIsAllExpensesOpen(
-                true,
-              )
-            }
-          />
-        )}
+        <ExpenseLedger
+          expenses={
+            displayExpenseRecords
+          }
+          onAddTransaction={() =>
+            setIsDialogOpen(true)
+          }
+          onShowAll={() =>
+            setIsAllExpensesOpen(
+              true,
+            )
+          }
+        />
       </div>
 
       {/* Full Expense Ledger */}
@@ -1470,13 +1478,24 @@ function ExpenseLedger({
           </thead>
 
           <tbody>
-            {visibleExpenses.map(
-              (expense) => (
-                <ExpenseTableRow
-                  key={expense.id}
-                  expense={expense}
-                />
-              ),
+            {visibleExpenses.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-5 py-10 text-center text-xs text-slate-400"
+                >
+                  No expenses recorded for this period.
+                </td>
+              </tr>
+            ) : (
+              visibleExpenses.map(
+                (expense) => (
+                  <ExpenseTableRow
+                    key={expense.id}
+                    expense={expense}
+                  />
+                ),
+              )
             )}
           </tbody>
         </table>

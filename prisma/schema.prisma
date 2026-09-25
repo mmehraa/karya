@@ -34,6 +34,7 @@ model Business {
   orders                           Order[]
   orderItems                       OrderItem[]
   expenses                         Expense[]
+  cashTransactions                 CashTransaction[]
   contentItems                     ContentItem[]
   contentPubs                      ContentPublication[]
   goals                            Goal[]
@@ -331,11 +332,11 @@ model RawMaterial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business                Business                              @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  purchases               RawMaterialPurchase[]
-  transactions            RawMaterialInventoryTransaction[]
-  formulationItems        ProductFormulationItem[]
-  productionConsumptions  ProductionBatchRawMaterialConsumption[]
+  business               Business                             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  purchases              RawMaterialPurchase[]
+  transactions           RawMaterialInventoryTransaction[]
+  formulationItems       ProductFormulationItem[]
+  productionConsumptions ProductionBatchRawMaterialConsumption[]
 
   @@unique([businessId, id])
   @@unique([businessId, name])
@@ -431,7 +432,7 @@ model PackagingMaterial {
 
   business                    Business                                @relation(fields: [businessId], references: [id], onDelete: Cascade)
   purchases                   PackagingMaterialPurchase[]
-  transactions                PackagingMaterialInventoryTransaction[]
+  transactions               PackagingMaterialInventoryTransaction[]
   packagingConfigurationItems ProductPackagingConfigurationItem[]
   productionConsumptions      ProductionBatchPackagingConsumption[]
 
@@ -506,10 +507,10 @@ model ProductionBatch {
   formulationId            String
   packagingConfigurationId String
 
-  batchNumber    String
+  batchNumber     String
   plannedQuantity Int
   producedQuantity Int?
-  status         ProductionBatchStatus @default(DRAFT)
+  status          ProductionBatchStatus @default(DRAFT)
 
   rawMaterialCost       Decimal? @db.Decimal(16, 6)
   packagingMaterialCost Decimal? @db.Decimal(16, 6)
@@ -522,10 +523,10 @@ model ProductionBatch {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  business               Business                         @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  product                Product                          @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Restrict)
-  formulation            ProductFormulation              @relation(fields: [businessId, formulationId], references: [businessId, id], onDelete: Restrict)
-  packagingConfiguration ProductPackagingConfiguration   @relation(fields: [businessId, packagingConfigurationId], references: [businessId, id], onDelete: Restrict)
+  business               Business                       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  product                Product                        @relation(fields: [businessId, productId], references: [businessId, id], onDelete: Restrict)
+  formulation            ProductFormulation             @relation(fields: [businessId, formulationId], references: [businessId, id], onDelete: Restrict)
+  packagingConfiguration ProductPackagingConfiguration @relation(fields: [businessId, packagingConfigurationId], references: [businessId, id], onDelete: Restrict)
 
   rawMaterialConsumptions ProductionBatchRawMaterialConsumption[]
   packagingConsumptions   ProductionBatchPackagingConsumption[]
@@ -551,9 +552,9 @@ model ProductionBatchRawMaterialConsumption {
 
   createdAt DateTime @default(now())
 
-  business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business    Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
   batch       ProductionBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  rawMaterial RawMaterial    @relation(fields: [businessId, rawMaterialId], references: [businessId, id], onDelete: Restrict)
+  rawMaterial RawMaterial     @relation(fields: [businessId, rawMaterialId], references: [businessId, id], onDelete: Restrict)
 
   @@unique([businessId, id])
   @@unique([businessId, batchId, rawMaterialId])
@@ -689,7 +690,7 @@ model OrderItem {
   quantity   Int
   unitPrice  Decimal @db.Decimal(12, 2)
 
-  costPriceSnapshot Decimal @db.Decimal(12, 2)
+  costPriceSnapshot Decimal @db.Decimal(16, 6)
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   order    Order    @relation(fields: [businessId, orderId], references: [businessId, id], onDelete: Cascade)
@@ -733,6 +734,50 @@ model Expense {
 
   @@index([businessId, expenseDate])
   @@index([businessId, category])
+}
+
+enum CashTransactionType {
+  INFLOW
+  OUTFLOW
+}
+
+enum CashTransactionCategory {
+  CUSTOMER_PAYMENT
+  OTHER_INCOME
+  RAW_MATERIAL_PURCHASE
+  PACKAGING_MATERIAL_PURCHASE
+  OPERATING_EXPENSE
+  SHIPPING
+  PAYMENT_PROCESSING_FEE
+  CUSTOMER_REFUND
+  OTHER
+}
+
+model CashTransaction {
+  id         String @id @default(uuid())
+  businessId String
+
+  transactionDate DateTime
+  type            CashTransactionType
+  category        CashTransactionCategory
+  amount          Decimal @db.Decimal(12, 2)
+
+  paymentMethod String?
+  description   String
+  referenceId   String?
+  sourceType    String?
+  sourceId      String?
+  notes         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, transactionDate])
+  @@index([businessId, type, transactionDate])
+  @@index([businessId, category, transactionDate])
+  @@index([businessId, sourceType, sourceId])
 }
 
 model PromotionalDispatch {
