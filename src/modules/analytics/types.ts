@@ -1,4 +1,8 @@
-import type { ExpenseCategory } from "@prisma/client";
+import type {
+  CashTransactionCategory,
+  CashTransactionType,
+  ExpenseCategory,
+} from "@prisma/client";
 
 export interface AnalyticsDateRange {
   from: Date | null;
@@ -314,4 +318,52 @@ export interface ExpenseIntelligence {
   byMonth: ExpenseByMonth[];
   trend: ExpenseTrend;
   concentration: ExpenseConcentration;
+}
+
+/* ============================================================
+   CASH FLOW INTELLIGENCE
+   ============================================================ */
+
+export interface CashFlowSummary {
+  totalInflows: number;
+  totalOutflows: number;
+  netCashFlow: number;
+  customerCollections: number;
+  otherIncome: number;
+  inventoryCashOutflow: number;
+  operatingCashOutflow: number;
+  shippingPayments: number;
+  paymentProcessingFees: number;
+  refunds: number;
+  otherCashOutflow: number;
+}
+
+export interface CashFlowByMonth {
+  month: string;
+  inflows: number;
+  outflows: number;
+  netCashFlow: number;
+}
+
+export interface CashFlowByCategory {
+  category: CashTransactionCategory;
+  type: CashTransactionType;
+  amount: number;
+  percentageOfTotal: number | null;
+  count: number;
+}
+
+export interface CashFlowTrend {
+  currentPeriodNetCashFlow: number;
+  previousPeriodNetCashFlow: number;
+  changeAmount: number;
+  changePercentage: number | null;
+}
+
+export interface CashFlowIntelligence {
+  period: AnalyticsDateRange;
+  summary: CashFlowSummary;
+  byMonth: CashFlowByMonth[];
+  byCategory: CashFlowByCategory[];
+  trend: CashFlowTrend;
 }

@@ -1,5 +1,9 @@
 import { Prisma } from "@prisma/client";
-import type { ExpenseCategory } from "@prisma/client";
+import type {
+  CashTransactionCategory,
+  CashTransactionType,
+  ExpenseCategory,
+} from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { getProductEconomics } from "@/modules/product-economics/services";
@@ -7,6 +11,9 @@ import { getInventoryMovementIntelligence } from "./inventory-movement-services"
 
 import type {
   AnalyticsDateRange,
+  CashFlowByCategory,
+  CashFlowByMonth,
+  CashFlowIntelligence,
   InventoryFinishedProduct,
   InventoryIntelligence,
   InventoryLowStockProduct,
@@ -1902,3 +1909,347 @@ export async function getExpenseIntelligence(
       ),
   };
 }
+
+/* ============================================================
+   CASH FLOW INTELLIGENCE
+   ============================================================ */
+
+function getCashFlowCategoryShare(
+  amount: number,
+  totalCashMovement: number,
+): number | null {
+  if (totalCashMovement <= 0) {
+    return null;
+  }
+
+  return (amount / totalCashMovement) * 100;
+}
+
+function getCashFlowCategoryAmount(
+  transactions: Array<{
+    type: CashTransactionType;
+    category: CashTransactionCategory;
+    amount: Prisma.Decimal;
+  }>,
+  type: CashTransactionType,
+  category: CashTransactionCategory,
+): number {
+  return transactions.reduce((total, transaction) => {
+    if (
+      transaction.type === type &&
+      transaction.category === category
+    ) {
+      return total + (decimalToNumber(transaction.amount) ?? 0);
+    }
+
+    return total;
+  }, 0);
+}
+
+async function getCashFlowTransactionsForPeriod(
+  businessId: string,
+  period: AnalyticsDateRange,
+) {
+  return db.cashTransaction.findMany({
+    where: {
+      businessId,
+      transactionDate: {
+        ...(period.from
+          ? {
+              gte: period.from,
+            }
+          : {}),
+        lte: period.to,
+      },
+    },
+    select: {
+      transactionDate: true,
+      type: true,
+      category: true,
+      amount: true,
+    },
+    orderBy: {
+      transactionDate: "asc",
+    },
+  });
+}
+
+function getCashFlowMonthKey(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function buildCashFlowByMonth(
+  transactions: Awaited<
+    ReturnType<typeof getCashFlowTransactionsForPeriod>
+  >,
+): CashFlowByMonth[] {
+  const monthMap = new Map<
+    string,
+    {
+      inflows: number;
+      outflows: number;
+    }
+  >();
+
+  for (const transaction of transactions) {
+    const month = getCashFlowMonthKey(
+      transaction.transactionDate,
+    );
+
+    const current = monthMap.get(month) ?? {
+      inflows: 0,
+      outflows: 0,
+    };
+
+    const amount = decimalToNumber(transaction.amount) ?? 0;
+
+    if (transaction.type === "INFLOW") {
+      current.inflows += amount;
+    } else {
+      current.outflows += amount;
+    }
+
+    monthMap.set(month, current);
+  }
+
+  return Array.from(monthMap.entries()).map(
+    ([month, value]) => ({
+      month,
+      inflows: value.inflows,
+      outflows: value.outflows,
+      netCashFlow:
+        value.inflows - value.outflows,
+    }),
+  );
+}
+
+function buildCashFlowByCategory(
+  transactions: Awaited<
+    ReturnType<typeof getCashFlowTransactionsForPeriod>
+  >,
+  totalCashMovement: number,
+): CashFlowByCategory[] {
+  const categoryMap = new Map<
+    string,
+    {
+      category: CashTransactionCategory;
+      type: CashTransactionType;
+      amount: number;
+      count: number;
+    }
+  >();
+
+  for (const transaction of transactions) {
+    const key = `${transaction.type}:${transaction.category}`;
+    const current = categoryMap.get(key);
+    const amount = decimalToNumber(transaction.amount) ?? 0;
+
+    if (current) {
+      current.amount += amount;
+      current.count += 1;
+      continue;
+    }
+
+    categoryMap.set(key, {
+      category: transaction.category,
+      type: transaction.type,
+      amount,
+      count: 1,
+    });
+  }
+
+  return Array.from(categoryMap.values())
+    .map((item) => ({
+      category: item.category,
+      type: item.type,
+      amount: item.amount,
+      percentageOfTotal: getCashFlowCategoryShare(
+        item.amount,
+        totalCashMovement,
+      ),
+      count: item.count,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
+async function getCashFlowNetForPeriod(
+  businessId: string,
+  period: AnalyticsDateRange,
+): Promise<number> {
+  const aggregate = await db.cashTransaction.groupBy({
+    by: ["type"],
+    where: {
+      businessId,
+      transactionDate: {
+        ...(period.from
+          ? {
+              gte: period.from,
+            }
+          : {}),
+        lte: period.to,
+      },
+    },
+    _sum: {
+      amount: true,
+    },
+  });
+
+  let inflows = 0;
+  let outflows = 0;
+
+  for (const row of aggregate) {
+    const amount = decimalToNumber(row._sum.amount) ?? 0;
+
+    if (row.type === "INFLOW") {
+      inflows = amount;
+    } else {
+      outflows = amount;
+    }
+  }
+
+  return inflows - outflows;
+}
+
+export async function getCashFlowIntelligence(
+  businessId: string,
+  options: AnalyticsOptions = {},
+): Promise<CashFlowIntelligence> {
+  const period = getPeriod(options);
+
+  const transactions =
+    await getCashFlowTransactionsForPeriod(
+      businessId,
+      period,
+    );
+
+  let totalInflows = 0;
+  let totalOutflows = 0;
+
+  for (const transaction of transactions) {
+    const amount = decimalToNumber(transaction.amount) ?? 0;
+
+    if (transaction.type === "INFLOW") {
+      totalInflows += amount;
+    } else {
+      totalOutflows += amount;
+    }
+  }
+
+  const customerCollections =
+    getCashFlowCategoryAmount(
+      transactions,
+      "INFLOW",
+      "CUSTOMER_PAYMENT",
+    );
+
+  const otherIncome = getCashFlowCategoryAmount(
+    transactions,
+    "INFLOW",
+    "OTHER_INCOME",
+  );
+
+  const rawMaterialCashOutflow =
+    getCashFlowCategoryAmount(
+      transactions,
+      "OUTFLOW",
+      "RAW_MATERIAL_PURCHASE",
+    );
+
+  const packagingCashOutflow =
+    getCashFlowCategoryAmount(
+      transactions,
+      "OUTFLOW",
+      "PACKAGING_MATERIAL_PURCHASE",
+    );
+
+  const inventoryCashOutflow =
+    rawMaterialCashOutflow + packagingCashOutflow;
+
+  const operatingCashOutflow =
+    getCashFlowCategoryAmount(
+      transactions,
+      "OUTFLOW",
+      "OPERATING_EXPENSE",
+    );
+
+  const shippingPayments =
+    getCashFlowCategoryAmount(
+      transactions,
+      "OUTFLOW",
+      "SHIPPING",
+    );
+
+  const paymentProcessingFees =
+    getCashFlowCategoryAmount(
+      transactions,
+      "OUTFLOW",
+      "PAYMENT_PROCESSING_FEE",
+    );
+
+  const refunds = getCashFlowCategoryAmount(
+    transactions,
+    "OUTFLOW",
+    "CUSTOMER_REFUND",
+  );
+
+  const otherCashOutflow =
+    getCashFlowCategoryAmount(
+      transactions,
+      "OUTFLOW",
+      "OTHER",
+    );
+
+  const previousPeriod = getPreviousPeriod(period);
+
+  const previousPeriodNetCashFlow =
+    previousPeriod
+      ? await getCashFlowNetForPeriod(
+          businessId,
+          previousPeriod,
+        )
+      : 0;
+
+  const netCashFlow = totalInflows - totalOutflows;
+  const changeAmount =
+    netCashFlow - previousPeriodNetCashFlow;
+
+  const totalCashMovement =
+    totalInflows + totalOutflows;
+
+  return {
+    period,
+    summary: {
+      totalInflows,
+      totalOutflows,
+      netCashFlow,
+      customerCollections,
+      otherIncome,
+      inventoryCashOutflow,
+      operatingCashOutflow,
+      shippingPayments,
+      paymentProcessingFees,
+      refunds,
+      otherCashOutflow,
+    },
+    byMonth: buildCashFlowByMonth(transactions),
+    byCategory: buildCashFlowByCategory(
+      transactions,
+      totalCashMovement,
+    ),
+    trend: {
+      currentPeriodNetCashFlow: netCashFlow,
+      previousPeriodNetCashFlow,
+      changeAmount,
+      changePercentage:
+        previousPeriodNetCashFlow === 0
+          ? null
+          : (changeAmount /
+              Math.abs(previousPeriodNetCashFlow)) *
+            100,
+    },
+  };
+}
+

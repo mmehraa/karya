@@ -15,6 +15,7 @@ import {
 
 import { getDashboardContext } from "@/modules/business/dashboard-context";
 import {
+  getCashFlowIntelligence,
   getExpenseIntelligence,
   getInventoryIntelligence,
   getRevenueIntelligence,
@@ -274,7 +275,7 @@ export default async function AnalyticsPage({
 
   const { businessId, business } = await getDashboardContext();
 
-  const [settings, revenue, inventory, expenses] = await Promise.all([
+  const [settings, revenue, inventory, expenses, cashFlow] = await Promise.all([
     import("@/lib/db").then(({ db }) =>
       db.businessSettings.findUnique({
         where: {
@@ -297,6 +298,11 @@ export default async function AnalyticsPage({
     }),
 
     getExpenseIntelligence(businessId, {
+      from,
+      to,
+    }),
+
+    getCashFlowIntelligence(businessId, {
       from,
       to,
     }),
@@ -2205,6 +2211,72 @@ export default async function AnalyticsPage({
             </div>
           </div>
         </section>
+
+        {/* ============================================================
+            CASH FLOW INTELLIGENCE
+        ============================================================ */}
+
+        <section className="mt-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">Cash Flow Intelligence</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">Cash Movement</h2>
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">Understand cash coming in, cash going out, and the categories driving the movement in the selected period.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-[22px] border border-emerald-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Cash Inflows</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-emerald-700">{money(cashFlow.summary.totalInflows, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">Customer collections + other income</p></div>
+            <div className="rounded-[22px] border border-red-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Cash Outflows</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-red-600">{money(cashFlow.summary.totalOutflows, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">All recorded cash payments</p></div>
+            <div className="rounded-[22px] border border-blue-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Net Cash Movement</p><p className={`mt-3 text-[28px] font-semibold tracking-[-0.05em] ${cashFlow.summary.netCashFlow >= 0 ? "text-blue-700" : "text-red-600"}`}>{money(cashFlow.summary.netCashFlow, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">Inflows minus outflows</p></div>
+            <div className="rounded-[22px] border border-amber-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Inventory Cash Outflow</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-amber-700">{money(cashFlow.summary.inventoryCashOutflow, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">Raw + packaging purchases</p></div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.25fr_0.75fr]">
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-slate-950">Monthly Cash Movement</h3>
+              <p className="mt-1 text-xs text-slate-500">Inflows, outflows and net movement by month.</p>
+              {cashFlow.byMonth.length === 0 ? <div className="mt-4">{emptyState("No cash movement in this period.")}</div> : <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[620px] text-left"><thead><tr className="border-b border-slate-100 text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400"><th className="pb-3">Month</th><th className="pb-3 text-right">Inflows</th><th className="pb-3 text-right">Outflows</th><th className="pb-3 text-right">Net</th></tr></thead><tbody>{cashFlow.byMonth.map((item) => <tr key={item.month} className="border-b border-slate-50 last:border-0"><td className="py-3 text-xs font-medium text-slate-700">{item.month}</td><td className="py-3 text-right text-xs font-semibold text-emerald-700">{money(item.inflows, currencySymbol)}</td><td className="py-3 text-right text-xs font-semibold text-red-600">{money(item.outflows, currencySymbol)}</td><td className={`py-3 text-right text-xs font-semibold ${item.netCashFlow >= 0 ? "text-slate-950" : "text-red-600"}`}>{money(item.netCashFlow, currencySymbol)}</td></tr>)}</tbody></table></div>}
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-slate-950">Cash Flow Breakdown</h3>
+              <p className="mt-1 text-xs text-slate-500">Where cash moved during the selected period.</p>
+              <div className="mt-5 space-y-4">
+                {[
+                  ["Customer Collections", cashFlow.summary.customerCollections],
+                  ["Other Income", cashFlow.summary.otherIncome],
+                  ["Inventory Purchases", cashFlow.summary.inventoryCashOutflow],
+                  ["Operating Expenses", cashFlow.summary.operatingCashOutflow],
+                  ["Shipping", cashFlow.summary.shippingPayments],
+                  ["Payment Fees", cashFlow.summary.paymentProcessingFees],
+                  ["Refunds", cashFlow.summary.refunds],
+                  ["Other Outflow", cashFlow.summary.otherCashOutflow],
+                ].map(([label, amount]) => {
+                  const numericAmount = Number(amount);
+                  const denominator = cashFlow.summary.totalInflows + cashFlow.summary.totalOutflows;
+                  const width = denominator > 0 ? (numericAmount / denominator) * 100 : 0;
+                  return <div key={String(label)}><div className="flex items-center justify-between gap-3"><p className="text-xs font-semibold text-slate-700">{label}</p><p className="text-xs font-semibold text-slate-950">{money(numericAmount, currencySymbol)}</p></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(width, 100)}%` }} /></div></div>;
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1fr_1fr]">
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-slate-950">Cash Flow Categories</h3>
+              <p className="mt-1 text-xs text-slate-500">Recorded cash transactions grouped by category.</p>
+              {cashFlow.byCategory.length === 0 ? <p className="py-8 text-center text-xs text-slate-400">No cash transaction data.</p> : <div className="mt-4 space-y-3">{cashFlow.byCategory.map((item) => <div key={`${item.type}-${item.category}`} className="rounded-xl bg-slate-50 px-3 py-3"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-800">{item.category}</p><p className="mt-0.5 text-[10px] text-slate-400">{item.type} · {item.count} {item.count === 1 ? "transaction" : "transactions"}</p></div><p className="shrink-0 text-xs font-semibold text-slate-950">{money(item.amount, currencySymbol)}</p></div><p className="mt-2 text-[10px] text-slate-400">{item.percentageOfTotal === null ? "Unavailable" : `${item.percentageOfTotal.toFixed(1)}% of cash movement`}</p></div>)}</div>}
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-slate-950">Cash Flow Trend</h3>
+              <p className="mt-1 text-xs text-slate-500">Net cash movement compared with the previous equivalent period.</p>
+              {isAllTime ? <div className="mt-5 rounded-2xl bg-slate-50 p-5"><p className="text-sm font-semibold text-slate-800">No previous-period baseline</p><p className="mt-1 text-xs leading-5 text-slate-500">Select a bounded period such as 7D, 30D, 3M, 1Y or Custom to compare cash movement with the previous equivalent period.</p></div> : <div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Current Net</p><p className={`mt-2 text-xl font-semibold tracking-[-0.04em] ${cashFlow.trend.currentPeriodNetCashFlow >= 0 ? "text-emerald-700" : "text-red-600"}`}>{money(cashFlow.trend.currentPeriodNetCashFlow, currencySymbol)}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Previous Net</p><p className={`mt-2 text-xl font-semibold tracking-[-0.04em] ${cashFlow.trend.previousPeriodNetCashFlow >= 0 ? "text-slate-950" : "text-red-600"}`}>{money(cashFlow.trend.previousPeriodNetCashFlow, currencySymbol)}</p></div><div className="col-span-2 rounded-2xl border border-slate-100 p-4"><div className="flex items-center justify-between gap-3"><span className="text-xs text-slate-500">Change</span><span className={`text-sm font-semibold ${cashFlow.trend.changeAmount >= 0 ? "text-emerald-700" : "text-red-600"}`}>{cashFlow.trend.changeAmount >= 0 ? "+" : ""}{money(cashFlow.trend.changeAmount, currencySymbol)}</span></div><div className="mt-2 flex items-center justify-between gap-3"><span className="text-xs text-slate-500">Change %</span><span className="text-sm font-semibold text-slate-950">{percentage(cashFlow.trend.changePercentage)}</span></div></div></div>}
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   );
