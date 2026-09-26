@@ -1,4 +1,5 @@
 import { Prisma } from "@prisma/client";
+import type { ExpenseCategory } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { getProductEconomics } from "@/modules/product-economics/services";
@@ -14,6 +15,12 @@ import type {
   InventoryStockStatus,
   InventorySummary,
   InventoryMovementIntelligence,
+  ExpenseByCategory,
+  ExpenseByMonth,
+  ExpenseConcentration,
+  ExpenseIntelligence,
+  ExpenseSummary,
+  ExpenseTrend,
   ProductCurrentEconomics,
   ProductIntelligence,
   ProductIntelligenceRow,
@@ -1569,5 +1576,329 @@ export async function getInventoryIntelligence(
       serializedPackagingMaterials,
     lowStockProducts,
     movement,
+  };
+}
+/* ============================================================
+   EXPENSE INTELLIGENCE
+   ============================================================ */
+
+async function getExpensesForPeriod(
+  businessId: string,
+  period: AnalyticsDateRange,
+) {
+  return db.expense.findMany({
+    where: {
+      businessId,
+      expenseDate: getExpenseDateFilter(period),
+    },
+    select: {
+      id: true,
+      expenseDate: true,
+      category: true,
+      amount: true,
+      isRecurring: true,
+    },
+    orderBy: [
+      {
+        expenseDate: "asc",
+      },
+      {
+        createdAt: "asc",
+      },
+    ],
+  });
+}
+
+function getExpenseDateFilter(
+  period: AnalyticsDateRange,
+) {
+  return {
+    ...(period.from
+      ? {
+          gte: period.from,
+        }
+      : {}),
+    lte: period.to,
+  };
+}
+
+async function getExpenseTotalForPeriod(
+  businessId: string,
+  period: AnalyticsDateRange,
+): Promise<number> {
+  const aggregate =
+    await db.expense.aggregate({
+      where: {
+        businessId,
+        expenseDate:
+          getExpenseDateFilter(period),
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+  return decimalToNumber(
+    aggregate._sum.amount,
+  ) ?? 0;
+}
+
+function buildExpenseSummary(
+  expenses: Awaited<
+    ReturnType<typeof getExpensesForPeriod>
+  >,
+): ExpenseSummary {
+  let totalExpenses = 0;
+  let recurringExpenseTotal = 0;
+  let recurringExpenseCount = 0;
+
+  for (const expense of expenses) {
+    const amount =
+      decimalToNumber(expense.amount) ?? 0;
+
+    totalExpenses += amount;
+
+    if (expense.isRecurring) {
+      recurringExpenseTotal += amount;
+      recurringExpenseCount += 1;
+    }
+  }
+
+  return {
+    totalExpenses,
+    expenseCount: expenses.length,
+    averageExpense:
+      expenses.length > 0
+        ? totalExpenses / expenses.length
+        : null,
+    recurringExpenseTotal,
+    recurringExpenseCount,
+  };
+}
+
+function buildExpenseByCategory(
+  expenses: Awaited<
+    ReturnType<typeof getExpensesForPeriod>
+  >,
+  totalExpenses: number,
+): ExpenseByCategory[] {
+  const categoryMap = new Map<
+    ExpenseCategory,
+    {
+      totalAmount: number;
+      expenseCount: number;
+    }
+  >();
+
+  for (const expense of expenses) {
+    const current =
+      categoryMap.get(expense.category) ?? {
+        totalAmount: 0,
+        expenseCount: 0,
+      };
+
+    current.totalAmount +=
+      decimalToNumber(expense.amount) ?? 0;
+
+    current.expenseCount += 1;
+
+    categoryMap.set(
+      expense.category,
+      current,
+    );
+  }
+
+  return Array.from(categoryMap.entries())
+    .map(([category, value]) => ({
+      category,
+      totalAmount: value.totalAmount,
+      expenseCount: value.expenseCount,
+      percentageOfTotal:
+        totalExpenses > 0
+          ? (value.totalAmount /
+              totalExpenses) *
+            100
+          : null,
+    }))
+    .sort(
+      (a, b) =>
+        b.totalAmount - a.totalAmount,
+    );
+}
+
+function buildExpenseByMonth(
+  expenses: Awaited<
+    ReturnType<typeof getExpensesForPeriod>
+  >,
+): ExpenseByMonth[] {
+  const monthMap = new Map<
+    string,
+    {
+      totalAmount: number;
+      expenseCount: number;
+    }
+  >();
+
+  for (const expense of expenses) {
+    const month =
+      expense.expenseDate.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          year: "numeric",
+        },
+      );
+
+    const current =
+      monthMap.get(month) ?? {
+        totalAmount: 0,
+        expenseCount: 0,
+      };
+
+    current.totalAmount +=
+      decimalToNumber(expense.amount) ?? 0;
+
+    current.expenseCount += 1;
+
+    monthMap.set(month, current);
+  }
+
+  return Array.from(monthMap.entries()).map(
+    ([month, value]) => ({
+      month,
+      totalAmount: value.totalAmount,
+      expenseCount: value.expenseCount,
+    }),
+  );
+}
+
+function getPreviousExpensePeriod(
+  period: AnalyticsDateRange,
+): AnalyticsDateRange | null {
+  if (!period.from) {
+    return null;
+  }
+
+  const duration =
+    period.to.getTime() -
+    period.from.getTime();
+
+  return {
+    from: new Date(
+      period.from.getTime() -
+        duration -
+        1,
+    ),
+    to: new Date(
+      period.from.getTime() - 1,
+    ),
+  };
+}
+
+function buildExpenseTrend(
+  currentPeriodExpenses: number,
+  previousPeriodExpenses: number,
+): ExpenseTrend {
+  const changeAmount =
+    currentPeriodExpenses -
+    previousPeriodExpenses;
+
+  return {
+    currentPeriodExpenses,
+    previousPeriodExpenses,
+    changeAmount,
+    changePercentage:
+      previousPeriodExpenses === 0
+        ? null
+        : (changeAmount /
+            previousPeriodExpenses) *
+          100,
+  };
+}
+
+function buildExpenseConcentration(
+  byCategory: ExpenseByCategory[],
+): ExpenseConcentration {
+  const topCategorySharePct =
+    byCategory[0]?.percentageOfTotal ??
+    null;
+
+  const topThreeAmount =
+    byCategory
+      .slice(0, 3)
+      .reduce(
+        (sum, category) =>
+          sum + category.totalAmount,
+        0,
+      );
+
+  const totalExpenses =
+    byCategory.reduce(
+      (sum, category) =>
+        sum + category.totalAmount,
+      0,
+    );
+
+  return {
+    topCategorySharePct,
+    topThreeCategorySharePct:
+      totalExpenses > 0
+        ? (topThreeAmount /
+            totalExpenses) *
+          100
+        : null,
+  };
+}
+
+export async function getExpenseIntelligence(
+  businessId: string,
+  options: AnalyticsOptions = {},
+): Promise<ExpenseIntelligence> {
+  const period = getPeriod(options);
+
+  const expenses =
+    await getExpensesForPeriod(
+      businessId,
+      period,
+    );
+
+  const summary =
+    buildExpenseSummary(expenses);
+
+  const byCategory =
+    buildExpenseByCategory(
+      expenses,
+      summary.totalExpenses,
+    );
+
+  const previousPeriod =
+    getPreviousExpensePeriod(period);
+
+  const previousPeriodExpenses =
+    previousPeriod
+      ? await getExpenseTotalForPeriod(
+          businessId,
+          previousPeriod,
+        )
+      : 0;
+
+  const trend = buildExpenseTrend(
+    summary.totalExpenses,
+    previousPeriodExpenses,
+  );
+
+  return {
+    period,
+    summary,
+    byCategory,
+    majorCategories:
+      byCategory.slice(0, 5),
+    byMonth:
+      buildExpenseByMonth(expenses),
+    trend,
+    concentration:
+      buildExpenseConcentration(
+        byCategory,
+      ),
   };
 }

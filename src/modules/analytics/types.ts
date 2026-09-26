@@ -1,3 +1,5 @@
+import type { ExpenseCategory } from "@prisma/client";
+
 export interface AnalyticsDateRange {
   from: Date | null;
   to: Date;
@@ -265,4 +267,51 @@ export interface InventoryIntelligence {
   packagingMaterials: InventoryPackagingMaterial[];
   lowStockProducts: InventoryLowStockProduct[];
   movement: InventoryMovementIntelligence;
+}
+
+/* ============================================================
+   EXPENSE INTELLIGENCE
+   ============================================================ */
+
+export interface ExpenseSummary {
+  totalExpenses: number;
+  expenseCount: number;
+  averageExpense: number | null;
+  recurringExpenseTotal: number;
+  recurringExpenseCount: number;
+}
+
+export interface ExpenseByCategory {
+  category: ExpenseCategory;
+  totalAmount: number;
+  expenseCount: number;
+  percentageOfTotal: number | null;
+}
+
+export interface ExpenseByMonth {
+  month: string;
+  totalAmount: number;
+  expenseCount: number;
+}
+
+export interface ExpenseTrend {
+  currentPeriodExpenses: number;
+  previousPeriodExpenses: number;
+  changeAmount: number;
+  changePercentage: number | null;
+}
+
+export interface ExpenseConcentration {
+  topCategorySharePct: number | null;
+  topThreeCategorySharePct: number | null;
+}
+
+export interface ExpenseIntelligence {
+  period: AnalyticsDateRange;
+  summary: ExpenseSummary;
+  byCategory: ExpenseByCategory[];
+  majorCategories: ExpenseByCategory[];
+  byMonth: ExpenseByMonth[];
+  trend: ExpenseTrend;
+  concentration: ExpenseConcentration;
 }

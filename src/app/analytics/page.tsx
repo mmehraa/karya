@@ -15,6 +15,7 @@ import {
 
 import { getDashboardContext } from "@/modules/business/dashboard-context";
 import {
+  getExpenseIntelligence,
   getInventoryIntelligence,
   getRevenueIntelligence,
 } from "@/modules/analytics/services";
@@ -273,7 +274,7 @@ export default async function AnalyticsPage({
 
   const { businessId, business } = await getDashboardContext();
 
-  const [settings, revenue, inventory] = await Promise.all([
+  const [settings, revenue, inventory, expenses] = await Promise.all([
     import("@/lib/db").then(({ db }) =>
       db.businessSettings.findUnique({
         where: {
@@ -291,6 +292,11 @@ export default async function AnalyticsPage({
     }),
 
     getInventoryIntelligence(businessId, {
+      from,
+      to,
+    }),
+
+    getExpenseIntelligence(businessId, {
       from,
       to,
     }),
@@ -1989,6 +1995,215 @@ export default async function AnalyticsPage({
               </table>
             </div>
           )}
+        </section>
+
+        {/* ============================================================
+            EXPENSE INTELLIGENCE
+        ============================================================ */}
+
+        <section className="mt-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-700">
+                Expense Intelligence
+              </p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">
+                Operating Expenses
+              </h2>
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">
+                Understand where operating money is going and how spending changes across the selected period.
+              </p>
+            </div>
+
+            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              Finance expense ledger
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-[22px] border border-amber-100 bg-white p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Total Expenses</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                {money(expenses.summary.totalExpenses, currencySymbol)}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                {expenses.summary.expenseCount} recorded {expenses.summary.expenseCount === 1 ? "expense" : "expenses"}
+              </p>
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Average Expense</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                {expenses.summary.averageExpense === null
+                  ? "Unavailable"
+                  : money(expenses.summary.averageExpense, currencySymbol)}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">Per recorded expense</p>
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Recurring Expenses</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                {money(expenses.summary.recurringExpenseTotal, currencySymbol)}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                {expenses.summary.recurringExpenseCount} recurring {expenses.summary.recurringExpenseCount === 1 ? "record" : "records"}
+              </p>
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Largest Category Share</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                {expenses.concentration.topCategorySharePct === null
+                  ? "Unavailable"
+                  : `${expenses.concentration.topCategorySharePct.toFixed(1)}%`}
+              </p>
+              <p className="mt-1 truncate text-xs text-slate-500">
+                {expenses.byCategory[0]?.category ?? "No category data"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-950">Expense Trend</h3>
+                  <p className="mt-1 text-xs text-slate-500">Monthly operating expenses in the selected period.</p>
+                </div>
+                {expenses.trend.changePercentage !== null && (
+                  <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold ${
+                    expenses.trend.changePercentage > 0
+                      ? "bg-rose-50 text-rose-700"
+                      : expenses.trend.changePercentage < 0
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-slate-100 text-slate-500"
+                  }`}>
+                    {percentage(expenses.trend.changePercentage)} vs previous period
+                  </span>
+                )}
+              </div>
+
+              {expenses.byMonth.length === 0 ? (
+                <div className="mt-5">{emptyState("No expense data for this period.")}</div>
+              ) : (
+                <div className="mt-5 overflow-x-auto">
+                  <div
+                    className="flex min-w-full items-end gap-4 border-b border-slate-100 px-4"
+                    style={{ minWidth: `${Math.max(expenses.byMonth.length * 105, 650)}px`, height: "250px" }}
+                  >
+                    {expenses.byMonth.map((item) => {
+                      const maxExpense = Math.max(...expenses.byMonth.map((month) => month.totalAmount), 0);
+                      const height = maxExpense > 0 ? (item.totalAmount / maxExpense) * 190 : 0;
+
+                      return (
+                        <div key={item.month} className="flex h-full flex-1 flex-col justify-end">
+                          <div className="group relative flex h-full items-end justify-center">
+                            <div
+                              className="w-9 rounded-t-xl bg-gradient-to-t from-amber-700 to-amber-400 transition-all group-hover:from-amber-800 group-hover:to-amber-500"
+                              style={{ height: `${Math.max(height, 5)}px` }}
+                            />
+                            <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-2 py-1 text-[9px] font-semibold text-white opacity-0 transition group-hover:opacity-100">
+                              {money(item.totalAmount, currencySymbol)}
+                            </div>
+                          </div>
+                          <div className="mt-3 pb-1 text-center">
+                            <p className="truncate text-[10px] font-semibold text-slate-600">{item.month}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-950">Major Spending Categories</h3>
+                <p className="mt-1 text-xs text-slate-500">Categories ordered by recorded expense amount.</p>
+              </div>
+
+              {expenses.byCategory.length === 0 ? (
+                <div className="mt-5">{emptyState("No categorized expenses for this period.")}</div>
+              ) : (
+                <div className="mt-5 space-y-4">
+                  {expenses.byCategory.slice(0, 5).map((item) => {
+                    const width = expenses.summary.totalExpenses > 0
+                      ? (item.totalAmount / expenses.summary.totalExpenses) * 100
+                      : 0;
+
+                    return (
+                      <div key={item.category}>
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="truncate text-xs font-semibold text-slate-700">{item.category}</p>
+                          <p className="shrink-0 text-xs font-semibold text-slate-950">
+                            {money(item.totalAmount, currencySymbol)}
+                          </p>
+                        </div>
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                          <div className="h-full rounded-full bg-amber-500" style={{ width: `${Math.min(width, 100)}%` }} />
+                        </div>
+                        <p className="mt-1 text-[10px] text-slate-400">
+                          {item.percentageOfTotal === null ? "Unavailable" : `${item.percentageOfTotal.toFixed(1)}%`} · {item.expenseCount} {item.expenseCount === 1 ? "expense" : "expenses"}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1fr_1fr]">
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-slate-950">Monthly Expense Detail</h3>
+              <div className="mt-4 overflow-x-auto">
+                {expenses.byMonth.length === 0 ? (
+                  <p className="py-8 text-center text-xs text-slate-400">No monthly expense data.</p>
+                ) : (
+                  <table className="w-full min-w-[520px] text-left">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                        <th className="pb-3">Month</th>
+                        <th className="pb-3 text-right">Expenses</th>
+                        <th className="pb-3 text-right">Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {expenses.byMonth.map((item) => (
+                        <tr key={item.month} className="border-b border-slate-50 last:border-0">
+                          <td className="py-3 text-xs font-medium text-slate-700">{item.month}</td>
+                          <td className="py-3 text-right text-xs font-semibold text-slate-950">{money(item.totalAmount, currencySymbol)}</td>
+                          <td className="py-3 text-right text-xs text-slate-500">{item.expenseCount}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <h3 className="text-sm font-semibold text-slate-950">Expense Concentration</h3>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Largest Category</p>
+                  <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-slate-950">
+                    {expenses.concentration.topCategorySharePct === null ? "Unavailable" : `${expenses.concentration.topCategorySharePct.toFixed(1)}%`}
+                  </p>
+                  <p className="mt-1 truncate text-xs text-slate-500">{expenses.byCategory[0]?.category ?? "No data"}</p>
+                </div>
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Top 3 Categories</p>
+                  <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-slate-950">
+                    {expenses.concentration.topThreeCategorySharePct === null ? "Unavailable" : `${expenses.concentration.topThreeCategorySharePct.toFixed(1)}%`}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">Share of total expenses</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </div>
