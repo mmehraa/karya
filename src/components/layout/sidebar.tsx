@@ -14,6 +14,7 @@ import {
   Users,
   Wallet,
   ArrowLeftRight,
+  BarChart3,
   Megaphone,
   Target,
   CheckSquare,
@@ -89,6 +90,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Cash Flow",
     href: "/cash-flow",
     icon: ArrowLeftRight,
+    enabled: true,
+  },
+  {
+    label: "Analytics",
+    href: "/analytics",
+    icon: BarChart3,
     enabled: true,
   },
   {
