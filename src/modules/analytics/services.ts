@@ -1,9 +1,19 @@
-import { OrderPaymentStatus, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
+import { getProductEconomics } from "@/modules/product-economics/services";
 
 import type {
   AnalyticsDateRange,
+  ProductCurrentEconomics,
+  ProductIntelligence,
+  ProductIntelligenceRow,
+  ProductProductionIntelligence,
+  ProductSalesProfitability,
+  ProductionByMonth,
+  ProductionByProduct,
+  ProductionIntelligence,
+  ProductionSummary,
   RevenueByChannel,
   RevenueByMonth,
   RevenueByOrder,
@@ -13,94 +23,65 @@ import type {
   RevenueSummary,
 } from "./types";
 
-interface GetRevenueIntelligenceOptions {
+interface AnalyticsOptions {
   from?: Date | null;
   to?: Date;
 }
 
-function startOfDay(date: Date): Date {
-  const result = new Date(date);
-
-  result.setHours(0, 0, 0, 0);
-
-  return result;
-}
-
-function endOfDay(date: Date): Date {
-  const result = new Date(date);
-
-  result.setHours(23, 59, 59, 999);
-
-  return result;
-}
-
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-
-  result.setDate(result.getDate() + days);
-
-  return result;
-}
-
-function differenceInDays(from: Date, to: Date): number {
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-
-  return Math.max(
-    1,
-    Math.ceil(
-      (startOfDay(to).getTime() - startOfDay(from).getTime()) /
-        millisecondsPerDay,
-    ) + 1,
-  );
-}
-
-function formatMonth(date: Date): string {
-  return date.toLocaleDateString("en-IN", {
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function getPreviousPeriod(
-  from: Date | null,
-  to: Date,
-): AnalyticsDateRange {
-  const currentTo = endOfDay(to);
-
-  /*
-   * An "All time" period has no natural previous period because
-   * it has no defined starting boundary.
-   *
-   * The caller handles this case separately using the first
-   * recorded paid order date.
-   */
-  if (!from) {
-    return {
-      from: null,
-      to: currentTo,
-    };
+function decimalToNumber(
+  value: Prisma.Decimal | number | string | null | undefined,
+): number | null {
+  if (value === null || value === undefined) {
+    return null;
   }
 
-  const currentFrom = startOfDay(from);
-  const periodLength = differenceInDays(currentFrom, currentTo);
+  const parsed = Number(value);
 
-  const previousTo = addDays(currentFrom, -1);
-  const previousFrom = addDays(
-    previousTo,
-    -(periodLength - 1),
-  );
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
 
+  return parsed;
+}
+
+function getPeriod(
+  options: AnalyticsOptions,
+): AnalyticsDateRange {
   return {
-    from: startOfDay(previousFrom),
-    to: endOfDay(previousTo),
+    from: options.from ?? null,
+    to: options.to ?? new Date(),
   };
 }
 
-function decimalToNumber(
-  value: Prisma.Decimal | null,
-): number {
-  return value ? Number(value) : 0;
+function getOrderDateFilter(
+  period: AnalyticsDateRange,
+) {
+  return {
+    ...(period.from
+      ? {
+          gte: period.from,
+        }
+      : {}),
+    lte: period.to,
+  };
 }
+
+function getProductionDateFilter(
+  period: AnalyticsDateRange,
+) {
+  return {
+    ...(period.from
+      ? {
+          gte: period.from,
+        }
+      : {}),
+    lte: period.to,
+  };
+}
+
+/* ============================================================
+   REVENUE INTELLIGENCE
+   ============================================================ */
 
 async function getPaidOrders(
   businessId: string,
@@ -109,30 +90,29 @@ async function getPaidOrders(
   return db.order.findMany({
     where: {
       businessId,
-      paymentStatus: OrderPaymentStatus.PAID,
-      orderDate: {
-        gte: period.from ?? undefined,
-        lte: period.to,
-      },
+      paymentStatus: "PAID",
+      orderDate: getOrderDateFilter(period),
     },
     select: {
       id: true,
       orderNumber: true,
       orderDate: true,
-      totalAmount: true,
-      channel: true,
       customer: {
         select: {
           name: true,
         },
       },
+      channel: true,
+      totalAmount: true,
       items: {
         select: {
           productId: true,
           quantity: true,
           unitPrice: true,
+          costPriceSnapshot: true,
           product: {
             select: {
+              id: true,
               name: true,
               sku: true,
             },
@@ -145,60 +125,33 @@ async function getPaidOrders(
         orderDate: "desc",
       },
       {
-        createdAt: "desc",
+        orderNumber: "desc",
       },
     ],
   });
 }
 
-async function getFirstPaidOrderDate(
-  businessId: string,
-): Promise<Date | null> {
-  const firstPaidOrder = await db.order.findFirst({
-    where: {
-      businessId,
-      paymentStatus: OrderPaymentStatus.PAID,
-    },
-    select: {
-      orderDate: true,
-    },
-    orderBy: {
-      orderDate: "asc",
-    },
-  });
-
-  return firstPaidOrder?.orderDate ?? null;
-}
-
 function buildRevenueSummary(
   orders: Awaited<ReturnType<typeof getPaidOrders>>,
 ): RevenueSummary {
-  const totalRevenue = orders.reduce(
-    (total, order) =>
-      total + decimalToNumber(order.totalAmount),
-    0,
-  );
+  let totalRevenue = 0;
+  let unitsSold = 0;
 
-  const unitsSold = orders.reduce(
-    (total, order) =>
-      total +
-      order.items.reduce(
-        (itemTotal, item) =>
-          itemTotal + item.quantity,
-        0,
-      ),
-    0,
-  );
+  for (const order of orders) {
+    totalRevenue += decimalToNumber(order.totalAmount) ?? 0;
 
-  const paidOrderCount = orders.length;
+    for (const item of order.items) {
+      unitsSold += item.quantity;
+    }
+  }
 
   return {
     totalRevenue,
-    paidOrderCount,
+    paidOrderCount: orders.length,
     unitsSold,
     averageOrderValue:
-      paidOrderCount > 0
-        ? totalRevenue / paidOrderCount
+      orders.length > 0
+        ? totalRevenue / orders.length
         : null,
   };
 }
@@ -206,63 +159,51 @@ function buildRevenueSummary(
 function buildRevenueByMonth(
   orders: Awaited<ReturnType<typeof getPaidOrders>>,
 ): RevenueByMonth[] {
-  const grouped = new Map<
+  const monthMap = new Map<
     string,
     {
-      date: Date;
       revenue: number;
       orderCount: number;
     }
   >();
 
   for (const order of orders) {
-    const date = new Date(
-      order.orderDate.getFullYear(),
-      order.orderDate.getMonth(),
-      1,
+    const month = order.orderDate.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        year: "numeric",
+      },
     );
 
-    const key = `${date.getFullYear()}-${String(
-      date.getMonth() + 1,
-    ).padStart(2, "0")}`;
+    const current = monthMap.get(month) ?? {
+      revenue: 0,
+      orderCount: 0,
+    };
 
-    const existing = grouped.get(key);
+    current.revenue +=
+      decimalToNumber(order.totalAmount) ?? 0;
 
-    if (existing) {
-      existing.revenue += decimalToNumber(
-        order.totalAmount,
-      );
-      existing.orderCount += 1;
-    } else {
-      grouped.set(key, {
-        date,
-        revenue: decimalToNumber(
-          order.totalAmount,
-        ),
-        orderCount: 1,
-      });
-    }
+    current.orderCount += 1;
+
+    monthMap.set(month, current);
   }
 
-  return Array.from(grouped.values())
-    .sort(
-      (a, b) =>
-        a.date.getTime() - b.date.getTime(),
-    )
-    .map((item) => ({
-      month: formatMonth(item.date),
-      revenue: item.revenue,
-      orderCount: item.orderCount,
-    }));
+  return Array.from(monthMap.entries()).map(
+    ([month, value]) => ({
+      month,
+      revenue: value.revenue,
+      orderCount: value.orderCount,
+    }),
+  );
 }
 
 function buildRevenueByProduct(
   orders: Awaited<ReturnType<typeof getPaidOrders>>,
 ): RevenueByProduct[] {
-  const grouped = new Map<
+  const productMap = new Map<
     string,
     {
-      productId: string;
       productName: string;
       sku: string;
       revenue: number;
@@ -273,46 +214,40 @@ function buildRevenueByProduct(
 
   for (const order of orders) {
     for (const item of order.items) {
-      /*
-       * Product revenue uses the historical selling price
-       * recorded on the order item rather than the product's
-       * current selling price.
-       */
-      const revenue =
-        decimalToNumber(item.unitPrice) *
-        item.quantity;
-
-      const existing = grouped.get(
+      const existing = productMap.get(
         item.productId,
       );
+
+      const revenue =
+        Number(item.unitPrice) * item.quantity;
 
       if (existing) {
         existing.revenue += revenue;
         existing.unitsSold += item.quantity;
         existing.orderIds.add(order.id);
-      } else {
-        grouped.set(item.productId, {
-          productId: item.productId,
-          productName: item.product.name,
-          sku: item.product.sku,
-          revenue,
-          unitsSold: item.quantity,
-          orderIds: new Set([order.id]),
-        });
+        continue;
       }
+
+      productMap.set(item.productId, {
+        productName: item.product.name,
+        sku: item.product.sku,
+        revenue,
+        unitsSold: item.quantity,
+        orderIds: new Set([order.id]),
+      });
     }
   }
 
-  return Array.from(grouped.values())
-    .sort((a, b) => b.revenue - a.revenue)
-    .map((item) => ({
-      productId: item.productId,
-      productName: item.productName,
-      sku: item.sku,
-      revenue: item.revenue,
-      unitsSold: item.unitsSold,
-      orderCount: item.orderIds.size,
-    }));
+  return Array.from(productMap.entries())
+    .map(([productId, value]) => ({
+      productId,
+      productName: value.productName,
+      sku: value.sku,
+      revenue: value.revenue,
+      unitsSold: value.unitsSold,
+      orderCount: value.orderIds.size,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
 }
 
 function buildRevenueByOrder(
@@ -323,7 +258,8 @@ function buildRevenueByOrder(
     orderNumber: order.orderNumber,
     orderDate: order.orderDate,
     customerName: order.customer.name,
-    revenue: decimalToNumber(order.totalAmount),
+    revenue:
+      decimalToNumber(order.totalAmount) ?? 0,
     channel: order.channel,
   }));
 }
@@ -331,10 +267,9 @@ function buildRevenueByOrder(
 function buildRevenueByChannel(
   orders: Awaited<ReturnType<typeof getPaidOrders>>,
 ): RevenueByChannel[] {
-  const grouped = new Map<
+  const channelMap = new Map<
     string,
     {
-      channel: string;
       revenue: number;
       orderCount: number;
       unitsSold: number;
@@ -342,159 +277,842 @@ function buildRevenueByChannel(
   >();
 
   for (const order of orders) {
-    const channel =
-      order.channel.trim() || "Unspecified";
+    const current = channelMap.get(order.channel) ?? {
+      revenue: 0,
+      orderCount: 0,
+      unitsSold: 0,
+    };
 
-    const unitsSold = order.items.reduce(
-      (total, item) =>
-        total + item.quantity,
-      0,
-    );
+    current.revenue +=
+      decimalToNumber(order.totalAmount) ?? 0;
 
-    const existing = grouped.get(channel);
+    current.orderCount += 1;
 
-    if (existing) {
-      existing.revenue += decimalToNumber(
-        order.totalAmount,
-      );
-      existing.orderCount += 1;
-      existing.unitsSold += unitsSold;
-    } else {
-      grouped.set(channel, {
-        channel,
-        revenue: decimalToNumber(
-          order.totalAmount,
-        ),
-        orderCount: 1,
-        unitsSold,
-      });
+    for (const item of order.items) {
+      current.unitsSold += item.quantity;
     }
+
+    channelMap.set(order.channel, current);
   }
 
-  return Array.from(grouped.values()).sort(
-    (a, b) => b.revenue - a.revenue,
+  return Array.from(channelMap.entries())
+    .map(([channel, value]) => ({
+      channel,
+      revenue: value.revenue,
+      orderCount: value.orderCount,
+      unitsSold: value.unitsSold,
+    }))
+    .sort((a, b) => b.revenue - a.revenue);
+}
+
+function getPreviousPeriod(
+  period: AnalyticsDateRange,
+): AnalyticsDateRange | null {
+  if (!period.from) {
+    return null;
+  }
+
+  const duration =
+    period.to.getTime() -
+    period.from.getTime();
+
+  return {
+    from: new Date(
+      period.from.getTime() - duration - 1,
+    ),
+    to: new Date(
+      period.from.getTime() - 1,
+    ),
+  };
+}
+
+async function getRevenueForPeriod(
+  businessId: string,
+  period: AnalyticsDateRange,
+): Promise<number> {
+  const orders = await db.order.findMany({
+    where: {
+      businessId,
+      paymentStatus: "PAID",
+      orderDate: getOrderDateFilter(period),
+    },
+    select: {
+      totalAmount: true,
+    },
+  });
+
+  return orders.reduce(
+    (sum, order) =>
+      sum +
+      (decimalToNumber(order.totalAmount) ?? 0),
+    0,
   );
 }
 
-function buildRevenueGrowth(
+async function buildRevenueGrowth(
+  businessId: string,
+  period: AnalyticsDateRange,
   currentRevenue: number,
-  previousRevenue: number,
-): RevenueGrowth {
+): Promise<RevenueGrowth> {
+  const previousPeriod = getPreviousPeriod(period);
+
+  if (!previousPeriod) {
+    return {
+      currentPeriodRevenue: currentRevenue,
+      previousPeriodRevenue: 0,
+      changeAmount: currentRevenue,
+      changePercentage: null,
+    };
+  }
+
+  const previousPeriodRevenue =
+    await getRevenueForPeriod(
+      businessId,
+      previousPeriod,
+    );
+
   const changeAmount =
-    currentRevenue - previousRevenue;
+    currentRevenue - previousPeriodRevenue;
+
+  const changePercentage =
+    previousPeriodRevenue === 0
+      ? null
+      : (changeAmount /
+          previousPeriodRevenue) *
+        100;
 
   return {
     currentPeriodRevenue: currentRevenue,
-    previousPeriodRevenue: previousRevenue,
+    previousPeriodRevenue,
     changeAmount,
-    changePercentage:
-      previousRevenue === 0
-        ? null
-        : (changeAmount / previousRevenue) * 100,
+    changePercentage,
   };
 }
 
 export async function getRevenueIntelligence(
   businessId: string,
-  options: GetRevenueIntelligenceOptions = {},
+  options: AnalyticsOptions = {},
 ): Promise<RevenueIntelligence> {
-  const now = new Date();
+  const period = getPeriod(options);
 
-  const period: AnalyticsDateRange = {
-    from: options.from
-      ? startOfDay(options.from)
-      : null,
-    to: options.to
-      ? endOfDay(options.to)
-      : endOfDay(now),
-  };
+  const orders = await getPaidOrders(
+    businessId,
+    period,
+  );
 
-  /*
-   * Explicit/custom periods have a normal previous period.
-   *
-   * All-time has no explicit start date, so we derive the
-   * business's first paid-order date and use an equally long
-   * period immediately before it as the comparison period.
-   */
-  let previousPeriod: AnalyticsDateRange;
+  const summary = buildRevenueSummary(orders);
 
-  if (period.from) {
-    previousPeriod = getPreviousPeriod(
-      period.from,
-      period.to,
-    );
-  } else {
-    const firstPaidOrderDate =
-      await getFirstPaidOrderDate(
-        businessId,
-      );
-
-    if (!firstPaidOrderDate) {
-      previousPeriod = {
-        from: null,
-        to: addDays(
-          startOfDay(period.to),
-          -1,
-        ),
-      };
-    } else {
-      const currentFrom =
-        startOfDay(firstPaidOrderDate);
-
-      const currentPeriodLength =
-        differenceInDays(
-          currentFrom,
-          period.to,
-        );
-
-      const previousTo =
-        addDays(currentFrom, -1);
-
-      const previousFrom = addDays(
-        previousTo,
-        -(currentPeriodLength - 1),
-      );
-
-      previousPeriod = {
-        from: startOfDay(previousFrom),
-        to: endOfDay(previousTo),
-      };
-    }
-  }
-
-  const [orders, previousOrders] =
-    await Promise.all([
-      getPaidOrders(
-        businessId,
-        period,
-      ),
-      getPaidOrders(
-        businessId,
-        previousPeriod,
-      ),
-    ]);
-
-  const summary =
-    buildRevenueSummary(orders);
-
-  const previousSummary =
-    buildRevenueSummary(previousOrders);
+  const [
+    growth,
+  ] = await Promise.all([
+    buildRevenueGrowth(
+      businessId,
+      period,
+      summary.totalRevenue,
+    ),
+  ]);
 
   return {
     period,
     summary,
-    byMonth:
-      buildRevenueByMonth(orders),
-    byProduct:
-      buildRevenueByProduct(orders),
-    byOrder:
-      buildRevenueByOrder(orders),
-    byChannel:
-      buildRevenueByChannel(orders),
-    growth:
-      buildRevenueGrowth(
-        summary.totalRevenue,
-        previousSummary.totalRevenue,
+    byMonth: buildRevenueByMonth(orders),
+    byProduct: buildRevenueByProduct(orders),
+    byOrder: buildRevenueByOrder(orders),
+    byChannel: buildRevenueByChannel(orders),
+    growth,
+  };
+}
+
+/* ============================================================
+   PRODUCT INTELLIGENCE
+   ============================================================ */
+
+async function getAnalyticsProducts(
+  businessId: string,
+) {
+  return db.product.findMany({
+    where: {
+      businessId,
+    },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
+
+async function getCompletedProductionBatches(
+  businessId: string,
+  period: AnalyticsDateRange,
+) {
+  return db.productionBatch.findMany({
+    where: {
+      businessId,
+      status: "COMPLETED",
+      completedAt: getProductionDateFilter(
+        period,
       ),
+    },
+    select: {
+      id: true,
+      productId: true,
+      producedQuantity: true,
+      totalCost: true,
+      costPerUnit: true,
+      completedAt: true,
+    },
+    orderBy: {
+      completedAt: "asc",
+    },
+  });
+}
+
+function buildProductSalesProfitability(
+  products: Array<{
+    id: string;
+    name: string;
+    sku: string;
+  }>,
+  orders: Awaited<ReturnType<typeof getPaidOrders>>,
+): ProductSalesProfitability[] {
+  const productMap = new Map<
+    string,
+    {
+      revenue: number;
+      unitsSold: number;
+      orderIds: Set<string>;
+      historicalCost: number;
+      hasMissingHistoricalCost: boolean;
+    }
+  >();
+
+  for (const product of products) {
+    productMap.set(product.id, {
+      revenue: 0,
+      unitsSold: 0,
+      orderIds: new Set<string>(),
+      historicalCost: 0,
+      hasMissingHistoricalCost: false,
+    });
+  }
+
+  for (const order of orders) {
+    for (const item of order.items) {
+      const current = productMap.get(
+        item.productId,
+      );
+
+      if (!current) {
+        continue;
+      }
+
+      current.revenue +=
+        Number(item.unitPrice) * item.quantity;
+
+      current.unitsSold += item.quantity;
+      current.orderIds.add(order.id);
+
+      if (item.costPriceSnapshot === null) {
+        current.hasMissingHistoricalCost = true;
+      } else {
+        current.historicalCost +=
+          Number(item.costPriceSnapshot) *
+          item.quantity;
+      }
+    }
+  }
+
+  return products.map((product) => {
+    const current = productMap.get(product.id);
+
+    if (!current) {
+      return {
+        productId: product.id,
+        productName: product.name,
+        sku: product.sku,
+        revenue: 0,
+        unitsSold: 0,
+        orderCount: 0,
+        historicalCost: null,
+        contributionProfit: null,
+        contributionMarginPct: null,
+      };
+    }
+
+    const historicalCost =
+      current.hasMissingHistoricalCost
+        ? null
+        : current.historicalCost;
+
+    const contributionProfit =
+      historicalCost === null
+        ? null
+        : current.revenue - historicalCost;
+
+    const contributionMarginPct =
+      contributionProfit === null ||
+      current.revenue === 0
+        ? null
+        : (contributionProfit /
+            current.revenue) *
+          100;
+
+    return {
+      productId: product.id,
+      productName: product.name,
+      sku: product.sku,
+      revenue: current.revenue,
+      unitsSold: current.unitsSold,
+      orderCount: current.orderIds.size,
+      historicalCost,
+      contributionProfit,
+      contributionMarginPct,
+    };
+  });
+}
+
+function buildProductProductionIntelligence(
+  products: Array<{
+    id: string;
+    name: string;
+    sku: string;
+  }>,
+  batches: Awaited<
+    ReturnType<typeof getCompletedProductionBatches>
+  >,
+): ProductProductionIntelligence[] {
+  const batchMap = new Map<
+    string,
+    typeof batches
+  >();
+
+  for (const batch of batches) {
+    const current =
+      batchMap.get(batch.productId) ?? [];
+
+    current.push(batch);
+    batchMap.set(batch.productId, current);
+  }
+
+  return products.map((product) => {
+    const productBatches =
+      batchMap.get(product.id) ?? [];
+
+    let unitsProduced = 0;
+    let productionCost = 0;
+    let hasMissingProductionCost = false;
+
+    let latestProductionCostPerUnit:
+      | number
+      | null = null;
+
+    let latestCompletedAt:
+      | Date
+      | null = null;
+
+    for (const batch of productBatches) {
+      const producedQuantity =
+        batch.producedQuantity ?? 0;
+
+      unitsProduced += producedQuantity;
+
+      const totalCost = decimalToNumber(
+        batch.totalCost,
+      );
+
+      if (totalCost === null) {
+        hasMissingProductionCost = true;
+      } else {
+        productionCost += totalCost;
+      }
+
+      const costPerUnit = decimalToNumber(
+        batch.costPerUnit,
+      );
+
+      if (
+        costPerUnit !== null &&
+        batch.completedAt &&
+        (!latestCompletedAt ||
+          batch.completedAt >
+            latestCompletedAt)
+      ) {
+        latestCompletedAt =
+          batch.completedAt;
+
+        latestProductionCostPerUnit =
+          costPerUnit;
+      }
+    }
+
+    const normalizedProductionCost =
+      productBatches.length === 0 ||
+      hasMissingProductionCost
+        ? null
+        : productionCost;
+
+    const averageProductionCostPerUnit =
+      normalizedProductionCost !== null &&
+      unitsProduced > 0
+        ? normalizedProductionCost /
+          unitsProduced
+        : null;
+
+    return {
+      productId: product.id,
+      productName: product.name,
+      sku: product.sku,
+      batchesCompleted:
+        productBatches.length,
+      unitsProduced,
+      productionCost:
+        normalizedProductionCost,
+      averageProductionCostPerUnit,
+      latestProductionCostPerUnit,
+    };
+  });
+}
+
+async function buildProductCurrentEconomics(
+  businessId: string,
+  products: Array<{
+    id: string;
+    name: string;
+    sku: string;
+  }>,
+): Promise<ProductCurrentEconomics[]> {
+  return Promise.all(
+    products.map(async (product) => {
+      const economics =
+        await getProductEconomics(
+          businessId,
+          product.id,
+        );
+
+      return {
+        productId: product.id,
+        productName: product.name,
+        sku: product.sku,
+        sellingPrice:
+          economics.sellingPrice,
+        rawMaterialCostPerUnit:
+          economics.rawMaterialCostPerUnit,
+        packagingCostPerUnit:
+          economics.packagingCostPerUnit,
+        preShippingUnitCost:
+          economics.preShippingUnitCost,
+        contributionProfitPerUnit:
+          economics.contributionProfitPerUnit,
+        contributionMarginPct:
+          economics.contributionMarginPct,
+        isComplete:
+          economics.isComplete,
+        incompleteReason:
+          economics.incompleteReason,
+      };
+    }),
+  );
+}
+
+export async function getProductIntelligence(
+  businessId: string,
+  options: AnalyticsOptions = {},
+): Promise<ProductIntelligence> {
+  const period = getPeriod(options);
+
+  const products =
+    await getAnalyticsProducts(
+      businessId,
+    );
+
+  const [
+    orders,
+    productionBatches,
+    currentEconomics,
+  ] = await Promise.all([
+    getPaidOrders(
+      businessId,
+      period,
+    ),
+
+    getCompletedProductionBatches(
+      businessId,
+      period,
+    ),
+
+    buildProductCurrentEconomics(
+      businessId,
+      products,
+    ),
+  ]);
+
+  const sales =
+    buildProductSalesProfitability(
+      products,
+      orders,
+    );
+
+  const production =
+    buildProductProductionIntelligence(
+      products,
+      productionBatches,
+    );
+
+  const currentEconomicsMap =
+    new Map(
+      currentEconomics.map((item) => [
+        item.productId,
+        item,
+      ]),
+    );
+
+  const salesMap = new Map(
+    sales.map((item) => [
+      item.productId,
+      item,
+    ]),
+  );
+
+  const productionMap = new Map(
+    production.map((item) => [
+      item.productId,
+      item,
+    ]),
+  );
+
+  const rows: ProductIntelligenceRow[] =
+    products.map((product) => ({
+      productId: product.id,
+      productName: product.name,
+      sku: product.sku,
+      currentEconomics:
+        currentEconomicsMap.get(
+          product.id,
+        )!,
+      sales:
+        salesMap.get(product.id)!,
+      production:
+        productionMap.get(
+          product.id,
+        )!,
+    }));
+
+  return {
+    period,
+    products: rows,
+  };
+}
+
+/* ============================================================
+   PRODUCTION INTELLIGENCE
+   ============================================================ */
+
+async function getProductionBatchesForPeriod(
+  businessId: string,
+  period: AnalyticsDateRange,
+) {
+  return db.productionBatch.findMany({
+    where: {
+      businessId,
+      createdAt: getProductionDateFilter(
+        period,
+      ),
+    },
+    select: {
+      id: true,
+      productId: true,
+      status: true,
+      producedQuantity: true,
+      totalCost: true,
+      costPerUnit: true,
+      completedAt: true,
+      createdAt: true,
+      product: {
+        select: {
+          id: true,
+          name: true,
+          sku: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+}
+
+function buildProductionSummary(
+  batches: Awaited<
+    ReturnType<typeof getProductionBatchesForPeriod>
+  >,
+): ProductionSummary {
+  let completedBatches = 0;
+  let cancelledBatches = 0;
+  let unitsProduced = 0;
+
+  let productionCost = 0;
+  let hasMissingProductionCost = false;
+
+  for (const batch of batches) {
+    if (batch.status === "COMPLETED") {
+      completedBatches += 1;
+
+      unitsProduced +=
+        batch.producedQuantity ?? 0;
+
+      const totalCost = decimalToNumber(
+        batch.totalCost,
+      );
+
+      if (totalCost === null) {
+        hasMissingProductionCost = true;
+      } else {
+        productionCost += totalCost;
+      }
+    }
+
+    if (batch.status === "CANCELLED") {
+      cancelledBatches += 1;
+    }
+  }
+
+  const normalizedProductionCost =
+    completedBatches === 0 ||
+    hasMissingProductionCost
+      ? completedBatches === 0
+        ? null
+        : null
+      : productionCost;
+
+  const averageProductionCostPerUnit =
+    normalizedProductionCost !== null &&
+    unitsProduced > 0
+      ? normalizedProductionCost /
+        unitsProduced
+      : null;
+
+  return {
+    totalBatches: batches.length,
+    completedBatches,
+    cancelledBatches,
+    unitsProduced,
+    productionCost:
+      normalizedProductionCost,
+    averageProductionCostPerUnit,
+  };
+}
+
+function buildProductionByProduct(
+  batches: Awaited<
+    ReturnType<typeof getProductionBatchesForPeriod>
+  >,
+): ProductionByProduct[] {
+  const productMap = new Map<
+    string,
+    {
+      productName: string;
+      sku: string;
+      totalBatches: number;
+      completedBatches: number;
+      cancelledBatches: number;
+      unitsProduced: number;
+      productionCost: number;
+      hasMissingProductionCost: boolean;
+    }
+  >();
+
+  for (const batch of batches) {
+    const existing =
+      productMap.get(batch.productId) ?? {
+        productName: batch.product.name,
+        sku: batch.product.sku,
+        totalBatches: 0,
+        completedBatches: 0,
+        cancelledBatches: 0,
+        unitsProduced: 0,
+        productionCost: 0,
+        hasMissingProductionCost: false,
+      };
+
+    existing.totalBatches += 1;
+
+    if (batch.status === "COMPLETED") {
+      existing.completedBatches += 1;
+
+      existing.unitsProduced +=
+        batch.producedQuantity ?? 0;
+
+      const totalCost = decimalToNumber(
+        batch.totalCost,
+      );
+
+      if (totalCost === null) {
+        existing.hasMissingProductionCost =
+          true;
+      } else {
+        existing.productionCost += totalCost;
+      }
+    }
+
+    if (batch.status === "CANCELLED") {
+      existing.cancelledBatches += 1;
+    }
+
+    productMap.set(
+      batch.productId,
+      existing,
+    );
+  }
+
+  return Array.from(productMap.entries())
+    .map(([productId, value]) => {
+      const productionCost =
+        value.completedBatches === 0 ||
+        value.hasMissingProductionCost
+          ? null
+          : value.productionCost;
+
+      const averageProductionCostPerUnit =
+        productionCost !== null &&
+        value.unitsProduced > 0
+          ? productionCost /
+            value.unitsProduced
+          : null;
+
+      return {
+        productId,
+        productName: value.productName,
+        sku: value.sku,
+        totalBatches: value.totalBatches,
+        completedBatches:
+          value.completedBatches,
+        cancelledBatches:
+          value.cancelledBatches,
+        unitsProduced:
+          value.unitsProduced,
+        productionCost,
+        averageProductionCostPerUnit,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.unitsProduced -
+        a.unitsProduced,
+    );
+}
+
+function buildProductionByMonth(
+  batches: Awaited<
+    ReturnType<typeof getProductionBatchesForPeriod>
+  >,
+): ProductionByMonth[] {
+  const monthMap = new Map<
+    string,
+    {
+      totalBatches: number;
+      completedBatches: number;
+      cancelledBatches: number;
+      unitsProduced: number;
+      productionCost: number;
+      hasMissingProductionCost: boolean;
+    }
+  >();
+
+  for (const batch of batches) {
+    const monthDate =
+      batch.status === "COMPLETED" &&
+      batch.completedAt
+        ? batch.completedAt
+        : batch.createdAt;
+
+    const month =
+      monthDate.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          year: "numeric",
+        },
+      );
+
+    const existing =
+      monthMap.get(month) ?? {
+        totalBatches: 0,
+        completedBatches: 0,
+        cancelledBatches: 0,
+        unitsProduced: 0,
+        productionCost: 0,
+        hasMissingProductionCost: false,
+      };
+
+    existing.totalBatches += 1;
+
+    if (batch.status === "COMPLETED") {
+      existing.completedBatches += 1;
+
+      existing.unitsProduced +=
+        batch.producedQuantity ?? 0;
+
+      const totalCost = decimalToNumber(
+        batch.totalCost,
+      );
+
+      if (totalCost === null) {
+        existing.hasMissingProductionCost =
+          true;
+      } else {
+        existing.productionCost += totalCost;
+      }
+    }
+
+    if (batch.status === "CANCELLED") {
+      existing.cancelledBatches += 1;
+    }
+
+    monthMap.set(month, existing);
+  }
+
+  return Array.from(monthMap.entries()).map(
+    ([month, value]) => ({
+      month,
+      totalBatches: value.totalBatches,
+      completedBatches:
+        value.completedBatches,
+      cancelledBatches:
+        value.cancelledBatches,
+      unitsProduced:
+        value.unitsProduced,
+      productionCost:
+        value.completedBatches === 0 ||
+        value.hasMissingProductionCost
+          ? null
+          : value.productionCost,
+    }),
+  );
+}
+
+export async function getProductionIntelligence(
+  businessId: string,
+  options: AnalyticsOptions = {},
+): Promise<ProductionIntelligence> {
+  const period = getPeriod(options);
+
+  const batches =
+    await getProductionBatchesForPeriod(
+      businessId,
+      period,
+    );
+
+  return {
+    period,
+    summary:
+      buildProductionSummary(batches),
+    byProduct:
+      buildProductionByProduct(batches),
+    byMonth:
+      buildProductionByMonth(batches),
   };
 }

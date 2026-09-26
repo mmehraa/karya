@@ -57,3 +57,99 @@ export interface RevenueIntelligence {
   byChannel: RevenueByChannel[];
   growth: RevenueGrowth;
 }
+
+/* ============================================================
+   PRODUCT INTELLIGENCE
+   ============================================================ */
+
+export interface ProductCurrentEconomics {
+  productId: string;
+  productName: string;
+  sku: string;
+  sellingPrice: number | null;
+  rawMaterialCostPerUnit: number | null;
+  packagingCostPerUnit: number | null;
+  preShippingUnitCost: number | null;
+  contributionProfitPerUnit: number | null;
+  contributionMarginPct: number | null;
+  isComplete: boolean;
+  incompleteReason: string | null;
+}
+
+export interface ProductSalesProfitability {
+  productId: string;
+  productName: string;
+  sku: string;
+  revenue: number;
+  unitsSold: number;
+  orderCount: number;
+  historicalCost: number | null;
+  contributionProfit: number | null;
+  contributionMarginPct: number | null;
+}
+
+export interface ProductProductionIntelligence {
+  productId: string;
+  productName: string;
+  sku: string;
+  batchesCompleted: number;
+  unitsProduced: number;
+  productionCost: number | null;
+  averageProductionCostPerUnit: number | null;
+  latestProductionCostPerUnit: number | null;
+}
+
+export interface ProductIntelligenceRow {
+  productId: string;
+  productName: string;
+  sku: string;
+  currentEconomics: ProductCurrentEconomics;
+  sales: ProductSalesProfitability;
+  production: ProductProductionIntelligence;
+}
+
+export interface ProductIntelligence {
+  period: AnalyticsDateRange;
+  products: ProductIntelligenceRow[];
+}
+
+/* ============================================================
+   PRODUCTION INTELLIGENCE
+   ============================================================ */
+
+export interface ProductionSummary {
+  totalBatches: number;
+  completedBatches: number;
+  cancelledBatches: number;
+  unitsProduced: number;
+  productionCost: number | null;
+  averageProductionCostPerUnit: number | null;
+}
+
+export interface ProductionByProduct {
+  productId: string;
+  productName: string;
+  sku: string;
+  totalBatches: number;
+  completedBatches: number;
+  cancelledBatches: number;
+  unitsProduced: number;
+  productionCost: number | null;
+  averageProductionCostPerUnit: number | null;
+}
+
+export interface ProductionByMonth {
+  month: string;
+  totalBatches: number;
+  completedBatches: number;
+  cancelledBatches: number;
+  unitsProduced: number;
+  productionCost: number | null;
+}
+
+export interface ProductionIntelligence {
+  period: AnalyticsDateRange;
+  summary: ProductionSummary;
+  byProduct: ProductionByProduct[];
+  byMonth: ProductionByMonth[];
+}
