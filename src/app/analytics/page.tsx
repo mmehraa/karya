@@ -17,6 +17,7 @@ import { getDashboardContext } from "@/modules/business/dashboard-context";
 import {
   getCashFlowIntelligence,
   getExpenseIntelligence,
+  getProductIntelligence,
   getInventoryIntelligence,
   getRevenueIntelligence,
 } from "@/modules/analytics/services";
@@ -275,7 +276,7 @@ export default async function AnalyticsPage({
 
   const { businessId, business } = await getDashboardContext();
 
-  const [settings, revenue, inventory, expenses, cashFlow] = await Promise.all([
+  const [settings, revenue, inventory, expenses, cashFlow, productIntelligence] = await Promise.all([
     import("@/lib/db").then(({ db }) =>
       db.businessSettings.findUnique({
         where: {
@@ -303,6 +304,11 @@ export default async function AnalyticsPage({
     }),
 
     getCashFlowIntelligence(businessId, {
+      from,
+      to,
+    }),
+
+    getProductIntelligence(businessId, {
       from,
       to,
     }),
@@ -1208,6 +1214,61 @@ export default async function AnalyticsPage({
         </section>
 
         {/* ============================================================
+            PRODUCT + PRODUCTION INTELLIGENCE
+        ============================================================ */}
+
+        <section className="mt-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">Product + Production Intelligence</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">Product Economics & Production</h2>
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">Current product economics, paid sales profitability, production output, and production-cost movement for the selected period.</p>
+            </div>
+          </div>
+
+          {productIntelligence.products.length === 0 ? (
+            <div>{emptyState("No products found.")}</div>
+          ) : (
+            <div className="overflow-x-auto rounded-[22px] border border-slate-200 bg-white p-5">
+              <table className="w-full min-w-[1180px] border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 text-left">
+                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Product</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Sell Price</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Pre-Ship Cost</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Margin</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Revenue</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Units</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Avg Production Cost</th>
+                    <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Cost Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productIntelligence.products.map((item) => {
+                    const change = item.production.productionCostChangePercentage;
+                    return (
+                      <tr key={item.productId} className="border-b border-slate-50 last:border-b-0">
+                        <td className="py-4 pr-4">
+                          <p className="text-xs font-semibold text-slate-800">{item.productName}</p>
+                          <p className="mt-0.5 text-[10px] text-slate-400">{item.sku}</p>
+                        </td>
+                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.currentEconomics.sellingPrice === null ? "Unavailable" : money(item.currentEconomics.sellingPrice, currencySymbol)}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.currentEconomics.preShippingUnitCost === null ? "Unavailable" : money(item.currentEconomics.preShippingUnitCost, currencySymbol)}</td>
+                        <td className="py-4 pr-4 text-right text-xs font-semibold text-slate-900">{item.currentEconomics.contributionMarginPct === null ? "Unavailable" : `${item.currentEconomics.contributionMarginPct.toFixed(1)}%`}</td>
+                        <td className="py-4 pr-4 text-right text-xs font-semibold text-slate-900">{money(item.sales.revenue, currencySymbol)}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.sales.unitsSold.toLocaleString("en-IN")}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.production.averageProductionCostPerUnit === null ? "Unavailable" : money(item.production.averageProductionCostPerUnit, currencySymbol)}</td>
+                        <td className="py-4 text-right text-xs font-semibold">{change === null ? <span className="text-slate-400">Unavailable</span> : <span className={change > 0 ? "text-red-600" : change < 0 ? "text-emerald-700" : "text-slate-600"}>{change >= 0 ? "+" : ""}{change.toFixed(1)}%</span>}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* ============================================================
             INVENTORY INTELLIGENCE
         ============================================================ */}
 
@@ -1340,6 +1401,21 @@ export default async function AnalyticsPage({
                   held
                 </p>
               </div>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Inventory Concentration</p>
+              <p className="mt-3 text-lg font-semibold text-slate-950">{inventory.summary.concentration.topItemName ?? "Unavailable"}</p>
+              <p className="mt-1 text-xs text-slate-500">Top item holds {inventory.summary.concentration.topItemSharePct === null ? "—" : `${inventory.summary.concentration.topItemSharePct.toFixed(1)}%`} of current inventory value.</p>
+              <p className="mt-2 text-[10px] text-slate-400">Top 3 share: {inventory.summary.concentration.topThreeItemSharePct === null ? "—" : `${inventory.summary.concentration.topThreeItemSharePct.toFixed(1)}%`}</p>
+            </div>
+            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Stock Coverage</p>
+              <p className="mt-3 text-lg font-semibold text-slate-950">{inventory.finishedProducts.filter((item) => item.stockCoverageDays !== null).length} products measurable</p>
+              <p className="mt-1 text-xs text-slate-500">Coverage uses available stock and paid-unit sales over the selected bounded period.</p>
+              <p className="mt-2 text-[10px] text-slate-400">All Time shows unavailable because there is no fixed demand window.</p>
             </div>
           </div>
 
@@ -1699,6 +1775,12 @@ export default async function AnalyticsPage({
                                   item.valuation,
                                   currencySymbol,
                                 )}
+                          </td>
+
+                          <td className="py-4 pr-4 text-right text-xs text-slate-600">
+                            {item.stockCoverageDays === null
+                              ? "Unavailable"
+                              : `${item.stockCoverageDays.toFixed(1)} days`}
                           </td>
 
                           <td className="py-4 text-right">

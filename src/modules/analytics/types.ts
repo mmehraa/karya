@@ -1,8 +1,8 @@
 import type {
   CashTransactionCategory,
   CashTransactionType,
-  ExpenseCategory,
 } from "@prisma/client";
+import type { ExpenseCategory } from "@prisma/client";
 
 export interface AnalyticsDateRange {
   from: Date | null;
@@ -103,6 +103,8 @@ export interface ProductProductionIntelligence {
   productionCost: number | null;
   averageProductionCostPerUnit: number | null;
   latestProductionCostPerUnit: number | null;
+  productionCostChangeAmount: number | null;
+  productionCostChangePercentage: number | null;
 }
 
 export interface ProductIntelligenceRow {
@@ -182,6 +184,7 @@ export interface InventoryFinishedProduct {
   valuation: number | null;
   valuationComplete: boolean;
   valuationIncompleteReason: string | null;
+  stockCoverageDays: number | null;
 }
 
 export interface InventoryRawMaterial {
@@ -211,6 +214,13 @@ export interface InventoryLowStockProduct {
   stockStatus: InventoryStockStatus;
 }
 
+export interface InventoryConcentration {
+  topItemName: string | null;
+  topItemValue: number | null;
+  topItemSharePct: number | null;
+  topThreeItemSharePct: number | null;
+}
+
 export interface InventorySummary {
   finishedProductValue: number | null;
   rawMaterialValue: number | null;
@@ -223,6 +233,7 @@ export interface InventorySummary {
   outOfStockProductCount: number;
   valuationComplete: boolean;
   valuationIncompleteReason: string | null;
+  concentration: InventoryConcentration;
 }
 
 export interface InventoryMovementSummary {
@@ -230,12 +241,10 @@ export interface InventoryMovementSummary {
   rawMaterialConsumption: number;
   rawMaterialAdjustmentsIn: number;
   rawMaterialAdjustmentsOut: number;
-
   packagingPurchases: number;
   packagingConsumption: number;
   packagingAdjustmentsIn: number;
   packagingAdjustmentsOut: number;
-
   finishedProductProduction: number;
   finishedProductSales: number;
   finishedProductReturns: number;

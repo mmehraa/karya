@@ -14,6 +14,7 @@ import type {
   CashFlowByCategory,
   CashFlowByMonth,
   CashFlowIntelligence,
+  InventoryConcentration,
   InventoryFinishedProduct,
   InventoryIntelligence,
   InventoryLowStockProduct,
@@ -605,11 +606,27 @@ function buildProductProductionIntelligence(
   batches: Awaited<
     ReturnType<typeof getCompletedProductionBatches>
   >,
+  previousBatches: Awaited<
+    ReturnType<typeof getCompletedProductionBatches>
+  >,
 ): ProductProductionIntelligence[] {
   const batchMap = new Map<
     string,
     typeof batches
   >();
+
+  const previousBatchMap = new Map<
+    string,
+    typeof previousBatches
+  >();
+
+  for (const batch of previousBatches) {
+    const current =
+      previousBatchMap.get(batch.productId) ?? [];
+
+    current.push(batch);
+    previousBatchMap.set(batch.productId, current);
+  }
 
   for (const batch of batches) {
     const current =
@@ -683,6 +700,47 @@ function buildProductProductionIntelligence(
           unitsProduced
         : null;
 
+    const previousProductBatches =
+      previousBatchMap.get(product.id) ?? [];
+
+    let previousCost = 0;
+    let previousUnits = 0;
+    let previousHasMissingCost = false;
+
+    for (const batch of previousProductBatches) {
+      previousUnits += batch.producedQuantity ?? 0;
+
+      const totalCost = decimalToNumber(batch.totalCost);
+      if (totalCost === null) {
+        previousHasMissingCost = true;
+      } else {
+        previousCost += totalCost;
+      }
+    }
+
+    const previousAverageProductionCostPerUnit =
+      previousProductBatches.length > 0 &&
+      !previousHasMissingCost &&
+      previousUnits > 0
+        ? previousCost / previousUnits
+        : null;
+
+    const productionCostChangeAmount =
+      averageProductionCostPerUnit !== null &&
+      previousAverageProductionCostPerUnit !== null
+        ? averageProductionCostPerUnit -
+          previousAverageProductionCostPerUnit
+        : null;
+
+    const productionCostChangePercentage =
+      productionCostChangeAmount !== null &&
+      previousAverageProductionCostPerUnit !== null &&
+      previousAverageProductionCostPerUnit !== 0
+        ? (productionCostChangeAmount /
+            previousAverageProductionCostPerUnit) *
+          100
+        : null;
+
     return {
       productId: product.id,
       productName: product.name,
@@ -694,6 +752,8 @@ function buildProductProductionIntelligence(
         normalizedProductionCost,
       averageProductionCostPerUnit,
       latestProductionCostPerUnit,
+      productionCostChangeAmount,
+      productionCostChangePercentage,
     };
   });
 }
@@ -750,9 +810,12 @@ export async function getProductIntelligence(
       businessId,
     );
 
+  const previousPeriod = getPreviousPeriod(period);
+
   const [
     orders,
     productionBatches,
+    previousProductionBatches,
     currentEconomics,
   ] = await Promise.all([
     getPaidOrders(
@@ -764,6 +827,13 @@ export async function getProductIntelligence(
       businessId,
       period,
     ),
+
+    previousPeriod
+      ? getCompletedProductionBatches(
+          businessId,
+          previousPeriod,
+        )
+      : Promise.resolve([]),
 
     buildProductCurrentEconomics(
       businessId,
@@ -781,6 +851,7 @@ export async function getProductIntelligence(
     buildProductProductionIntelligence(
       products,
       productionBatches,
+      previousProductionBatches,
     );
 
   const currentEconomicsMap =
@@ -1281,6 +1352,8 @@ function buildInventoryFinishedProducts(
       incompleteReason: string | null;
     }
   >,
+  unitsSoldByProduct: Map<string, number>,
+  coverageDays: number | null,
 ): InventoryFinishedProduct[] {
   return products.map((product) => {
     const physicalStock =
@@ -1321,6 +1394,13 @@ function buildInventoryFinishedProducts(
       valuationUnitCost !== null &&
       economics?.isComplete === true;
 
+    const unitsSold = unitsSoldByProduct.get(product.id) ?? 0;
+    const stockCoverageDays =
+      coverageDays !== null &&
+      unitsSold > 0
+        ? availableStock / (unitsSold / coverageDays)
+        : null;
+
     return {
       productId: product.id,
       productName: product.name,
@@ -1339,6 +1419,7 @@ function buildInventoryFinishedProducts(
           ? null
           : economics?.incompleteReason ??
             "Current product economics are incomplete.",
+      stockCoverageDays,
     };
   });
 }
@@ -1389,6 +1470,51 @@ function buildInventoryPackagingMaterials(
         material.weightedAverageCost,
       ) ?? 0,
   }));
+}
+
+function buildInventoryConcentration(
+  finishedProducts: InventoryFinishedProduct[],
+  rawMaterials: InventoryRawMaterial[],
+  packagingMaterials: InventoryPackagingMaterial[],
+): InventoryConcentration {
+  const items = [
+    ...finishedProducts.map((item) => ({
+      name: item.productName,
+      value: item.valuation,
+    })),
+    ...rawMaterials.map((item) => ({
+      name: item.name,
+      value: item.currentValue,
+    })),
+    ...packagingMaterials.map((item) => ({
+      name: item.name,
+      value: item.currentValue,
+    })),
+  ].filter(
+    (item): item is { name: string; value: number } =>
+      item.value !== null && Number.isFinite(item.value) && item.value > 0,
+  );
+
+  const total = items.reduce((sum, item) => sum + item.value, 0);
+
+  if (total <= 0 || items.length === 0) {
+    return {
+      topItemName: null,
+      topItemValue: null,
+      topItemSharePct: null,
+      topThreeItemSharePct: null,
+    };
+  }
+
+  items.sort((a, b) => b.value - a.value);
+
+  return {
+    topItemName: items[0].name,
+    topItemValue: items[0].value,
+    topItemSharePct: (items[0].value / total) * 100,
+    topThreeItemSharePct:
+      (items.slice(0, 3).reduce((sum, item) => sum + item.value, 0) / total) * 100,
+  };
 }
 
 function buildInventoryLowStockProducts(
@@ -1510,6 +1636,11 @@ function buildInventorySummary(
       valuationComplete
         ? null
         : "Finished-product inventory valuation is incomplete because one or more products do not have complete current product economics.",
+    concentration: buildInventoryConcentration(
+      finishedProducts,
+      rawMaterials,
+      packagingMaterials,
+    ),
   };
 }
 
@@ -1524,6 +1655,7 @@ export async function getInventoryIntelligence(
     rawMaterials,
     packagingMaterials,
     movement,
+    orders,
   ] = await Promise.all([
     getInventoryProducts(businessId),
     getInventoryRawMaterials(businessId),
@@ -1531,6 +1663,10 @@ export async function getInventoryIntelligence(
       businessId,
     ),
     getInventoryMovementIntelligence(
+      businessId,
+      period,
+    ),
+    getPaidOrders(
       businessId,
       period,
     ),
@@ -1546,10 +1682,32 @@ export async function getInventoryIntelligence(
       })),
     );
 
+  const unitsSoldByProduct = new Map<string, number>();
+
+  for (const order of orders) {
+    for (const item of order.items) {
+      unitsSoldByProduct.set(
+        item.productId,
+        (unitsSoldByProduct.get(item.productId) ?? 0) + item.quantity,
+      );
+    }
+  }
+
+  const coverageDays =
+    period.from !== null
+      ? Math.max(
+          1,
+          (period.to.getTime() - period.from.getTime()) /
+            (1000 * 60 * 60 * 24),
+        )
+      : null;
+
   const finishedProducts =
     buildInventoryFinishedProducts(
       products,
       currentEconomics,
+      unitsSoldByProduct,
+      coverageDays,
     );
 
   const serializedRawMaterials =
