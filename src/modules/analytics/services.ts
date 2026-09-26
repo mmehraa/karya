@@ -2,9 +2,18 @@ import { Prisma } from "@prisma/client";
 
 import { db } from "@/lib/db";
 import { getProductEconomics } from "@/modules/product-economics/services";
+import { getInventoryMovementIntelligence } from "./inventory-movement-services";
 
 import type {
   AnalyticsDateRange,
+  InventoryFinishedProduct,
+  InventoryIntelligence,
+  InventoryLowStockProduct,
+  InventoryPackagingMaterial,
+  InventoryRawMaterial,
+  InventoryStockStatus,
+  InventorySummary,
+  InventoryMovementIntelligence,
   ProductCurrentEconomics,
   ProductIntelligence,
   ProductIntelligenceRow,
@@ -402,9 +411,7 @@ export async function getRevenueIntelligence(
 
   const summary = buildRevenueSummary(orders);
 
-  const [
-    growth,
-  ] = await Promise.all([
+  const [growth] = await Promise.all([
     buildRevenueGrowth(
       businessId,
       period,
@@ -1114,5 +1121,453 @@ export async function getProductionIntelligence(
       buildProductionByProduct(batches),
     byMonth:
       buildProductionByMonth(batches),
+  };
+}
+
+/* ============================================================
+   INVENTORY INTELLIGENCE
+   ============================================================ */
+
+async function getInventoryProducts(
+  businessId: string,
+) {
+  return db.product.findMany({
+    where: {
+      businessId,
+    },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+      currentStock: true,
+      promotionalStock: true,
+      reorderLevel: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
+
+async function getInventoryRawMaterials(
+  businessId: string,
+) {
+  return db.rawMaterial.findMany({
+    where: {
+      businessId,
+    },
+    select: {
+      id: true,
+      name: true,
+      baseUnit: true,
+      currentQuantity: true,
+      currentValue: true,
+      weightedAverageCost: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
+
+async function getInventoryPackagingMaterials(
+  businessId: string,
+) {
+  return db.packagingMaterial.findMany({
+    where: {
+      businessId,
+    },
+    select: {
+      id: true,
+      name: true,
+      baseUnit: true,
+      currentQuantity: true,
+      currentValue: true,
+      weightedAverageCost: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}
+
+async function getCurrentProductEconomicsForInventory(
+  businessId: string,
+  products: Array<{
+    id: string;
+    name: string;
+    sku: string;
+  }>,
+): Promise<
+  Map<
+    string,
+    {
+      preShippingUnitCost: number | null;
+      isComplete: boolean;
+      incompleteReason: string | null;
+    }
+  >
+> {
+  const economics = await Promise.all(
+    products.map(async (product) => {
+      const result = await getProductEconomics(
+        businessId,
+        product.id,
+      );
+
+      return {
+        productId: product.id,
+        preShippingUnitCost:
+          result.preShippingUnitCost,
+        isComplete: result.isComplete,
+        incompleteReason:
+          result.incompleteReason,
+      };
+    }),
+  );
+
+  return new Map(
+    economics.map((item) => [
+      item.productId,
+      {
+        preShippingUnitCost:
+          item.preShippingUnitCost,
+        isComplete: item.isComplete,
+        incompleteReason:
+          item.incompleteReason,
+      },
+    ]),
+  );
+}
+
+function getFinishedProductStockStatus(
+  availableStock: number,
+  reorderLevel: number,
+): InventoryStockStatus {
+  if (availableStock <= 0) {
+    return "OUT_OF_STOCK";
+  }
+
+  if (availableStock <= reorderLevel) {
+    return "LOW_STOCK";
+  }
+
+  return "HEALTHY";
+}
+
+function buildInventoryFinishedProducts(
+  products: Awaited<
+    ReturnType<typeof getInventoryProducts>
+  >,
+  currentEconomics: Map<
+    string,
+    {
+      preShippingUnitCost: number | null;
+      isComplete: boolean;
+      incompleteReason: string | null;
+    }
+  >,
+): InventoryFinishedProduct[] {
+  return products.map((product) => {
+    const physicalStock =
+      Math.max(0, product.currentStock);
+
+    const promotionalStock = Math.max(
+      0,
+      Math.min(
+        product.promotionalStock,
+        physicalStock,
+      ),
+    );
+
+    const availableStock = Math.max(
+      0,
+      physicalStock - promotionalStock,
+    );
+
+    const stockStatus =
+      getFinishedProductStockStatus(
+        availableStock,
+        product.reorderLevel,
+      );
+
+    const economics =
+      currentEconomics.get(product.id);
+
+    const valuationUnitCost =
+      economics?.preShippingUnitCost ?? null;
+
+    const valuation =
+      valuationUnitCost !== null
+        ? physicalStock *
+          valuationUnitCost
+        : null;
+
+    const valuationComplete =
+      valuationUnitCost !== null &&
+      economics?.isComplete === true;
+
+    return {
+      productId: product.id,
+      productName: product.name,
+      sku: product.sku,
+      physicalStock,
+      promotionalStock,
+      availableStock,
+      reorderLevel:
+        product.reorderLevel,
+      stockStatus,
+      valuationUnitCost,
+      valuation,
+      valuationComplete,
+      valuationIncompleteReason:
+        valuationComplete
+          ? null
+          : economics?.incompleteReason ??
+            "Current product economics are incomplete.",
+    };
+  });
+}
+
+function buildInventoryRawMaterials(
+  materials: Awaited<
+    ReturnType<typeof getInventoryRawMaterials>
+  >,
+): InventoryRawMaterial[] {
+  return materials.map((material) => ({
+    rawMaterialId: material.id,
+    name: material.name,
+    baseUnit: material.baseUnit,
+    currentQuantity:
+      decimalToNumber(
+        material.currentQuantity,
+      ) ?? 0,
+    currentValue:
+      decimalToNumber(
+        material.currentValue,
+      ) ?? 0,
+    weightedAverageCost:
+      decimalToNumber(
+        material.weightedAverageCost,
+      ) ?? 0,
+  }));
+}
+
+function buildInventoryPackagingMaterials(
+  materials: Awaited<
+    ReturnType<typeof getInventoryPackagingMaterials>
+  >,
+): InventoryPackagingMaterial[] {
+  return materials.map((material) => ({
+    packagingMaterialId: material.id,
+    name: material.name,
+    baseUnit: material.baseUnit,
+    currentQuantity:
+      decimalToNumber(
+        material.currentQuantity,
+      ) ?? 0,
+    currentValue:
+      decimalToNumber(
+        material.currentValue,
+      ) ?? 0,
+    weightedAverageCost:
+      decimalToNumber(
+        material.weightedAverageCost,
+      ) ?? 0,
+  }));
+}
+
+function buildInventoryLowStockProducts(
+  products: InventoryFinishedProduct[],
+): InventoryLowStockProduct[] {
+  return products
+    .filter(
+      (product) =>
+        product.stockStatus !== "HEALTHY",
+    )
+    .map((product) => ({
+      productId: product.productId,
+      productName: product.productName,
+      sku: product.sku,
+      availableStock:
+        product.availableStock,
+      reorderLevel:
+        product.reorderLevel,
+      stockStatus:
+        product.stockStatus,
+    }))
+    .sort((a, b) => {
+      if (
+        a.stockStatus ===
+          "OUT_OF_STOCK" &&
+        b.stockStatus !==
+          "OUT_OF_STOCK"
+      ) {
+        return -1;
+      }
+
+      if (
+        a.stockStatus !==
+          "OUT_OF_STOCK" &&
+        b.stockStatus ===
+          "OUT_OF_STOCK"
+      ) {
+        return 1;
+      }
+
+      return (
+        a.availableStock -
+        b.availableStock
+      );
+    });
+}
+
+function buildInventorySummary(
+  finishedProducts: InventoryFinishedProduct[],
+  rawMaterials: InventoryRawMaterial[],
+  packagingMaterials: InventoryPackagingMaterial[],
+): InventorySummary {
+  const finishedProductValue =
+    finishedProducts.every(
+      (product) =>
+        product.valuationComplete,
+    )
+      ? finishedProducts.reduce(
+          (sum, product) =>
+            sum +
+            (product.valuation ?? 0),
+          0,
+        )
+      : null;
+
+  const rawMaterialValue =
+    rawMaterials.reduce(
+      (sum, material) =>
+        sum + material.currentValue,
+      0,
+    );
+
+  const packagingMaterialValue =
+    packagingMaterials.reduce(
+      (sum, material) =>
+        sum + material.currentValue,
+      0,
+    );
+
+  const valuationComplete =
+    finishedProductValue !== null;
+
+  const totalInventoryValue =
+    valuationComplete
+      ? finishedProductValue +
+        rawMaterialValue +
+        packagingMaterialValue
+      : null;
+
+  const lowStockProductCount =
+    finishedProducts.filter(
+      (product) =>
+        product.stockStatus ===
+        "LOW_STOCK",
+    ).length;
+
+  const outOfStockProductCount =
+    finishedProducts.filter(
+      (product) =>
+        product.stockStatus ===
+        "OUT_OF_STOCK",
+    ).length;
+
+  return {
+    finishedProductValue,
+    rawMaterialValue,
+    packagingMaterialValue,
+    totalInventoryValue,
+    finishedProductCount:
+      finishedProducts.length,
+    rawMaterialCount:
+      rawMaterials.length,
+    packagingMaterialCount:
+      packagingMaterials.length,
+    lowStockProductCount,
+    outOfStockProductCount,
+    valuationComplete,
+    valuationIncompleteReason:
+      valuationComplete
+        ? null
+        : "Finished-product inventory valuation is incomplete because one or more products do not have complete current product economics.",
+  };
+}
+
+export async function getInventoryIntelligence(
+  businessId: string,
+  options: AnalyticsOptions = {},
+): Promise<InventoryIntelligence> {
+  const period = getPeriod(options);
+
+  const [
+    products,
+    rawMaterials,
+    packagingMaterials,
+    movement,
+  ] = await Promise.all([
+    getInventoryProducts(businessId),
+    getInventoryRawMaterials(businessId),
+    getInventoryPackagingMaterials(
+      businessId,
+    ),
+    getInventoryMovementIntelligence(
+      businessId,
+      period,
+    ),
+  ]);
+
+  const currentEconomics =
+    await getCurrentProductEconomicsForInventory(
+      businessId,
+      products.map((product) => ({
+        id: product.id,
+        name: product.name,
+        sku: product.sku,
+      })),
+    );
+
+  const finishedProducts =
+    buildInventoryFinishedProducts(
+      products,
+      currentEconomics,
+    );
+
+  const serializedRawMaterials =
+    buildInventoryRawMaterials(
+      rawMaterials,
+    );
+
+  const serializedPackagingMaterials =
+    buildInventoryPackagingMaterials(
+      packagingMaterials,
+    );
+
+  const lowStockProducts =
+    buildInventoryLowStockProducts(
+      finishedProducts,
+    );
+
+  const summary =
+    buildInventorySummary(
+      finishedProducts,
+      serializedRawMaterials,
+      serializedPackagingMaterials,
+    );
+
+  return {
+    summary,
+    finishedProducts,
+    rawMaterials:
+      serializedRawMaterials,
+    packagingMaterials:
+      serializedPackagingMaterials,
+    lowStockProducts,
+    movement,
   };
 }

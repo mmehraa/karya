@@ -153,3 +153,116 @@ export interface ProductionIntelligence {
   byProduct: ProductionByProduct[];
   byMonth: ProductionByMonth[];
 }
+
+/* ============================================================
+   INVENTORY INTELLIGENCE
+   ============================================================ */
+
+export type InventoryStockStatus =
+  | "OUT_OF_STOCK"
+  | "LOW_STOCK"
+  | "HEALTHY";
+
+export interface InventoryFinishedProduct {
+  productId: string;
+  productName: string;
+  sku: string;
+  physicalStock: number;
+  promotionalStock: number;
+  availableStock: number;
+  reorderLevel: number;
+  stockStatus: InventoryStockStatus;
+  valuationUnitCost: number | null;
+  valuation: number | null;
+  valuationComplete: boolean;
+  valuationIncompleteReason: string | null;
+}
+
+export interface InventoryRawMaterial {
+  rawMaterialId: string;
+  name: string;
+  baseUnit: "GRAM" | "MILLILITER" | "PIECE";
+  currentQuantity: number;
+  currentValue: number;
+  weightedAverageCost: number;
+}
+
+export interface InventoryPackagingMaterial {
+  packagingMaterialId: string;
+  name: string;
+  baseUnit: "PIECE";
+  currentQuantity: number;
+  currentValue: number;
+  weightedAverageCost: number;
+}
+
+export interface InventoryLowStockProduct {
+  productId: string;
+  productName: string;
+  sku: string;
+  availableStock: number;
+  reorderLevel: number;
+  stockStatus: InventoryStockStatus;
+}
+
+export interface InventorySummary {
+  finishedProductValue: number | null;
+  rawMaterialValue: number | null;
+  packagingMaterialValue: number | null;
+  totalInventoryValue: number | null;
+  finishedProductCount: number;
+  rawMaterialCount: number;
+  packagingMaterialCount: number;
+  lowStockProductCount: number;
+  outOfStockProductCount: number;
+  valuationComplete: boolean;
+  valuationIncompleteReason: string | null;
+}
+
+export interface InventoryMovementSummary {
+  rawMaterialPurchases: number;
+  rawMaterialConsumption: number;
+  rawMaterialAdjustmentsIn: number;
+  rawMaterialAdjustmentsOut: number;
+
+  packagingPurchases: number;
+  packagingConsumption: number;
+  packagingAdjustmentsIn: number;
+  packagingAdjustmentsOut: number;
+
+  finishedProductProduction: number;
+  finishedProductSales: number;
+  finishedProductReturns: number;
+  finishedProductWriteOffs: number;
+  finishedProductAdjustmentsIn: number;
+  finishedProductAdjustmentsOut: number;
+  finishedProductPromotionalDispatches: number;
+}
+
+export interface InventoryMovementByMonth {
+  month: string;
+  rawMaterialPurchases: number;
+  rawMaterialConsumption: number;
+  packagingPurchases: number;
+  packagingConsumption: number;
+  finishedProductProduction: number;
+  finishedProductSales: number;
+  finishedProductReturns: number;
+  finishedProductWriteOffs: number;
+  finishedProductPromotionalDispatches: number;
+}
+
+export interface InventoryMovementIntelligence {
+  period: AnalyticsDateRange;
+  summary: InventoryMovementSummary;
+  byMonth: InventoryMovementByMonth[];
+}
+
+export interface InventoryIntelligence {
+  summary: InventorySummary;
+  finishedProducts: InventoryFinishedProduct[];
+  rawMaterials: InventoryRawMaterial[];
+  packagingMaterials: InventoryPackagingMaterial[];
+  lowStockProducts: InventoryLowStockProduct[];
+  movement: InventoryMovementIntelligence;
+}
