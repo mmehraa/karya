@@ -42,6 +42,8 @@ model Business {
   alerts                           Alert[]
   inventoryLedger                  InventoryTransaction[]
   promotionalDispatches            PromotionalDispatch[]
+  investorMarketAssumptions        InvestorMarketAssumption[]
+  investorVerifiedCashBalances     InvestorVerifiedCashBalance[]
 
   rawMaterials                     RawMaterial[]
   rawMaterialPurchases             RawMaterialPurchase[]
@@ -946,3 +948,55 @@ model Alert {
 
   @@index([businessId, isResolved])
 }
+
+enum InvestorMarketType {
+  TAM
+  SAM
+  SOM
+}
+
+enum InvestorMarketSourceType {
+  USER_PROVIDED
+  EXTERNAL_RESEARCH
+}
+
+model InvestorMarketAssumption {
+  id                String                  @id @default(uuid())
+  businessId        String
+  market            InvestorMarketType
+  value             Decimal                 @db.Decimal(20, 2)
+  currencyCode      String                  @default("INR")
+  marketDefinition  String
+  geography         String
+  methodology       String
+  sourceType        InvestorMarketSourceType @default(USER_PROVIDED)
+  sourceName        String?
+  sourceUrl         String?
+  asOfDate          DateTime
+  notes             String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, market, asOfDate])
+  @@index([businessId, createdAt])
+}
+
+model InvestorVerifiedCashBalance {
+  id                String   @id @default(uuid())
+  businessId        String
+  amount            Decimal  @db.Decimal(20, 2)
+  currencyCode      String   @default("INR")
+  asOfDate          DateTime
+  sourceDescription String
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, asOfDate])
+  @@index([businessId, createdAt])
+}
+

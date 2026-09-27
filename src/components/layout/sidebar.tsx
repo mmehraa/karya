@@ -15,6 +15,7 @@ import {
   Wallet,
   ArrowLeftRight,
   BarChart3,
+  TrendingUp,
   Megaphone,
   Target,
   CheckSquare,
@@ -96,6 +97,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Analytics",
     href: "/analytics",
     icon: BarChart3,
+    enabled: true,
+  },
+  {
+    label: "Investor Metrics",
+    href: "/investor-metrics",
+    icon: TrendingUp,
     enabled: true,
   },
   {

@@ -1,6 +1,10 @@
+
 "use server";
 
+import { redirect } from "next/navigation";
 import { z } from "zod";
+
+import { db } from "@/lib/db";
 import { createBusiness } from "@/modules/business/services";
 import { setActiveBusinessId } from "@/modules/business/tenant-resolution";
 
@@ -26,6 +30,10 @@ const createBusinessSchema = z.object({
   currencySymbol: z.string().trim().min(1, "Currency symbol is required."),
   founderStageAssessmentId: z.number().int().min(0).max(8),
   products: z.array(onboardingProductSchema).max(100).default([]),
+});
+
+const switchBusinessSchema = z.object({
+  businessId: z.string().trim().min(1, "Select a business."),
 });
 
 export type CreateBusinessActionInput = z.input<
@@ -69,10 +77,7 @@ export async function createBusinessAction(
       })),
     });
 
-    /*
-     * Set the active business only after the database transaction
-     * has completed successfully.
-     */
+    // Set the active business only after the database transaction succeeds.
     await setActiveBusinessId(business.id);
 
     return {
@@ -97,4 +102,35 @@ export async function createBusinessAction(
       error: "We couldn't create the business. Please try again.",
     };
   }
+}
+
+/**
+ * Validates that the requested business exists, sets it as active,
+ * and navigates to the dashboard.
+ */
+export async function switchBusinessAction(formData: FormData) {
+  const parsed = switchBusinessSchema.safeParse({
+    businessId: formData.get("businessId"),
+  });
+
+  if (!parsed.success) {
+    redirect("/select-business");
+  }
+
+  const business = await db.business.findUnique({
+    where: {
+      id: parsed.data.businessId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!business) {
+    redirect("/select-business");
+  }
+
+  await setActiveBusinessId(business.id);
+
+  redirect("/dashboard");
 }
