@@ -66,9 +66,9 @@ const initialCashForm = (): CashFormState => ({
 });
 
 const inputClass =
-  "mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-50";
+  "mt-1.5 w-full rounded-lg border border-border bg-surface-muted px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition focus:border-emerald-500 focus:bg-surface-raised focus:ring-2 focus:ring-emerald-50";
 
-const labelClass = "block text-xs font-medium text-slate-600";
+const labelClass = "block text-xs font-medium text-text-secondary";
 
 const buttonClass =
   "inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50";
@@ -185,17 +185,17 @@ export default function InvestorMetricsInputs() {
   }
 
   return (
-    <section className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+    <section className="rounded-[22px] border border-border bg-surface-raised p-5 shadow-sm sm:p-6">
       <div className="mb-5">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
             <CircleDollarSign className="h-5 w-5 text-emerald-700" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+            <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
               Investor data inputs
             </h2>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
+            <p className="mt-1 text-xs leading-5 text-text-secondary">
               Add or update documented assumptions and your verified cash
               position when needed.
             </p>
@@ -205,17 +205,17 @@ export default function InvestorMetricsInputs() {
 
       <div className="grid gap-3 xl:grid-cols-2">
         {/* Market assumptions */}
-        <details className="group min-w-0 rounded-2xl border border-slate-200 bg-slate-50/50">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-4 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+        <details className="group min-w-0 rounded-2xl border border-border bg-surface-muted/50">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-4 transition hover:bg-surface-muted [&::-webkit-details-marker]:hidden">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm ring-1 ring-slate-200">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised text-text-secondary shadow-sm ring-1 ring-slate-200">
                 <CircleDollarSign className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-slate-900">
+                <h3 className="text-sm font-semibold text-text-primary">
                   Market size assumptions
                 </h3>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Record TAM, SAM, or SOM with supporting methodology.
                 </p>
               </div>
@@ -228,7 +228,7 @@ export default function InvestorMetricsInputs() {
             </span>
           </summary>
 
-          <div className="border-t border-slate-200 p-4 sm:p-5">
+          <div className="border-t border-border p-4 sm:p-5">
             <form onSubmit={submitMarket} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className={labelClass}>
@@ -385,7 +385,7 @@ export default function InvestorMetricsInputs() {
                 </label>
 
                 <label className={`${labelClass} sm:col-span-2`}>
-                  Notes <span className="font-normal text-slate-400">(optional)</span>
+                  Notes <span className="font-normal text-text-muted">(optional)</span>
                   <textarea
                     className={inputClass}
                     rows={2}
@@ -400,8 +400,8 @@ export default function InvestorMetricsInputs() {
 
               <StatusMessage message={marketMessage} error={marketError} />
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
-                <p className="text-[10px] leading-4 text-slate-500">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                <p className="text-[10px] leading-4 text-text-secondary">
                   External research requires a source name and URL.
                 </p>
                 <button
@@ -417,17 +417,17 @@ export default function InvestorMetricsInputs() {
         </details>
 
         {/* Verified cash balance */}
-        <details className="group min-w-0 rounded-2xl border border-slate-200 bg-slate-50/50">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-4 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+        <details className="group min-w-0 rounded-2xl border border-border bg-surface-muted/50">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-4 transition hover:bg-surface-muted [&::-webkit-details-marker]:hidden">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm ring-1 ring-slate-200">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised text-text-secondary shadow-sm ring-1 ring-slate-200">
                 <Wallet className="h-5 w-5" />
               </span>
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-slate-900">
+                <h3 className="text-sm font-semibold text-text-primary">
                   Verified cash balance
                 </h3>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Record a manually checked cash position for runway.
                 </p>
               </div>
@@ -440,7 +440,7 @@ export default function InvestorMetricsInputs() {
             </span>
           </summary>
 
-          <div className="border-t border-slate-200 p-4 sm:p-5">
+          <div className="border-t border-border p-4 sm:p-5">
             <form onSubmit={submitCash} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className={labelClass}>
@@ -504,7 +504,7 @@ export default function InvestorMetricsInputs() {
                 </label>
 
                 <label className={`${labelClass} sm:col-span-2`}>
-                  Notes <span className="font-normal text-slate-400">(optional)</span>
+                  Notes <span className="font-normal text-text-muted">(optional)</span>
                   <textarea
                     className={inputClass}
                     rows={3}
@@ -519,8 +519,8 @@ export default function InvestorMetricsInputs() {
 
               <StatusMessage message={cashMessage} error={cashError} />
 
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
-                <p className="text-[10px] leading-4 text-slate-500">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                <p className="text-[10px] leading-4 text-text-secondary">
                   Manually recorded; not independently bank-reconciled.
                 </p>
                 <button

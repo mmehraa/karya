@@ -56,11 +56,11 @@ export default async function ProductsPage() {
             Product Workspace
           </p>
 
-          <h1 className="text-2xl font-semibold tracking-[-0.035em] text-slate-950 sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-[-0.035em] text-text-primary sm:text-3xl">
             Product catalog
           </h1>
 
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-text-secondary">
             Manage your registered offerings, pricing, dynamic unit economics,
             inventory thresholds, and production history.
           </p>

@@ -136,14 +136,14 @@ export function ExpenseFormDialog({
         }
       }}
     >
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl">
+        <div className="flex items-start justify-between border-b border-border px-6 py-5">
           <div>
-            <h2 className="text-lg font-bold tracking-tight text-slate-900">
+            <h2 className="text-lg font-bold tracking-tight text-text-primary">
               Record Expense
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-text-secondary">
               Add a genuine business expense to the financial ledger.
             </p>
           </div>
@@ -152,7 +152,7 @@ export function ExpenseFormDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -171,7 +171,7 @@ export function ExpenseFormDialog({
               <div>
                 <label
                   htmlFor="expense-date"
-                  className="text-xs font-semibold text-slate-700"
+                  className="text-xs font-semibold text-text-secondary"
                 >
                   Expense Date
                 </label>
@@ -183,7 +183,7 @@ export function ExpenseFormDialog({
                   onChange={(event) =>
                     setExpenseDate(event.target.value)
                   }
-                  className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                  className="mt-1.5 w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                   required
                 />
               </div>
@@ -191,7 +191,7 @@ export function ExpenseFormDialog({
               <div>
                 <label
                   htmlFor="expense-category"
-                  className="text-xs font-semibold text-slate-700"
+                  className="text-xs font-semibold text-text-secondary"
                 >
                   Category
                 </label>
@@ -202,7 +202,7 @@ export function ExpenseFormDialog({
                   onChange={(event) =>
                     setCategory(event.target.value as ExpenseCategory)
                   }
-                  className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                  className="mt-1.5 w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                 >
                   {EXPENSE_CATEGORIES.map((item) => (
                     <option key={item.value} value={item.value}>
@@ -216,7 +216,7 @@ export function ExpenseFormDialog({
             <div>
               <label
                 htmlFor="expense-description"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-text-secondary"
               >
                 Description
               </label>
@@ -230,7 +230,7 @@ export function ExpenseFormDialog({
                 }
                 placeholder="e.g. Packaging material purchase"
                 maxLength={200}
-                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="mt-1.5 w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                 required
               />
             </div>
@@ -239,13 +239,13 @@ export function ExpenseFormDialog({
               <div>
                 <label
                   htmlFor="expense-amount"
-                  className="text-xs font-semibold text-slate-700"
+                  className="text-xs font-semibold text-text-secondary"
                 >
                   Amount
                 </label>
 
                 <div className="relative mt-1.5">
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-slate-400">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-text-muted">
                     ₹
                   </span>
 
@@ -259,7 +259,7 @@ export function ExpenseFormDialog({
                       setAmount(event.target.value)
                     }
                     placeholder="0.00"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-8 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    className="w-full rounded-lg border border-border bg-surface-raised py-2.5 pl-8 pr-3 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     required
                   />
                 </div>
@@ -268,10 +268,10 @@ export function ExpenseFormDialog({
               <div>
                 <label
                   htmlFor="expense-vendor"
-                  className="text-xs font-semibold text-slate-700"
+                  className="text-xs font-semibold text-text-secondary"
                 >
                   Vendor
-                  <span className="ml-1 font-normal text-slate-400">
+                  <span className="ml-1 font-normal text-text-muted">
                     Optional
                   </span>
                 </label>
@@ -285,7 +285,7 @@ export function ExpenseFormDialog({
                   }
                   placeholder="Vendor or supplier"
                   maxLength={150}
-                  className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                  className="mt-1.5 w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                 />
               </div>
             </div>
@@ -293,10 +293,10 @@ export function ExpenseFormDialog({
             <div>
               <label
                 htmlFor="expense-payment-method"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-text-secondary"
               >
                 Payment Method
-                <span className="ml-1 font-normal text-slate-400">
+                <span className="ml-1 font-normal text-text-muted">
                   Optional
                 </span>
               </label>
@@ -310,26 +310,26 @@ export function ExpenseFormDialog({
                 }
                 placeholder="UPI, Cash, Bank Transfer..."
                 maxLength={80}
-                className="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="mt-1.5 w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               />
             </div>
 
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-surface-muted px-4 py-3">
               <input
                 type="checkbox"
                 checked={isRecurring}
                 onChange={(event) =>
                   setIsRecurring(event.target.checked)
                 }
-                className="h-4 w-4 rounded border-slate-300"
+                className="h-4 w-4 rounded border-border-strong"
               />
 
               <span>
-                <span className="block text-sm font-medium text-slate-800">
+                <span className="block text-sm font-medium text-text-primary">
                   Recurring expense
                 </span>
 
-                <span className="block text-xs text-slate-500">
+                <span className="block text-xs text-text-secondary">
                   Mark this expense as recurring for reporting purposes.
                 </span>
               </span>
@@ -338,10 +338,10 @@ export function ExpenseFormDialog({
             <div>
               <label
                 htmlFor="expense-notes"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-text-secondary"
               >
                 Notes
-                <span className="ml-1 font-normal text-slate-400">
+                <span className="ml-1 font-normal text-text-muted">
                   Optional
                 </span>
               </label>
@@ -355,17 +355,17 @@ export function ExpenseFormDialog({
                 placeholder="Additional information..."
                 maxLength={500}
                 rows={4}
-                className="mt-1.5 w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="mt-1.5 w-full resize-none rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <div className="flex items-center justify-end gap-3 border-t border-border bg-surface-muted px-6 py-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-border bg-surface-raised px-4 py-2.5 text-sm font-medium text-text-secondary shadow-sm transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>

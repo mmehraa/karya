@@ -389,34 +389,34 @@ export default function OnboardingPage() {
     );
 
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-12">
+      <main className="min-h-screen bg-surface-muted px-6 py-12">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8">
             <div className="mb-3 text-xs font-bold uppercase tracking-wider text-blue-600">
               Business Setup
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
               Tell us about your business
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">
               Review your information before creating the business.
             </p>
           </div>
 
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-xl border border-border bg-surface-raised p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 Step 5 of 5
               </span>
 
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs font-medium text-text-secondary">
                 Review &amp; Complete
               </span>
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
               <div
                 className="h-full bg-blue-600"
                 style={{ width: "100%" }}
@@ -424,81 +424,81 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-text-primary">
                 Review your setup
               </h2>
 
-              <p className="mt-1 text-sm leading-6 text-slate-500">
+              <p className="mt-1 text-sm leading-6 text-text-secondary">
                 Check the information below before creating your business.
               </p>
             </div>
 
             <div className="space-y-4">
-              <div className="rounded-lg border border-slate-200 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div className="rounded-lg border border-border p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                   Business
                 </p>
 
-                <p className="mt-1 text-sm font-bold text-slate-900">
+                <p className="mt-1 text-sm font-bold text-text-primary">
                   {businessName}
                 </p>
 
                 {tagline && (
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-text-secondary">
                     {tagline}
                   </p>
                 )}
 
                 {description && (
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                  <p className="mt-3 text-sm leading-6 text-text-secondary">
                     {description}
                   </p>
                 )}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="rounded-lg border border-border p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                     Industry
                   </p>
 
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                  <p className="mt-1 text-sm font-semibold text-text-primary">
                     {industry}
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="rounded-lg border border-border p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                     Business type
                   </p>
 
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                  <p className="mt-1 text-sm font-semibold text-text-primary">
                     {constitution || "Not specified"}
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="rounded-lg border border-border p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                     Country
                   </p>
 
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                  <p className="mt-1 text-sm font-semibold text-text-primary">
                     {selectedCountry?.name ?? "Not specified"}
                   </p>
                 </div>
 
-                <div className="rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div className="rounded-lg border border-border p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                     Currency
                   </p>
 
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                  <p className="mt-1 text-sm font-semibold text-text-primary">
                     {currencyName} ({currencyCode})
                   </p>
 
-                  <p className="mt-1 text-lg font-semibold text-slate-700">
+                  <p className="mt-1 text-lg font-semibold text-text-secondary">
                     {currencySymbol}
                   </p>
                 </div>
@@ -509,29 +509,29 @@ export default function OnboardingPage() {
                   Founder assessment
                 </p>
 
-                <p className="mt-1 text-sm font-bold text-slate-900">
+                <p className="mt-1 text-sm font-bold text-text-primary">
                   Stage {selectedStage?.id}: {selectedStage?.name}
                 </p>
 
-                <p className="mt-1 text-sm leading-6 text-slate-600">
+                <p className="mt-1 text-sm leading-6 text-text-secondary">
                   {selectedStage?.description}
                 </p>
 
-                <p className="mt-3 text-xs leading-5 text-slate-500">
+                <p className="mt-3 text-xs leading-5 text-text-secondary">
                   This assessment is stored separately from the BOS official
                   stage. The BOS will determine official stage readiness using
                   its own requirements.
                 </p>
               </div>
 
-              <div className="rounded-lg border border-slate-200 p-4">
+              <div className="rounded-lg border border-border p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                       Products / Services
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold text-slate-900">
+                    <p className="mt-1 text-sm font-semibold text-text-primary">
                       {products.length === 0
                         ? "None added"
                         : `${products.length} ${
@@ -546,19 +546,19 @@ export default function OnboardingPage() {
                     {products.map((product, index) => (
                       <div
                         key={`${product.name}-${index}`}
-                        className="rounded-lg bg-slate-50 p-3"
+                        className="rounded-lg bg-surface-muted p-3"
                       >
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-text-primary">
                           {product.name}
                         </p>
 
                         {product.description && (
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                          <p className="mt-1 text-xs leading-5 text-text-secondary">
                             {product.description}
                           </p>
                         )}
 
-                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-secondary">
                           {product.sku && (
                             <span>SKU: {product.sku}</span>
                           )}
@@ -604,7 +604,7 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="mt-8 flex justify-between border-t border-slate-100 pt-6">
+            <div className="mt-8 flex justify-between border-t border-border pt-6">
               <button
                 type="button"
                 disabled={isPending}
@@ -612,7 +612,7 @@ export default function OnboardingPage() {
                   setError("");
                   setStep(4);
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg border border-border-strong bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Back
               </button>
@@ -628,7 +628,7 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-text-muted">
             Your business and onboarding information will be saved together.
           </p>
         </div>
@@ -641,35 +641,35 @@ export default function OnboardingPage() {
    */
   if (step === 4) {
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-12">
+      <main className="min-h-screen bg-surface-muted px-6 py-12">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8">
             <div className="mb-3 text-xs font-bold uppercase tracking-wider text-blue-600">
               Business Setup
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
               Tell us about your business
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">
               Your business information is being held temporarily. Nothing
               has been created in the database yet.
             </p>
           </div>
 
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-xl border border-border bg-surface-raised p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 Step 4 of 5
               </span>
 
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs font-medium text-text-secondary">
                 Products &amp; Services
               </span>
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
               <div
                 className="h-full bg-blue-600"
                 style={{ width: "80%" }}
@@ -677,36 +677,36 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-text-primary">
                 What do you sell or provide?
               </h2>
 
-              <p className="mt-1 text-sm leading-6 text-slate-500">
+              <p className="mt-1 text-sm leading-6 text-text-secondary">
                 Adding products or services is optional. You can add them now
                 or create them later from the Products section.
               </p>
             </div>
 
             <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-sm font-semibold text-text-primary">
                 Don&apos;t know the economics yet?
               </p>
 
-              <p className="mt-1 text-xs leading-5 text-slate-600">
+              <p className="mt-1 text-xs leading-5 text-text-secondary">
                 That&apos;s okay. Selling price, COGS, packaging cost, and
                 variable cost can all be left blank and added later.
               </p>
             </div>
 
             {products.length === 0 && (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                <p className="text-sm font-semibold text-slate-700">
+              <div className="rounded-lg border border-dashed border-border-strong bg-surface-muted p-8 text-center">
+                <p className="text-sm font-semibold text-text-secondary">
                   No products or services added yet.
                 </p>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-text-secondary">
                   You can skip this step and add them later.
                 </p>
               </div>
@@ -716,10 +716,10 @@ export default function OnboardingPage() {
               {products.map((product, index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-slate-200 p-5"
+                  className="rounded-xl border border-border p-5"
                 >
                   <div className="mb-5 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-900">
+                    <h3 className="text-sm font-bold text-text-primary">
                       Product / Service {index + 1}
                     </h3>
 
@@ -736,7 +736,7 @@ export default function OnboardingPage() {
                     <div>
                       <label
                         htmlFor={`product-name-${index}`}
-                        className="mb-1.5 block text-sm font-semibold text-slate-700"
+                        className="mb-1.5 block text-sm font-semibold text-text-secondary"
                       >
                         Name
                         <span className="ml-1 text-red-500">*</span>
@@ -754,17 +754,17 @@ export default function OnboardingPage() {
                           )
                         }
                         placeholder="e.g. Moisturising Face Pack"
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor={`product-description-${index}`}
-                        className="mb-1.5 block text-sm font-semibold text-slate-700"
+                        className="mb-1.5 block text-sm font-semibold text-text-secondary"
                       >
                         Description
-                        <span className="ml-1 text-xs font-normal text-slate-400">
+                        <span className="ml-1 text-xs font-normal text-text-muted">
                           Optional
                         </span>
                       </label>
@@ -781,17 +781,17 @@ export default function OnboardingPage() {
                         }
                         rows={3}
                         placeholder="Brief description of the product or service."
-                        className="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full resize-none rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor={`product-sku-${index}`}
-                        className="mb-1.5 block text-sm font-semibold text-slate-700"
+                        className="mb-1.5 block text-sm font-semibold text-text-secondary"
                       >
                         SKU / Code
-                        <span className="ml-1 text-xs font-normal text-slate-400">
+                        <span className="ml-1 text-xs font-normal text-text-muted">
                           Optional
                         </span>
                       </label>
@@ -804,12 +804,12 @@ export default function OnboardingPage() {
                           updateProduct(index, "sku", event.target.value)
                         }
                         placeholder="e.g. PR-MFP-001"
-                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                        className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
                     </div>
 
                     <div>
-                      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
                         Commercial information
                       </p>
 
@@ -817,16 +817,16 @@ export default function OnboardingPage() {
                         <div>
                           <label
                             htmlFor={`product-price-${index}`}
-                            className="mb-1.5 block text-sm font-semibold text-slate-700"
+                            className="mb-1.5 block text-sm font-semibold text-text-secondary"
                           >
                             Selling price
-                            <span className="ml-1 text-xs font-normal text-slate-400">
+                            <span className="ml-1 text-xs font-normal text-text-muted">
                               Optional
                             </span>
                           </label>
 
                           <div className="flex">
-                            <span className="flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm text-slate-500">
+                            <span className="flex items-center rounded-l-lg border border-r-0 border-border-strong bg-surface-muted px-3 text-sm text-text-secondary">
                               {currencySymbol}
                             </span>
 
@@ -844,7 +844,7 @@ export default function OnboardingPage() {
                                 )
                               }
                               placeholder="0.00"
-                              className="w-full rounded-r-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-r-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
                           </div>
                         </div>
@@ -852,16 +852,16 @@ export default function OnboardingPage() {
                         <div>
                           <label
                             htmlFor={`product-cogs-${index}`}
-                            className="mb-1.5 block text-sm font-semibold text-slate-700"
+                            className="mb-1.5 block text-sm font-semibold text-text-secondary"
                           >
                             COGS
-                            <span className="ml-1 text-xs font-normal text-slate-400">
+                            <span className="ml-1 text-xs font-normal text-text-muted">
                               Optional
                             </span>
                           </label>
 
                           <div className="flex">
-                            <span className="flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm text-slate-500">
+                            <span className="flex items-center rounded-l-lg border border-r-0 border-border-strong bg-surface-muted px-3 text-sm text-text-secondary">
                               {currencySymbol}
                             </span>
 
@@ -879,7 +879,7 @@ export default function OnboardingPage() {
                                 )
                               }
                               placeholder="0.00"
-                              className="w-full rounded-r-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-r-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
                           </div>
                         </div>
@@ -887,16 +887,16 @@ export default function OnboardingPage() {
                         <div>
                           <label
                             htmlFor={`product-packaging-${index}`}
-                            className="mb-1.5 block text-sm font-semibold text-slate-700"
+                            className="mb-1.5 block text-sm font-semibold text-text-secondary"
                           >
                             Packaging cost
-                            <span className="ml-1 text-xs font-normal text-slate-400">
+                            <span className="ml-1 text-xs font-normal text-text-muted">
                               Optional
                             </span>
                           </label>
 
                           <div className="flex">
-                            <span className="flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm text-slate-500">
+                            <span className="flex items-center rounded-l-lg border border-r-0 border-border-strong bg-surface-muted px-3 text-sm text-text-secondary">
                               {currencySymbol}
                             </span>
 
@@ -914,7 +914,7 @@ export default function OnboardingPage() {
                                 )
                               }
                               placeholder="0.00"
-                              className="w-full rounded-r-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-r-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
                           </div>
                         </div>
@@ -922,16 +922,16 @@ export default function OnboardingPage() {
                         <div>
                           <label
                             htmlFor={`product-variable-cost-${index}`}
-                            className="mb-1.5 block text-sm font-semibold text-slate-700"
+                            className="mb-1.5 block text-sm font-semibold text-text-secondary"
                           >
                             Other variable cost
-                            <span className="ml-1 text-xs font-normal text-slate-400">
+                            <span className="ml-1 text-xs font-normal text-text-muted">
                               Optional
                             </span>
                           </label>
 
                           <div className="flex">
-                            <span className="flex items-center rounded-l-lg border border-r-0 border-slate-300 bg-slate-50 px-3 text-sm text-slate-500">
+                            <span className="flex items-center rounded-l-lg border border-r-0 border-border-strong bg-surface-muted px-3 text-sm text-text-secondary">
                               {currencySymbol}
                             </span>
 
@@ -949,7 +949,7 @@ export default function OnboardingPage() {
                                 )
                               }
                               placeholder="0.00"
-                              className="w-full rounded-r-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                              className="w-full rounded-r-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             />
                           </div>
                         </div>
@@ -963,7 +963,7 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={addProduct}
-              className="mt-5 w-full rounded-lg border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              className="mt-5 w-full rounded-lg border border-dashed border-border-strong bg-surface-raised px-4 py-3 text-sm font-semibold text-text-secondary transition hover:border-slate-400 hover:bg-surface-muted"
             >
               + Add product / service
             </button>
@@ -974,14 +974,14 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="mt-8 flex justify-between border-t border-slate-100 pt-6">
+            <div className="mt-8 flex justify-between border-t border-border pt-6">
               <button
                 type="button"
                 onClick={() => {
                   setError("");
                   setStep(3);
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-border-strong bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted"
               >
                 Back
               </button>
@@ -996,7 +996,7 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-text-muted">
             Products can also be added or changed later.
           </p>
         </div>
@@ -1009,35 +1009,35 @@ export default function OnboardingPage() {
    */
   if (step === 3) {
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-12">
+      <main className="min-h-screen bg-surface-muted px-6 py-12">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8">
             <div className="mb-3 text-xs font-bold uppercase tracking-wider text-blue-600">
               Business Setup
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
               Tell us about your business
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">
               Your country and currency settings have been saved temporarily.
               Nothing has been created in the database yet.
             </p>
           </div>
 
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-xl border border-border bg-surface-raised p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 Step 3 of 5
               </span>
 
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs font-medium text-text-secondary">
                 Founder Assessment
               </span>
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
               <div
                 className="h-full bg-blue-600"
                 style={{ width: "60%" }}
@@ -1045,25 +1045,25 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-text-primary">
                 Where is your business today?
               </h2>
 
-              <p className="mt-1 text-sm leading-6 text-slate-500">
+              <p className="mt-1 text-sm leading-6 text-text-secondary">
                 Select the stage that best describes where you believe your
                 business currently stands.
               </p>
             </div>
 
             <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-sm font-semibold text-text-primary">
                 This is your assessment — not the BOS&apos;s final
                 determination.
               </p>
 
-              <p className="mt-1 text-xs leading-5 text-slate-600">
+              <p className="mt-1 text-xs leading-5 text-text-secondary">
                 The BOS will separately evaluate your actual business data and
                 stage requirements. Your assessment is recorded for context.
               </p>
@@ -1084,7 +1084,7 @@ export default function OnboardingPage() {
                     className={`w-full rounded-xl border p-4 text-left transition ${
                       selected
                         ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        : "border-border bg-surface-raised hover:border-border-strong hover:bg-surface-muted"
                     }`}
                   >
                     <div className="flex items-start gap-4">
@@ -1092,7 +1092,7 @@ export default function OnboardingPage() {
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                           selected
                             ? "bg-blue-600 text-white"
-                            : "bg-slate-100 text-slate-600"
+                            : "bg-surface-muted text-text-secondary"
                         }`}
                       >
                         {stage.id}
@@ -1100,7 +1100,7 @@ export default function OnboardingPage() {
 
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-sm font-bold text-slate-900">
+                          <h3 className="text-sm font-bold text-text-primary">
                             {stage.name}
                           </h3>
 
@@ -1108,12 +1108,12 @@ export default function OnboardingPage() {
                             className={`h-4 w-4 rounded-full border-2 ${
                               selected
                                 ? "border-blue-600 bg-blue-600"
-                                : "border-slate-300 bg-white"
+                                : "border-border-strong bg-surface-raised"
                             }`}
                           />
                         </div>
 
-                        <p className="mt-1 text-sm leading-5 text-slate-500">
+                        <p className="mt-1 text-sm leading-5 text-text-secondary">
                           {stage.description}
                         </p>
                       </div>
@@ -1129,14 +1129,14 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="mt-8 flex justify-between border-t border-slate-100 pt-6">
+            <div className="mt-8 flex justify-between border-t border-border pt-6">
               <button
                 type="button"
                 onClick={() => {
                   setError("");
                   setStep(2);
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-border-strong bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted"
               >
                 Back
               </button>
@@ -1151,7 +1151,7 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-text-muted">
             Your business will only be created after you complete onboarding.
           </p>
         </div>
@@ -1164,35 +1164,35 @@ export default function OnboardingPage() {
    */
   if (step === 2) {
     return (
-      <main className="min-h-screen bg-slate-50 px-6 py-12">
+      <main className="min-h-screen bg-surface-muted px-6 py-12">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8">
             <div className="mb-3 text-xs font-bold uppercase tracking-wider text-blue-600">
               Business Setup
             </div>
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
               Tell us about your business
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">
               Your business identity has been saved temporarily. Nothing has
               been created in the database yet.
             </p>
           </div>
 
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-6 rounded-xl border border-border bg-surface-raised p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 Step 2 of 5
               </span>
 
-              <span className="text-xs font-medium text-slate-500">
+              <span className="text-xs font-medium text-text-secondary">
                 Country &amp; Currency
               </span>
             </div>
 
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
               <div
                 className="h-full bg-blue-600"
                 style={{ width: "40%" }}
@@ -1200,24 +1200,24 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-text-primary">
                 Country &amp; currency
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-text-secondary">
                 We&apos;ll use these settings for financial and commercial
                 information throughout the BOS.
               </p>
             </div>
 
             <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-sm font-semibold text-text-primary">
                 {businessName}
               </p>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 {industry}
                 {constitution ? ` · ${constitution}` : ""}
               </p>
@@ -1227,7 +1227,7 @@ export default function OnboardingPage() {
               <div>
                 <label
                   htmlFor="country"
-                  className="mb-1.5 block text-sm font-semibold text-slate-700"
+                  className="mb-1.5 block text-sm font-semibold text-text-secondary"
                 >
                   Country
                   <span className="ml-1 text-red-500">*</span>
@@ -1239,7 +1239,7 @@ export default function OnboardingPage() {
                   onChange={(event) =>
                     handleCountryChange(event.target.value)
                   }
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 >
                   <option value="">Select your country</option>
 
@@ -1255,25 +1255,25 @@ export default function OnboardingPage() {
                 <div>
                   <label
                     htmlFor="currency"
-                    className="mb-1.5 block text-sm font-semibold text-slate-700"
+                    className="mb-1.5 block text-sm font-semibold text-text-secondary"
                   >
                     Currency
                     <span className="ml-1 text-red-500">*</span>
                   </label>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div className="rounded-lg border border-border bg-surface-muted px-4 py-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-text-primary">
                           {currencyName}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-text-secondary">
                           Currency code: {currencyCode}
                         </p>
                       </div>
 
-                      <div className="text-2xl font-semibold text-slate-900">
+                      <div className="text-2xl font-semibold text-text-primary">
                         {currencySymbol}
                       </div>
                     </div>
@@ -1288,14 +1288,14 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            <div className="mt-8 flex justify-between border-t border-slate-100 pt-6">
+            <div className="mt-8 flex justify-between border-t border-border pt-6">
               <button
                 type="button"
                 onClick={() => {
                   setError("");
                   setStep(1);
                 }}
-                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className="rounded-lg border border-border-strong bg-surface-raised px-5 py-2.5 text-sm font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted"
               >
                 Back
               </button>
@@ -1310,7 +1310,7 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-slate-400">
+          <p className="mt-4 text-center text-xs text-text-muted">
             Your business will only be created after you complete onboarding.
           </p>
         </div>
@@ -1322,35 +1322,35 @@ export default function OnboardingPage() {
    * STEP 1 — BUSINESS IDENTITY
    */
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-12">
+    <main className="min-h-screen bg-surface-muted px-6 py-12">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8">
           <div className="mb-3 text-xs font-bold uppercase tracking-wider text-blue-600">
             Business Setup
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-text-primary">
             Tell us about your business
           </h1>
 
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-text-secondary">
             Start with the basics. You can add products, financial data,
             customers, and operational information later.
           </p>
         </div>
 
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-border bg-surface-raised p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
               Step 1 of 5
             </span>
 
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium text-text-secondary">
               Business Identity
             </span>
           </div>
 
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-muted">
             <div
               className="h-full bg-blue-600"
               style={{ width: "20%" }}
@@ -1358,13 +1358,13 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg font-bold text-text-primary">
               Business identity
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-text-secondary">
               These details help the BOS understand what business it is
               managing.
             </p>
@@ -1374,7 +1374,7 @@ export default function OnboardingPage() {
             <div>
               <label
                 htmlFor="businessName"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
+                className="mb-1.5 block text-sm font-semibold text-text-secondary"
               >
                 Business name
                 <span className="ml-1 text-red-500">*</span>
@@ -1386,17 +1386,17 @@ export default function OnboardingPage() {
                 value={businessName}
                 onChange={(event) => setBusinessName(event.target.value)}
                 placeholder="e.g. Pahad Rituals"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
 
             <div>
               <label
                 htmlFor="tagline"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
+                className="mb-1.5 block text-sm font-semibold text-text-secondary"
               >
                 Tagline
-                <span className="ml-1 text-xs font-normal text-slate-400">
+                <span className="ml-1 text-xs font-normal text-text-muted">
                   Optional
                 </span>
               </label>
@@ -1407,17 +1407,17 @@ export default function OnboardingPage() {
                 value={tagline}
                 onChange={(event) => setTagline(event.target.value)}
                 placeholder="A short statement that represents your business"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
 
             <div>
               <label
                 htmlFor="description"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
+                className="mb-1.5 block text-sm font-semibold text-text-secondary"
               >
                 What does your business do?
-                <span className="ml-1 text-xs font-normal text-slate-400">
+                <span className="ml-1 text-xs font-normal text-text-muted">
                   Optional
                 </span>
               </label>
@@ -1428,14 +1428,14 @@ export default function OnboardingPage() {
                 onChange={(event) => setDescription(event.target.value)}
                 rows={4}
                 placeholder="Briefly describe what your business sells or provides."
-                className="w-full resize-none rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full resize-none rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
             </div>
 
             <div>
               <label
                 htmlFor="industry"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
+                className="mb-1.5 block text-sm font-semibold text-text-secondary"
               >
                 Industry
                 <span className="ml-1 text-red-500">*</span>
@@ -1445,7 +1445,7 @@ export default function OnboardingPage() {
                 id="industry"
                 value={industry}
                 onChange={(event) => setIndustry(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="">Select an industry</option>
 
@@ -1460,10 +1460,10 @@ export default function OnboardingPage() {
             <div>
               <label
                 htmlFor="constitution"
-                className="mb-1.5 block text-sm font-semibold text-slate-700"
+                className="mb-1.5 block text-sm font-semibold text-text-secondary"
               >
                 Business type / constitution
-                <span className="ml-1 text-xs font-normal text-slate-400">
+                <span className="ml-1 text-xs font-normal text-text-muted">
                   Optional
                 </span>
               </label>
@@ -1472,7 +1472,7 @@ export default function OnboardingPage() {
                 id="constitution"
                 value={constitution}
                 onChange={(event) => setConstitution(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="">Select business type</option>
 
@@ -1491,7 +1491,7 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
+          <div className="mt-8 flex justify-end border-t border-border pt-6">
             <button
               type="button"
               onClick={handleStepOneContinue}
@@ -1502,7 +1502,7 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        <p className="mt-4 text-center text-xs text-slate-400">
+        <p className="mt-4 text-center text-xs text-text-muted">
           You can add or change business information later from your business
           settings.
         </p>

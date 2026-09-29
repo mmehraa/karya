@@ -30,11 +30,11 @@ export default async function CashFlowPage() {
             Finance Workspace
           </p>
 
-          <h1 className="text-2xl font-semibold tracking-[-0.035em] text-slate-950 sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-[-0.035em] text-text-primary sm:text-3xl">
             Cash flow
           </h1>
 
-          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+          <p className="mt-1.5 max-w-2xl text-sm leading-6 text-text-secondary">
             Track money coming into and leaving
             the business, with every movement tied
             back to its source where possible.

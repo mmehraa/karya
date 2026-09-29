@@ -19,16 +19,16 @@ export function TransactionHistoryTable({
 }: TransactionHistoryTableProps) {
   if (transactions.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+      <div className="rounded-xl border border-border bg-surface-raised p-12 text-center shadow-sm">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-surface-muted text-text-secondary">
           <History className="h-6 w-6" />
         </div>
 
-        <h3 className="mt-4 text-sm font-semibold text-slate-900">
+        <h3 className="mt-4 text-sm font-semibold text-text-primary">
           No Inventory Transactions Recorded
         </h3>
 
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-text-secondary">
           The ledger is currently empty. Record production, restocks, or
           audits to populate the audit log.
         </p>
@@ -41,11 +41,11 @@ export function TransactionHistoryTable({
   );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[950px] border-collapse text-left text-xs">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold text-slate-700">
+            <tr className="border-b border-border bg-surface-muted/75 text-[11px] font-semibold text-text-secondary">
               <th className="px-4 py-3">Timestamp</th>
               <th className="px-4 py-3">Offering</th>
               <th className="px-4 py-3">Event Type</th>
@@ -70,10 +70,10 @@ export function TransactionHistoryTable({
               return (
                 <tr
                   key={transaction.id}
-                  className="transition-colors hover:bg-slate-50/70"
+                  className="transition-colors hover:bg-surface-muted/70"
                 >
                   {/* Timestamp */}
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-[11px] text-slate-500">
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-[11px] text-text-secondary">
                     {new Date(transaction.createdAt).toLocaleString("en-IN", {
                       dateStyle: "medium",
                       timeStyle: "short",
@@ -81,10 +81,10 @@ export function TransactionHistoryTable({
                   </td>
 
                   {/* Offering */}
-                  <td className="px-4 py-3 font-semibold text-slate-900">
+                  <td className="px-4 py-3 font-semibold text-text-primary">
                     {product ? product.name : "Unknown Offering"}
 
-                    <span className="block font-mono text-[10px] font-normal text-slate-400">
+                    <span className="block font-mono text-[10px] font-normal text-text-muted">
                       {product?.sku || transaction.productId}
                     </span>
                   </td>
@@ -116,27 +116,27 @@ export function TransactionHistoryTable({
                   </td>
 
                   {/* Recorded Unit Cost */}
-                  <td className="px-4 py-3 text-right font-medium text-slate-600">
+                  <td className="px-4 py-3 text-right font-medium text-text-secondary">
                     {transaction.unitCost !== null ? (
                       formatINR(transaction.unitCost)
                     ) : (
-                      <span className="font-normal italic text-slate-400">
+                      <span className="font-normal italic text-text-muted">
                         Not recorded
                       </span>
                     )}
                   </td>
 
                   {/* Reference ID */}
-                  <td className="px-4 py-3 font-mono text-slate-600">
+                  <td className="px-4 py-3 font-mono text-text-secondary">
                     {transaction.referenceId || (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-text-muted">-</span>
                     )}
                   </td>
 
                   {/* Sanitized Notes */}
-                  <td className="max-w-xs truncate px-4 py-3 text-slate-500">
+                  <td className="max-w-xs truncate px-4 py-3 text-text-secondary">
                     {sanitizedNotes || (
-                      <span className="text-slate-400">-</span>
+                      <span className="text-text-muted">-</span>
                     )}
                   </td>
                 </tr>
@@ -199,7 +199,7 @@ function getTypeBadge(type: InventoryTransactionType) {
 
     case InventoryTransactionType.INITIAL_STOCK:
       return (
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+        <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
           Initial Stock
         </span>
       );
@@ -213,7 +213,7 @@ function getTypeBadge(type: InventoryTransactionType) {
 
     case InventoryTransactionType.SALE:
       return (
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+        <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
           Direct Sale
         </span>
       );
@@ -234,7 +234,7 @@ function getTypeBadge(type: InventoryTransactionType) {
 
     default:
       return (
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+        <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
           {type}
         </span>
       );

@@ -63,21 +63,21 @@ export function StageAdvanceCard({
             Gate Unlocked
           </div>
 
-          <h3 className="text-lg font-bold tracking-tight text-slate-900">
+          <h3 className="text-lg font-bold tracking-tight text-text-primary">
             Confirm Stage Advancement
           </h3>
 
-          <p className="text-xs text-slate-600 max-w-xl">
+          <p className="text-xs text-text-secondary max-w-xl">
             All mandatory gate criteria for Stage {currentStageId} ({currentStageName}) are satisfied.
             Advancing will officially transition the business to Stage {nextStageId} and record an immutable audit entry.
           </p>
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-right text-xs shadow-sm">
-          <span className="block text-slate-400 font-medium uppercase tracking-wider text-[10px]">
+        <div className="rounded-lg border border-border bg-surface-raised px-3 py-2 text-right text-xs shadow-sm">
+          <span className="block text-text-muted font-medium uppercase tracking-wider text-[10px]">
             Target Transition
           </span>
-          <span className="font-bold text-slate-900">
+          <span className="font-bold text-text-primary">
             Stage {currentStageId} → Stage {nextStageId}
           </span>
         </div>
@@ -95,11 +95,11 @@ export function StageAdvanceCard({
           <div className="flex items-center justify-between">
             <label
               htmlFor="advancement-reason"
-              className="text-xs font-semibold text-slate-700"
+              className="text-xs font-semibold text-text-secondary"
             >
               Advancement Audit Rationale *
             </label>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-text-muted">
               {reason.trim().length} / 500 (min 10 chars)
             </span>
           </div>
@@ -114,7 +114,7 @@ export function StageAdvanceCard({
             }}
             disabled={isPending}
             placeholder="Record the operational rationale and verification notes for advancing this stage..."
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:opacity-50"
+            className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm placeholder:text-text-muted focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:opacity-50"
           />
         </div>
 

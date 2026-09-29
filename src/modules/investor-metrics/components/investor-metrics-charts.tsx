@@ -86,8 +86,8 @@ function ColumnChart({
 }) {
   if (items.length === 0) {
     return (
-      <div className="flex min-h-[230px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-        <p className="max-w-xs text-xs leading-5 text-slate-500">
+      <div className="flex min-h-[230px] items-center justify-center rounded-2xl border border-dashed border-border bg-surface-muted px-6 text-center">
+        <p className="max-w-xs text-xs leading-5 text-text-secondary">
           Not enough recorded data to visualize these metrics for the
           selected period.
         </p>
@@ -259,11 +259,11 @@ function ChartCard({
   const total = items.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <article className="min-w-0 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+    <article className="min-w-0 overflow-hidden rounded-[24px] border border-border bg-surface-raised shadow-sm">
       <div className="flex items-start justify-between gap-3 p-5 pb-1 sm:p-6 sm:pb-1">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-slate-950">{title}</h3>
-          <p className="mt-1 text-xs leading-5 text-slate-500">{subtitle}</p>
+          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+          <p className="mt-1 text-xs leading-5 text-text-secondary">{subtitle}</p>
         </div>
         <span
           className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
@@ -276,16 +276,16 @@ function ChartCard({
       </div>
 
       {items.length > 0 && (
-        <div className="mx-5 mb-5 rounded-xl bg-slate-50 px-4 py-3 sm:mx-6">
+        <div className="mx-5 mb-5 rounded-xl bg-surface-muted px-4 py-3 sm:mx-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
               Combined displayed values
             </span>
-            <span className="text-sm font-bold tabular-nums text-slate-900">
+            <span className="text-sm font-bold tabular-nums text-text-primary">
               {formatCurrency(total, currencyCode)}
             </span>
           </div>
-          <p className="mt-1 text-[10px] leading-4 text-slate-400">
+          <p className="mt-1 text-[10px] leading-4 text-text-muted">
             A simple sum of the plotted values, not an accounting subtotal.
           </p>
         </div>
@@ -349,16 +349,16 @@ export default function InvestorMetricsCharts({
             </svg>
           </span>
           <div>
-            <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+            <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
               Financial visualizations
             </h2>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
+            <p className="mt-1 text-xs leading-5 text-text-secondary">
               Explore how the selected period&apos;s financial metrics compare.
             </p>
           </div>
         </div>
 
-        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-medium text-slate-500">
+        <span className="rounded-full border border-border bg-surface-raised px-3 py-1.5 text-[10px] font-medium text-text-secondary">
           Selected period · No fabricated trends
         </span>
       </div>
@@ -381,7 +381,7 @@ export default function InvestorMetricsCharts({
         />
       </div>
 
-      <p className="mt-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-[10px] leading-5 text-slate-500">
+      <p className="mt-3 rounded-xl border border-border bg-surface-raised px-4 py-3 text-[10px] leading-5 text-text-secondary">
         These charts compare period totals, not monthly performance. Earned
         revenue and paid collections are distinct measures; gross profit,
         expenses, and ledger cash movement are displayed separately and should

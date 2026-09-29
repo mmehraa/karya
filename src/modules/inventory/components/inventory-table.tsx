@@ -25,16 +25,16 @@ export function InventoryTable({
 }: InventoryTableProps) {
   if (products.length === 0) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+      <div className="rounded-2xl border border-border bg-surface-raised p-8 text-center shadow-sm sm:p-12">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-surface-muted text-text-secondary">
           <Package className="h-6 w-6" />
         </div>
 
-        <h3 className="mt-4 text-sm font-semibold text-slate-900">
+        <h3 className="mt-4 text-sm font-semibold text-text-primary">
           No Products in Inventory
         </h3>
 
-        <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-500">
+        <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-text-secondary">
           Add products first, then record opening stock, production runs, or
           purchase restocks to begin tracking inventory.
         </p>
@@ -43,14 +43,14 @@ export function InventoryTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 bg-slate-50/60 px-5 py-4">
+    <div className="overflow-hidden overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
+      <div className="border-b border-border bg-surface-muted/50 px-3 py-3 sm:px-5">
         <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-semibold text-text-primary">
             Stock by Offering
           </h2>
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-text-secondary">
             Physical inventory, promotional allocation, and stock available
             for normal sales.
           </p>
@@ -58,104 +58,104 @@ export function InventoryTable({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1260px] border-collapse text-left text-xs">
+        <table className="w-full min-w-[1080px] border-collapse text-left text-xs">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50/75 text-[11px] font-semibold text-slate-600">
-              <th className="px-4 py-3.5">Offering</th>
-              <th className="px-4 py-3.5">Category</th>
-              <th className="px-4 py-3.5">Stock Health</th>
+            <tr className="border-b border-border bg-surface-muted/70 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
+              <th className="px-3 py-3">Offering</th>
+              <th className="px-3 py-3">Category</th>
+              <th className="px-3 py-3">Stock Health</th>
 
-              <th className="px-4 py-3.5 text-right">
+              <th className="px-3 py-3 text-right">
                 Physical
               </th>
 
-              <th className="px-4 py-3.5 text-right">
+              <th className="px-3 py-3 text-right">
                 Promotional
               </th>
 
-              <th className="px-4 py-3.5 text-right">
+              <th className="px-3 py-3 text-right">
                 Available
               </th>
 
-              <th className="px-4 py-3.5 text-right">
+              <th className="px-3 py-3 text-right">
                 Reorder Threshold
               </th>
 
-              <th className="px-4 py-3.5 text-right">
+              <th className="px-3 py-3 text-right">
                 COGS
               </th>
 
-              <th className="px-4 py-3.5 text-right">
+              <th className="px-3 py-3 text-right">
                 Stock Valuation
               </th>
 
-              <th className="px-4 py-3.5 text-center">
+              <th className="px-3 py-3 text-center">
                 Actions
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border/70">
             {products.map((product) => (
               <tr
                 key={product.id}
-                className="transition-colors hover:bg-slate-50/60"
+                className="transition-colors hover:bg-surface-muted/50"
               >
                 {/* Offering */}
-                <td className="px-4 py-4">
-                  <div className="min-w-[190px]">
-                    <p className="font-semibold text-slate-900">
+                <td className="px-3 py-3">
+                  <div className="min-w-[160px]">
+                    <p className="font-semibold text-text-primary">
                       {product.name}
                     </p>
 
-                    <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-slate-400">
+                    <p className="mt-0.5 font-mono text-[10px] uppercase tracking-wide text-text-muted">
                       {product.sku}
                     </p>
                   </div>
                 </td>
 
                 {/* Category */}
-                <td className="px-4 py-4">
-                  <span className="text-slate-600">
+                <td className="px-3 py-3">
+                  <span className="text-text-secondary">
                     {product.category}
                   </span>
                 </td>
 
                 {/* Stock Health */}
-                <td className="px-4 py-4">
+                <td className="px-3 py-3">
                   {getStockBadge(product.stockStatus)}
                 </td>
 
                 {/* Physical Stock */}
-                <td className="px-4 py-4 text-right">
-                  <span className="font-semibold text-slate-900">
+                <td className="px-3 py-3 text-right">
+                  <span className="font-semibold text-text-primary">
                     {product.currentStock}
                   </span>
 
-                  <span className="ml-1 text-[10px] text-slate-400">
+                  <span className="ml-1 text-[10px] text-text-muted">
                     units
                   </span>
                 </td>
 
                 {/* Promotional Stock */}
-                <td className="px-4 py-4 text-right">
+                <td className="px-3 py-3 text-right">
                   {product.promotionalStock > 0 ? (
                     <span className="font-semibold text-violet-700">
                       {product.promotionalStock}
                     </span>
                   ) : (
-                    <span className="text-slate-400">
+                    <span className="text-text-muted">
                       0
                     </span>
                   )}
 
-                  <span className="ml-1 text-[10px] text-slate-400">
+                  <span className="ml-1 text-[10px] text-text-muted">
                     units
                   </span>
                 </td>
 
                 {/* Available Stock */}
-                <td className="px-4 py-4 text-right">
+                <td className="px-3 py-3 text-right">
                   <span
                     className={
                       product.availableStock <= 0
@@ -166,47 +166,47 @@ export function InventoryTable({
                     {product.availableStock}
                   </span>
 
-                  <span className="ml-1 text-[10px] text-slate-400">
+                  <span className="ml-1 text-[10px] text-text-muted">
                     units
                   </span>
                 </td>
 
                 {/* Reorder Threshold */}
-                <td className="px-4 py-4 text-right text-slate-600">
+                <td className="px-3 py-3 text-right text-text-secondary">
                   {product.reorderLevel}
                 </td>
 
                 {/* COGS */}
-                <td className="px-4 py-4 text-right font-medium text-slate-700">
+                <td className="px-3 py-3 text-right font-medium text-text-secondary">
                   {product.cogs !== null ? (
                     formatINR(product.cogs)
                   ) : (
-                    <span className="font-normal italic text-slate-400">
+                    <span className="font-normal italic text-text-muted">
                       Not recorded
                     </span>
                   )}
                 </td>
 
                 {/* Stock Valuation */}
-                <td className="px-4 py-4 text-right font-semibold text-slate-900">
+                <td className="px-3 py-3 text-right font-semibold text-text-primary">
                   {product.valuation !== null ? (
                     formatINR(product.valuation)
                   ) : (
-                    <span className="font-normal italic text-slate-400">
+                    <span className="font-normal italic text-text-muted">
                       Not recorded
                     </span>
                   )}
                 </td>
 
                 {/* Actions */}
-                <td className="px-4 py-4">
-                  <div className="flex min-w-[170px] flex-col items-stretch gap-1.5">
+                <td className="px-3 py-3">
+                  <div className="flex min-w-[150px] flex-col items-stretch gap-1.5">
                     <button
                       type="button"
                       onClick={() =>
                         onOpenMovementModal(product.id)
                       }
-                      className="inline-flex items-center justify-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
+                      className="inline-flex items-center justify-center gap-1 rounded-lg border border-border bg-surface-raised px-2.5 py-2 text-[11px] font-semibold text-text-primary shadow-sm transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
                     >
                       <PlusCircle className="h-3.5 w-3.5 text-blue-600" />
                       Move Stock
@@ -217,7 +217,7 @@ export function InventoryTable({
                       onClick={() =>
                         onOpenPromotionalModal(product.id)
                       }
-                      className="inline-flex items-center justify-center gap-1 rounded-md border border-violet-200 bg-violet-50/50 px-2.5 py-1.5 text-xs font-semibold text-violet-700 shadow-sm transition-colors hover:bg-violet-50 hover:text-violet-800"
+                      className="inline-flex items-center justify-center gap-1 rounded-lg border border-violet-200 bg-violet-50/60 px-2.5 py-2 text-[11px] font-semibold text-violet-800 shadow-sm transition-colors hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-1"
                     >
                       <Gift className="h-3.5 w-3.5" />
                       Promo Stock
@@ -231,10 +231,10 @@ export function InventoryTable({
       </div>
 
       {/* Stock terminology */}
-      <div className="border-t border-slate-100 bg-slate-50/40 px-5 py-3">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] text-slate-500">
+      <div className="border-t border-border bg-surface-muted/40 px-4 py-3 sm:px-5">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] leading-4 text-text-secondary">
           <span>
-            <strong className="font-semibold text-slate-700">
+            <strong className="font-semibold text-text-secondary">
               Physical
             </strong>{" "}
             = all units physically held

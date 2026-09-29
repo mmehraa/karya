@@ -72,7 +72,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
   };
 
   return (
-    <div className="p-5 transition-colors hover:bg-slate-50/80">
+    <div className="p-5 transition-colors hover:bg-surface-muted/80">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         {/* Left: Icon & Description */}
         <div className="flex items-start gap-3">
@@ -80,7 +80,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
 
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h4 className="text-sm font-semibold text-slate-900">
+              <h4 className="text-sm font-semibold text-text-primary">
                 {requirement.title}
               </h4>
 
@@ -88,7 +88,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
               {getEvalBadge(requirement.evalMode)}
             </div>
 
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-text-secondary">
               {requirement.description}
             </p>
 
@@ -103,7 +103,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
 
             {/* Display Notes if present */}
             {requirement.notes && (
-              <p className="mt-1 text-xs italic text-slate-500">
+              <p className="mt-1 text-xs italic text-text-secondary">
                 Note: {requirement.notes}
               </p>
             )}
@@ -124,14 +124,14 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
                 }
               }}
               disabled={isPending}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-100 disabled:opacity-50"
+              className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface-raised px-2.5 py-1 text-xs font-medium text-text-secondary shadow-sm transition-colors hover:bg-surface-muted disabled:opacity-50"
             >
-              <Edit3 className="h-3.5 w-3.5 text-slate-500" />
+              <Edit3 className="h-3.5 w-3.5 text-text-secondary" />
               {isEditing ? "Close" : "Update"}
             </button>
           ) : (
             <span
-              className="text-[11px] text-slate-400 italic"
+              className="text-[11px] text-text-muted italic"
               title="This requirement is evaluated automatically by system checks"
             >
               Automated
@@ -142,15 +142,15 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
 
       {/* Edit Form Drawer / Panel */}
       {isEditing && (
-        <div className="mt-4 space-y-4 rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
+        <div className="mt-4 space-y-4 rounded-lg border border-border bg-surface-muted/50 p-4">
+          <div className="flex items-center justify-between border-b border-border pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-text-secondary">
               Manage Requirement Status
             </span>
 
             <button
               onClick={handleCancel}
-              className="text-slate-400 hover:text-slate-600"
+              className="text-text-muted hover:text-text-secondary"
             >
               <X className="h-4 w-4" />
             </button>
@@ -165,7 +165,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Status Selector */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700">
+              <label className="block text-xs font-semibold text-text-secondary">
                 Status
               </label>
 
@@ -175,7 +175,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
                   setStatus(e.target.value as RequirementStatus)
                 }
                 disabled={isPending}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-primary shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value={RequirementStatus.NOT_STARTED}>
                   Not Started
@@ -205,7 +205,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
                   onChange={(e) => setBlockerReason(e.target.value)}
                   placeholder="Why is this blocked?"
                   disabled={isPending}
-                  className="w-full rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs text-slate-800 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                  className="w-full rounded-lg border border-red-300 bg-surface-raised px-3 py-1.5 text-xs text-text-primary shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                 />
               </div>
             )}
@@ -213,7 +213,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
 
           {/* Founder Notes */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700">
+            <label className="block text-xs font-semibold text-text-secondary">
               Founder Notes (Optional)
             </label>
 
@@ -223,7 +223,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
               placeholder="Add context, external document links, or progress remarks..."
               rows={2}
               disabled={isPending}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-xs text-text-primary shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
@@ -233,7 +233,7 @@ export function RequirementRow({ requirement }: RequirementRowProps) {
               type="button"
               onClick={handleCancel}
               disabled={isPending}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              className="rounded-lg border border-border-strong bg-surface-raised px-3 py-1.5 text-xs font-medium text-text-secondary shadow-sm hover:bg-surface-muted"
             >
               Cancel
             </button>
@@ -280,7 +280,7 @@ function getStatusIcon(status: RequirementStatus) {
 
     case RequirementStatus.NOT_STARTED:
     default:
-      return <MinusCircle className="h-5 w-5 text-slate-300" />;
+      return <MinusCircle className="h-5 w-5 text-text-muted" />;
   }
 }
 
@@ -310,7 +310,7 @@ function getStatusBadge(status: RequirementStatus) {
     case RequirementStatus.NOT_STARTED:
     default:
       return (
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+        <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-medium text-text-secondary">
           Not Started
         </span>
       );
@@ -335,7 +335,7 @@ function getTypeBadge(type: RequirementType) {
 
     case RequirementType.OPTIONAL:
       return (
-        <span className="rounded border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+        <span className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-text-secondary">
           Optional
         </span>
       );
@@ -361,7 +361,7 @@ function getEvalBadge(mode: EvaluationMode) {
     case EvaluationMode.MANUAL:
     default:
       return (
-        <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+        <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-text-secondary">
           Manual
         </span>
       );

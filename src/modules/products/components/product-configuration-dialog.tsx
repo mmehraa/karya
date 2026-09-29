@@ -969,14 +969,14 @@ export function ProductConfigurationDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-900/50 p-2 backdrop-blur-sm sm:p-3"
       role="dialog"
       aria-modal="true"
       aria-labelledby="product-configuration-title"
     >
-      <div className="my-8 flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="my-0 flex max-h-[calc(100dvh-1rem)] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl sm:max-h-[calc(100dvh-1.5rem)]">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+        <div className="flex shrink-0 items-start justify-between border-b border-border px-4 py-3 sm:px-5">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
               Product Configuration
@@ -984,12 +984,12 @@ export function ProductConfigurationDialog({
 
             <h2
               id="product-configuration-title"
-              className="mt-1 text-lg font-semibold tracking-[-0.025em] text-slate-950"
+              className="mt-1 text-lg font-semibold tracking-[-0.025em] text-text-primary"
             >
               {product.name}
             </h2>
 
-            <p className="mt-1 font-mono text-[10px] text-slate-400">
+            <p className="mt-1 font-mono text-[10px] text-text-muted">
               {product.sku}
             </p>
           </div>
@@ -998,7 +998,7 @@ export function ProductConfigurationDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+            className="rounded-lg p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-secondary disabled:opacity-50"
             aria-label="Close configuration"
           >
             <X className="h-5 w-5" />
@@ -1006,7 +1006,7 @@ export function ProductConfigurationDialog({
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-slate-100 px-6">
+        <div className="shrink-0 border-b border-border px-4 sm:px-5">
           <div className="flex gap-6">
             <button
               type="button"
@@ -1015,10 +1015,10 @@ export function ProductConfigurationDialog({
                 setError(null);
                 setSuccessMessage(null);
               }}
-              className={`border-b-2 py-3 text-xs font-semibold transition ${
+              className={`border-b-2 py-2 text-xs font-semibold transition ${
                 activeTab === "formulation"
-                  ? "border-slate-950 text-slate-950"
-                  : "border-transparent text-slate-400 hover:text-slate-700"
+                  ? "border-slate-950 text-text-primary"
+                  : "border-transparent text-text-muted hover:text-text-secondary"
               }`}
             >
               <span className="inline-flex items-center gap-1.5">
@@ -1034,10 +1034,10 @@ export function ProductConfigurationDialog({
                 setError(null);
                 setSuccessMessage(null);
               }}
-              className={`border-b-2 py-3 text-xs font-semibold transition ${
+              className={`border-b-2 py-2 text-xs font-semibold transition ${
                 activeTab === "packaging"
-                  ? "border-slate-950 text-slate-950"
-                  : "border-transparent text-slate-400 hover:text-slate-700"
+                  ? "border-slate-950 text-text-primary"
+                  : "border-transparent text-text-muted hover:text-text-secondary"
               }`}
             >
               <span className="inline-flex items-center gap-1.5">
@@ -1049,16 +1049,16 @@ export function ProductConfigurationDialog({
         </div>
 
         {/* Content */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
           {isLoading ? (
             <div className="flex min-h-[360px] items-center justify-center">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-text-secondary">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading product configuration...
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {error && (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
                   {error}
@@ -1165,8 +1165,8 @@ export function ProductConfigurationDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-          <p className="text-[10px] leading-4 text-slate-400">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border px-4 py-3 sm:px-5">
+          <p className="text-[10px] leading-4 text-text-muted">
             Creating a new version does not consume
             inventory. Costs are always calculated from
             current inventory weighted-average costs.
@@ -1176,7 +1176,7 @@ export function ProductConfigurationDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-border bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted disabled:opacity-50"
           >
             Close
           </button>
@@ -1240,7 +1240,7 @@ function FormulationWorkspace({
   ) => void;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeading
         eyebrow="Active configuration"
         title="Current formulation"
@@ -1248,14 +1248,14 @@ function FormulationWorkspace({
       />
 
       {activeFormulation ? (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+        <div className="overflow-hidden rounded-xl border border-border">
+          <div className="flex items-center justify-between border-b border-border bg-surface-muted/60 px-4 py-3">
             <div>
-              <p className="text-xs font-semibold text-slate-900">
+              <p className="text-xs font-semibold text-text-primary">
                 {activeFormulation.name}
               </p>
 
-              <p className="mt-0.5 text-[10px] text-slate-400">
+              <p className="mt-0.5 text-[10px] text-text-muted">
                 Version{" "}
                 {activeFormulation.version}{" "}
                 · Active
@@ -1263,11 +1263,11 @@ function FormulationWorkspace({
             </div>
 
             <div className="text-right">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-text-muted">
                 Cost / unit
               </p>
 
-              <p className="mt-0.5 text-sm font-bold text-slate-900">
+              <p className="mt-0.5 text-sm font-bold text-text-primary">
                 {formatINR(
                   activeFormulation.totalRawMaterialCost
                 )}
@@ -1303,7 +1303,7 @@ function FormulationWorkspace({
         />
       )}
 
-      <div className="border-t border-slate-100 pt-6">
+      <div className="border-t border-border pt-6">
         <SectionHeading
           eyebrow={
             activeFormulation
@@ -1318,7 +1318,7 @@ function FormulationWorkspace({
           description="Saving creates a new version and makes it the active formulation."
         />
 
-        <div className="mt-4 space-y-4">
+        <div className="mt-3 space-y-3">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               label="Formulation name"
@@ -1327,12 +1327,12 @@ function FormulationWorkspace({
               placeholder="Default Formulation"
             />
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <div className="rounded-lg border border-border bg-surface-muted px-3 py-2.5">
+              <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Current calculated cost
               </span>
 
-              <span className="mt-1 block text-sm font-bold text-slate-900">
+              <span className="mt-1 block text-sm font-bold text-text-primary">
                 {formatINR(previewCost)}
               </span>
             </div>
@@ -1345,8 +1345,8 @@ function FormulationWorkspace({
             placeholder="Optional notes about this formulation"
           />
 
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <div className="grid grid-cols-[minmax(0,1fr)_120px_80px] gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <div className="overflow-hidden rounded-xl border border-border">
+            <div className="grid grid-cols-[minmax(0,1fr)_120px_80px] gap-3 border-b border-border bg-surface-muted/60 px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-text-muted">
               <span>Raw material</span>
               <span>Qty / unit</span>
               <span />
@@ -1378,7 +1378,7 @@ function FormulationWorkspace({
                             event.target.value
                           )
                         }
-                        className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-slate-400"
+                        className="h-9 rounded-lg border border-border bg-surface-raised px-3 text-xs text-text-secondary outline-none transition focus:border-slate-400"
                       >
                         <option value="">
                           Select raw material
@@ -1414,12 +1414,12 @@ function FormulationWorkspace({
                           )
                         }
                         placeholder="0"
-                        className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-slate-400"
+                        className="h-9 rounded-lg border border-border bg-surface-raised px-3 text-xs text-text-secondary outline-none transition focus:border-slate-400"
                       />
 
                       <div className="flex items-center justify-end gap-2">
                         {material && (
-                          <span className="text-[9px] text-slate-400">
+                          <span className="text-[9px] text-text-muted">
                             {formatINR(
                               material.weightedAverageCost
                             )}
@@ -1436,7 +1436,7 @@ function FormulationWorkspace({
                               1 ||
                             isPending
                           }
-                          className="rounded-lg p-2 text-slate-300 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg p-2 text-text-muted transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
                           aria-label="Remove raw material"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -1448,12 +1448,12 @@ function FormulationWorkspace({
               )}
             </div>
 
-            <div className="border-t border-slate-100 px-4 py-3">
+            <div className="border-t border-border px-4 py-3">
               <button
                 type="button"
                 onClick={onAddRow}
                 disabled={isPending}
-                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-600 transition hover:text-slate-950 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-text-secondary transition hover:text-text-primary disabled:opacity-50"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add raw material
@@ -1565,7 +1565,7 @@ function PackagingWorkspace({
   ) => void;
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <SectionHeading
         eyebrow="Active configuration"
         title="Current packaging"
@@ -1573,14 +1573,14 @@ function PackagingWorkspace({
       />
 
       {activePackaging ? (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-4 py-3">
+        <div className="overflow-hidden rounded-xl border border-border">
+          <div className="flex items-center justify-between border-b border-border bg-surface-muted/60 px-4 py-3">
             <div>
-              <p className="text-xs font-semibold text-slate-900">
+              <p className="text-xs font-semibold text-text-primary">
                 {activePackaging.name}
               </p>
 
-              <p className="mt-0.5 text-[10px] text-slate-400">
+              <p className="mt-0.5 text-[10px] text-text-muted">
                 Version{" "}
                 {activePackaging.version}{" "}
                 · Active
@@ -1588,11 +1588,11 @@ function PackagingWorkspace({
             </div>
 
             <div className="text-right">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-text-muted">
                 Cost / unit
               </p>
 
-              <p className="mt-0.5 text-sm font-bold text-slate-900">
+              <p className="mt-0.5 text-sm font-bold text-text-primary">
                 {formatINR(
                   activePackaging.totalPackagingCost
                 )}
@@ -1628,7 +1628,7 @@ function PackagingWorkspace({
         />
       )}
 
-      <div className="border-t border-slate-100 pt-6">
+      <div className="border-t border-border pt-6">
         <SectionHeading
           eyebrow={
             activePackaging
@@ -1643,7 +1643,7 @@ function PackagingWorkspace({
           description="Saving creates a new version and makes it the active packaging configuration."
         />
 
-        <div className="mt-4 space-y-4">
+        <div className="mt-3 space-y-3">
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               label="Packaging name"
@@ -1652,12 +1652,12 @@ function PackagingWorkspace({
               placeholder="Default Packaging"
             />
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
-              <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <div className="rounded-lg border border-border bg-surface-muted px-3 py-2.5">
+              <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Current calculated cost
               </span>
 
-              <span className="mt-1 block text-sm font-bold text-slate-900">
+              <span className="mt-1 block text-sm font-bold text-text-primary">
                 {formatINR(previewCost)}
               </span>
             </div>
@@ -1670,8 +1670,8 @@ function PackagingWorkspace({
             placeholder="Optional notes about this packaging"
           />
 
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <div className="grid grid-cols-[minmax(0,1fr)_120px_80px] gap-3 border-b border-slate-100 bg-slate-50/60 px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400">
+          <div className="overflow-hidden rounded-xl border border-border">
+            <div className="grid grid-cols-[minmax(0,1fr)_120px_80px] gap-3 border-b border-border bg-surface-muted/60 px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-text-muted">
               <span>Packaging material</span>
               <span>Qty / unit</span>
               <span />
@@ -1703,7 +1703,7 @@ function PackagingWorkspace({
                             event.target.value
                           )
                         }
-                        className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-slate-400"
+                        className="h-9 rounded-lg border border-border bg-surface-raised px-3 text-xs text-text-secondary outline-none transition focus:border-slate-400"
                       >
                         <option value="">
                           Select packaging material
@@ -1738,12 +1738,12 @@ function PackagingWorkspace({
                           )
                         }
                         placeholder="0"
-                        className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-slate-400"
+                        className="h-9 rounded-lg border border-border bg-surface-raised px-3 text-xs text-text-secondary outline-none transition focus:border-slate-400"
                       />
 
                       <div className="flex items-center justify-end gap-2">
                         {material && (
-                          <span className="text-[9px] text-slate-400">
+                          <span className="text-[9px] text-text-muted">
                             {formatINR(
                               material.weightedAverageCost
                             )}
@@ -1760,7 +1760,7 @@ function PackagingWorkspace({
                               1 ||
                             isPending
                           }
-                          className="rounded-lg p-2 text-slate-300 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg p-2 text-text-muted transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
                           aria-label="Remove packaging material"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -1772,12 +1772,12 @@ function PackagingWorkspace({
               )}
             </div>
 
-            <div className="border-t border-slate-100 px-4 py-3">
+            <div className="border-t border-border px-4 py-3">
               <button
                 type="button"
                 onClick={onAddRow}
                 disabled={isPending}
-                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-600 transition hover:text-slate-950 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-text-secondary transition hover:text-text-primary disabled:opacity-50"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add packaging material
@@ -1862,11 +1862,11 @@ function SectionHeading({
         {eyebrow}
       </p>
 
-      <h3 className="mt-1 text-sm font-semibold text-slate-950">
+      <h3 className="mt-1 text-sm font-semibold text-text-primary">
         {title}
       </h3>
 
-      <p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-500">
+      <p className="mt-1 max-w-2xl text-[11px] leading-5 text-text-secondary">
         {description}
       </p>
     </div>
@@ -1884,11 +1884,11 @@ function ConfigurationItemsTable({
     <div className="overflow-x-auto">
       <table className="w-full min-w-[560px] text-left">
         <thead>
-          <tr className="border-b border-slate-100">
+          <tr className="border-b border-border">
             {headers.map((header) => (
               <th
                 key={header}
-                className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400"
+                className="px-4 py-2.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-text-muted"
               >
                 {header}
               </th>
@@ -1903,7 +1903,7 @@ function ConfigurationItemsTable({
                 (value, valueIndex) => (
                   <td
                     key={valueIndex}
-                    className="px-4 py-3 text-[11px] text-slate-600"
+                    className="px-4 py-3 text-[11px] text-text-secondary"
                   >
                     {value}
                   </td>
@@ -1943,11 +1943,11 @@ function VersionHistory({
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-xs font-semibold text-slate-900">
+        <h3 className="text-xs font-semibold text-text-primary">
           {title}
         </h3>
 
-        <span className="text-[10px] text-slate-400">
+        <span className="text-[10px] text-text-muted">
           {versions.length}{" "}
           {versions.length === 1
             ? "version"
@@ -1956,28 +1956,28 @@ function VersionHistory({
       </div>
 
       {versions.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-200 px-4 py-5 text-center text-[10px] text-slate-400">
+        <div className="rounded-lg border border-dashed border-border px-4 py-5 text-center text-[10px] text-text-muted">
           No versions yet.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200">
+        <div className="overflow-hidden rounded-xl border border-border">
           {versions.map((version) => (
             <div
               key={version.id}
-              className="flex items-center justify-between border-b border-slate-100 px-4 py-3 last:border-b-0"
+              className="flex items-center justify-between border-b border-border px-4 py-3 last:border-b-0"
             >
               <div>
-                <p className="text-[11px] font-semibold text-slate-800">
+                <p className="text-[11px] font-semibold text-text-primary">
                   Version {version.version}
                 </p>
 
-                <p className="mt-0.5 text-[10px] text-slate-400">
+                <p className="mt-0.5 text-[10px] text-text-muted">
                   {version.name}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-slate-700">
+                <span className="text-xs font-semibold text-text-secondary">
                   {formatINR(version.cost)}
                 </span>
 
@@ -1993,7 +1993,7 @@ function VersionHistory({
                     onDelete(version)
                   }
                   disabled={isPending}
-                  className="rounded-lg p-2 text-slate-300 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-lg p-2 text-text-muted transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label={`Delete version ${version.version}`}
                   title={`Delete version ${version.version}`}
                 >
@@ -2033,13 +2033,13 @@ function DeleteConfirmationDialog({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
       <div
-        className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-border bg-surface-raised shadow-2xl"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="delete-version-title"
         aria-describedby="delete-version-description"
       >
-        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
+        <div className="flex items-start justify-between border-b border-border px-5 py-4">
           <div>
             <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-red-600">
               Delete version
@@ -2047,7 +2047,7 @@ function DeleteConfirmationDialog({
 
             <h3
               id="delete-version-title"
-              className="mt-1 text-sm font-semibold text-slate-950"
+              className="mt-1 text-sm font-semibold text-text-primary"
             >
               Delete {configurationType}?
             </h3>
@@ -2057,7 +2057,7 @@ function DeleteConfirmationDialog({
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+            className="rounded-lg p-1.5 text-text-muted transition hover:bg-surface-muted hover:text-text-secondary disabled:opacity-50"
             aria-label="Close delete confirmation"
           >
             <X className="h-4 w-4" />
@@ -2065,19 +2065,19 @@ function DeleteConfirmationDialog({
         </div>
 
         <div className="px-5 py-5">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <p className="text-xs font-semibold text-slate-800">
+          <div className="rounded-xl border border-border bg-surface-muted px-4 py-3">
+            <p className="text-xs font-semibold text-text-primary">
               Version {target.version}
             </p>
 
-            <p className="mt-1 text-[10px] text-slate-500">
+            <p className="mt-1 text-[10px] text-text-secondary">
               {target.name}
             </p>
           </div>
 
           <p
             id="delete-version-description"
-            className="mt-4 text-xs leading-5 text-slate-600"
+            className="mt-4 text-xs leading-5 text-text-secondary"
           >
             This will permanently delete this{" "}
             {configurationType} version.
@@ -2107,25 +2107,25 @@ function DeleteConfirmationDialog({
             )}
 
           {!target.isActive && (
-            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-[10px] leading-4 text-slate-500">
+            <div className="mt-3 rounded-lg border border-border bg-surface-muted px-3 py-2.5 text-[10px] leading-4 text-text-secondary">
               The active version will not be changed by
               deleting this inactive version.
             </div>
           )}
 
-          <p className="mt-4 text-[10px] leading-4 text-slate-400">
+          <p className="mt-4 text-[10px] leading-4 text-text-muted">
             Versions already used by a production batch
             cannot be deleted because production history
             must remain intact.
           </p>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-4">
+        <div className="flex justify-end gap-2 border-t border-border px-5 py-4">
           <button
             type="button"
             onClick={onCancel}
             disabled={isPending}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-border bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
           >
             Cancel
           </button>
@@ -2158,12 +2158,12 @@ function EmptyConfiguration({
   description: string;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-5 py-8 text-center">
-      <p className="text-xs font-semibold text-slate-700">
+    <div className="rounded-xl border border-dashed border-border bg-surface-muted/50 px-5 py-8 text-center">
+      <p className="text-xs font-semibold text-text-secondary">
         {title}
       </p>
 
-      <p className="mx-auto mt-1 max-w-md text-[10px] leading-4 text-slate-400">
+      <p className="mx-auto mt-1 max-w-md text-[10px] leading-4 text-text-muted">
         {description}
       </p>
     </div>
@@ -2183,7 +2183,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10px] font-semibold text-slate-600">
+      <span className="mb-1.5 block text-[10px] font-semibold text-text-secondary">
         {label}
       </span>
 
@@ -2194,7 +2194,7 @@ function Field({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-slate-400"
+        className="h-9 w-full rounded-lg border border-border bg-surface-raised px-3 text-xs text-text-secondary outline-none transition placeholder:text-text-muted focus:border-slate-400"
       />
     </label>
   );

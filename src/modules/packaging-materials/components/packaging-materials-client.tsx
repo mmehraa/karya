@@ -167,20 +167,20 @@ export function PackagingMaterialsClient({
           MATERIAL TABLE
       ===================================================== */}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold tracking-[-0.02em] text-slate-950">
+              <h2 className="text-base font-semibold tracking-[-0.02em] text-text-primary">
                 Packaging-material inventory
               </h2>
 
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+              <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
                 {initialMaterials.length}
               </span>
             </div>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-text-secondary">
               Purchases update inventory value and weighted-average cost
               automatically.
             </p>
@@ -208,28 +208,28 @@ export function PackagingMaterialsClient({
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px]">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70 text-left">
-                  <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <tr className="border-b border-border bg-surface-muted/70 text-left">
+                  <th className="px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     Material
                   </th>
 
-                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     Supplier
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     Current Stock
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     Avg. Cost
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     Inventory Value
                   </th>
 
-                  <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                  <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
                     Actions
                   </th>
                 </tr>
@@ -240,35 +240,35 @@ export function PackagingMaterialsClient({
                   (material) => (
                     <tr
                       key={material.id}
-                      className="transition-colors hover:bg-slate-50/60"
+                      className="transition-colors hover:bg-surface-muted/60"
                     >
                       <td className="px-5 py-4">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">
+                          <p className="text-sm font-semibold text-text-primary">
                             {material.name}
                           </p>
 
                           <div className="mt-1 flex items-center gap-2">
                             {material.category && (
-                              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                              <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-text-secondary">
                                 {material.category}
                               </span>
                             )}
 
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-[10px] text-text-muted">
                               Base: pieces
                             </span>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-4 py-4 text-xs text-slate-600">
+                      <td className="px-4 py-4 text-xs text-text-secondary">
                         {material.supplier ||
                           "Not recorded"}
                       </td>
 
                       <td className="px-4 py-4 text-right">
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-text-primary">
                           {formatQuantity(
                             material.currentQuantity,
                           )}
@@ -276,19 +276,19 @@ export function PackagingMaterialsClient({
                       </td>
 
                       <td className="px-4 py-4 text-right">
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-text-primary">
                           {formatUnitCost(
                             material.weightedAverageCost,
                           )}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] text-slate-400">
+                        <p className="mt-0.5 text-[10px] text-text-muted">
                           per piece
                         </p>
                       </td>
 
                       <td className="px-4 py-4 text-right">
-                        <p className="text-sm font-semibold text-slate-900">
+                        <p className="text-sm font-semibold text-text-primary">
                           {formatINR(
                             material.currentValue,
                           )}
@@ -304,7 +304,7 @@ export function PackagingMaterialsClient({
                                 material,
                               )
                             }
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary shadow-sm hover:bg-surface-muted"
                           >
                             <History className="h-3.5 w-3.5" />
                             History
@@ -321,7 +321,7 @@ export function PackagingMaterialsClient({
                               material.currentQuantity <=
                               0
                             }
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-2.5 py-1.5 text-[11px] font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             <MinusCircle className="h-3.5 w-3.5" />
                             Consume
@@ -435,23 +435,23 @@ function SummaryCard({
   icon: typeof Boxes;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-border bg-surface-raised p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-slate-500">
+          <p className="text-xs font-medium text-text-secondary">
             {label}
           </p>
 
-          <p className="mt-2 truncate text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+          <p className="mt-2 truncate text-2xl font-semibold tracking-[-0.04em] text-text-primary">
             {value}
           </p>
 
-          <p className="mt-0.5 text-[11px] text-slate-400">
+          <p className="mt-0.5 text-[11px] text-text-muted">
             {description}
           </p>
         </div>
 
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-text-secondary">
           <Icon className="h-4 w-4" />
         </div>
       </div>
@@ -474,11 +474,11 @@ function EmptyState({
         <Boxes className="h-5 w-5" />
       </div>
 
-      <h3 className="mt-4 text-sm font-semibold text-slate-900">
+      <h3 className="mt-4 text-sm font-semibold text-text-primary">
         No packaging materials yet
       </h3>
 
-      <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
+      <p className="mt-1 max-w-md text-xs leading-5 text-text-secondary">
         Add packaging such as boxes, pouches,
         flash cards, wrapping sheets, labels,
         and other packaging components.
@@ -526,18 +526,18 @@ function DialogShell({
       }}
     >
       <div
-        className={`my-8 w-full ${maxWidth} rounded-xl border border-slate-200 bg-white p-6 shadow-xl`}
+        className={`my-8 w-full ${maxWidth} rounded-xl border border-border bg-surface-raised p-6 shadow-xl`}
         onMouseDown={(event) =>
           event.stopPropagation()
         }
       >
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+        <div className="flex items-start justify-between border-b border-border pb-4">
           <div>
-            <h2 className="text-lg font-bold tracking-tight text-slate-900">
+            <h2 className="text-lg font-bold tracking-tight text-text-primary">
               {title}
             </h2>
 
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-text-secondary">
               {description}
             </p>
           </div>
@@ -545,7 +545,7 @@ function DialogShell({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1 text-text-muted hover:bg-surface-muted hover:text-text-secondary"
             aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
@@ -676,7 +676,7 @@ function AddPackagingMaterialDialog({
         <div className="space-y-1">
           <label
             htmlFor="packaging-material-name"
-            className="block text-xs font-semibold text-slate-700"
+            className="block text-xs font-semibold text-text-secondary"
           >
             Material Name *
           </label>
@@ -690,14 +690,14 @@ function AddPackagingMaterialDialog({
             }
             placeholder="e.g. Tamper-Proof Pouch"
             disabled={isPending}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
           />
         </div>
 
         <div className="space-y-1">
           <label
             htmlFor="packaging-material-category"
-            className="block text-xs font-semibold text-slate-700"
+            className="block text-xs font-semibold text-text-secondary"
           >
             Category
           </label>
@@ -711,14 +711,14 @@ function AddPackagingMaterialDialog({
             }
             placeholder="e.g. Pouches, Boxes, Printing"
             disabled={isPending}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
           />
         </div>
 
         <div className="space-y-1">
           <label
             htmlFor="packaging-material-supplier"
-            className="block text-xs font-semibold text-slate-700"
+            className="block text-xs font-semibold text-text-secondary"
           >
             Supplier
           </label>
@@ -732,20 +732,20 @@ function AddPackagingMaterialDialog({
             }
             placeholder="e.g. ABC Packaging"
             disabled={isPending}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
           />
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        <div className="rounded-xl border border-border bg-surface-muted p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
             Base unit
           </p>
 
-          <p className="mt-1 text-sm font-semibold text-slate-900">
+          <p className="mt-1 text-sm font-semibold text-text-primary">
             Piece
           </p>
 
-          <p className="mt-1 text-[11px] leading-5 text-slate-500">
+          <p className="mt-1 text-[11px] leading-5 text-text-secondary">
             Karya stores packaging inventory in individual
             pieces. You can purchase by pack, box, bundle,
             or carton.
@@ -755,7 +755,7 @@ function AddPackagingMaterialDialog({
         <div className="space-y-1">
           <label
             htmlFor="packaging-material-notes"
-            className="block text-xs font-semibold text-slate-700"
+            className="block text-xs font-semibold text-text-secondary"
           >
             Notes
           </label>
@@ -769,16 +769,16 @@ function AddPackagingMaterialDialog({
             }
             placeholder="Optional notes..."
             disabled={isPending}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+            className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
           />
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+        <div className="flex justify-end gap-3 border-t border-border pt-4">
           <button
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:opacity-50"
           >
             Cancel
           </button>
@@ -1067,14 +1067,14 @@ function PurchasePackagingMaterialDialog({
           </Field>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-xl border border-border bg-surface-muted p-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Total pieces received
               </p>
 
-              <p className="mt-1 text-xl font-semibold tracking-[-0.03em] text-slate-950">
+              <p className="mt-1 text-xl font-semibold tracking-[-0.03em] text-text-primary">
                 {totalPieces > 0
                   ? formatQuantity(
                       totalPieces,
@@ -1084,7 +1084,7 @@ function PurchasePackagingMaterialDialog({
             </div>
 
             <div className="text-right">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Cost per piece
               </p>
 
@@ -1099,7 +1099,7 @@ function PurchasePackagingMaterialDialog({
             </div>
           </div>
 
-          <p className="mt-3 text-[11px] leading-5 text-slate-500">
+          <p className="mt-3 text-[11px] leading-5 text-text-secondary">
             Example: 5 boxes × 100 pieces per box =
             500 pieces. A ₹2,500 purchase would produce
             a ₹5.00 cost per piece.
@@ -1186,7 +1186,7 @@ function PurchasePackagingMaterialDialog({
           </Field>
         </div>
 
-        <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+        <div className="flex justify-end gap-3 border-t border-border pt-4">
           <button
             type="button"
             onClick={onClose}
@@ -1332,14 +1332,14 @@ function ConsumePackagingMaterialDialog({
           <ErrorBox message={error} />
         )}
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-xl border border-border bg-surface-muted p-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <p className={mutedLabelClass}>
                 Available stock
               </p>
 
-              <p className="mt-1 text-lg font-semibold text-slate-950">
+              <p className="mt-1 text-lg font-semibold text-text-primary">
                 {formatQuantity(
                   material.currentQuantity,
                 )}
@@ -1351,7 +1351,7 @@ function ConsumePackagingMaterialDialog({
                 Avg. cost
               </p>
 
-              <p className="mt-1 text-lg font-semibold text-slate-950">
+              <p className="mt-1 text-lg font-semibold text-text-primary">
                 {formatINR(
                   material.weightedAverageCost,
                 )}
@@ -1363,7 +1363,7 @@ function ConsumePackagingMaterialDialog({
                 Current value
               </p>
 
-              <p className="mt-1 text-lg font-semibold text-slate-950">
+              <p className="mt-1 text-lg font-semibold text-text-primary">
                 {formatINR(
                   material.currentValue,
                 )}
@@ -1460,7 +1460,7 @@ function ConsumePackagingMaterialDialog({
           />
         </Field>
 
-        <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+        <div className="flex justify-end gap-3 border-t border-border pt-4">
           <button
             type="button"
             onClick={onClose}
@@ -1742,7 +1742,7 @@ function PackagingMaterialHistoryDialog({
       return "border-amber-200 bg-amber-50 text-amber-700";
     }
 
-    return "border-slate-200 bg-slate-50 text-slate-600";
+    return "border-border bg-surface-muted text-text-secondary";
   };
 
   return (
@@ -1755,53 +1755,53 @@ function PackagingMaterialHistoryDialog({
       >
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-text-muted" />
           </div>
         ) : error ? (
           <ErrorBox message={error} />
         ) : history.length === 0 ? (
           <div className="py-12 text-center">
-            <History className="mx-auto h-6 w-6 text-slate-300" />
+            <History className="mx-auto h-6 w-6 text-text-muted" />
 
-            <p className="mt-3 text-sm font-semibold text-slate-800">
+            <p className="mt-3 text-sm font-semibold text-text-primary">
               No inventory movements recorded
             </p>
 
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-text-secondary">
               Purchases and packaging consumption will appear here.
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-slate-200">
+          <div className="overflow-hidden rounded-xl border border-border">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[850px] table-fixed">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50">
-                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                  <tr className="border-b border-border bg-surface-muted">
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       Date
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       Type
                     </th>
 
-                    <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       Quantity
                     </th>
 
-                    <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       Unit Cost
                     </th>
 
-                    <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       Value
                     </th>
 
-                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       Reference
                     </th>
 
-                    <th className="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">
+                    <th className="w-12 px-3 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.1em] text-text-secondary">
                       <span className="sr-only">
                         Actions
                       </span>
@@ -1857,7 +1857,7 @@ function PackagingMaterialHistoryDialog({
                         <tr
                           key={entry.id}
                         >
-                          <td className="px-4 py-3 text-xs text-slate-600">
+                          <td className="px-4 py-3 text-xs text-text-secondary">
                             {formatDate(
                               isPurchase &&
                                 purchase
@@ -1878,14 +1878,14 @@ function PackagingMaterialHistoryDialog({
                             </span>
                           </td>
 
-                          <td className="px-4 py-3 text-right text-xs font-medium text-slate-800">
+                          <td className="px-4 py-3 text-right text-xs font-medium text-text-primary">
                             {isOutgoing
                               ? "−"
                               : ""}
                             {quantityLabel}
                           </td>
 
-                          <td className="px-4 py-3 text-right text-xs font-semibold text-slate-800">
+                          <td className="px-4 py-3 text-right text-xs font-semibold text-text-primary">
                             {formatINR(
                               entry.unitCost,
                             )}
@@ -1911,7 +1911,7 @@ function PackagingMaterialHistoryDialog({
                             )}
                           </td>
 
-                          <td className="px-4 py-3 text-xs text-slate-600">
+                          <td className="px-4 py-3 text-xs text-text-secondary">
                             {entry.referenceId ||
                               entry.notes ||
                               purchase?.invoiceReference ||
@@ -1932,7 +1932,7 @@ function PackagingMaterialHistoryDialog({
                                   isDeleting ||
                                   isDeletingConsumption
                                 }
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label="Delete purchase"
                                 title="Delete purchase"
                               >
@@ -1955,7 +1955,7 @@ function PackagingMaterialHistoryDialog({
                                   isDeleting ||
                                   isDeletingConsumption
                                 }
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 aria-label="Delete consumption"
                                 title="Delete consumption"
                               >
@@ -1998,8 +1998,8 @@ function PackagingMaterialHistoryDialog({
               />
             )}
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold text-slate-900">
+            <div className="rounded-xl border border-border bg-surface-muted p-4">
+              <p className="text-xs font-semibold text-text-primary">
                 {purchaseToDelete.quantity.toLocaleString(
                   "en-IN",
                 )}{" "}
@@ -2011,7 +2011,7 @@ function PackagingMaterialHistoryDialog({
                 }
               </p>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 {formatDate(
                   purchaseToDelete.purchaseDate,
                 )}
@@ -2021,14 +2021,14 @@ function PackagingMaterialHistoryDialog({
                 )}
               </p>
 
-              <p className="mt-1 text-[11px] text-slate-400">
+              <p className="mt-1 text-[11px] text-text-muted">
                 {formatQuantity(
                   purchaseToDelete.baseQuantity,
                 )} received
               </p>
             </div>
 
-            <p className="text-xs leading-5 text-slate-500">
+            <p className="text-xs leading-5 text-text-secondary">
               The purchase record and linked inventory
               entry will be permanently removed. Karya
               will recalculate stock, inventory value,
@@ -2036,7 +2036,7 @@ function PackagingMaterialHistoryDialog({
               remaining inventory ledger.
             </p>
 
-            <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-3 border-t border-border pt-4">
               <button
                 type="button"
                 onClick={() =>
@@ -2097,14 +2097,14 @@ function PackagingMaterialHistoryDialog({
               />
             )}
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-semibold text-slate-900">
+            <div className="rounded-xl border border-border bg-surface-muted p-4">
+              <p className="text-xs font-semibold text-text-primary">
                 {formatQuantity(
                   consumptionToDelete.quantity,
                 )}
               </p>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 {formatDate(
                   consumptionToDelete.createdAt,
                 )}
@@ -2115,14 +2115,14 @@ function PackagingMaterialHistoryDialog({
               </p>
             </div>
 
-            <p className="text-xs leading-5 text-slate-500">
+            <p className="text-xs leading-5 text-text-secondary">
               The consumption inventory entry will be
               permanently removed. Karya will recalculate
               stock, inventory value, and weighted-average
               cost from the remaining inventory ledger.
             </p>
 
-            <div className="flex justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-3 border-t border-border pt-4">
               <button
                 type="button"
                 onClick={() =>
@@ -2169,16 +2169,16 @@ function PackagingMaterialHistoryDialog({
 ========================================================= */
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:bg-slate-50 disabled:text-slate-400";
+  "w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 disabled:bg-surface-muted disabled:text-text-muted";
 
 const primaryButtonClass =
   "inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50";
 
 const secondaryButtonClass =
-  "rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50";
+  "rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:opacity-50";
 
 const mutedLabelClass =
-  "text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-400";
+  "text-[10px] font-semibold uppercase tracking-[0.1em] text-text-muted";
 
 function Field({
   label,
@@ -2193,7 +2193,7 @@ function Field({
     <div className="space-y-1">
       <label
         htmlFor={htmlFor}
-        className="block text-xs font-semibold text-slate-700"
+        className="block text-xs font-semibold text-text-secondary"
       >
         {label}
       </label>

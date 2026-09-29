@@ -84,11 +84,11 @@ export default async function StagesPage() {
             Business Lifecycle
           </p>
 
-          <h1 className="mt-1 text-[25px] font-semibold tracking-[-0.035em] text-slate-950">
+          <h1 className="mt-1 text-[25px] font-semibold tracking-[-0.035em] text-text-primary">
             Stage &amp; Gates
           </h1>
 
-          <p className="mt-1 max-w-2xl text-xs text-slate-500">
+          <p className="mt-1 max-w-2xl text-xs text-text-secondary">
             Track your progress, complete key requirements, and move through
             the business lifecycle with transparent stage gates.
           </p>
@@ -107,13 +107,13 @@ export default async function StagesPage() {
           LIFECYCLE TIMELINE
       ============================================================ */}
 
-      <section className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      <section className="rounded-2xl border border-border bg-surface-raised px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-muted">
             Business Lifecycle
           </p>
 
-          <span className="text-[10px] font-medium text-slate-400">
+          <span className="text-[10px] font-medium text-text-muted">
             Stage {currentStage.id} of {stages.length}
           </span>
         </div>
@@ -142,7 +142,7 @@ export default async function StagesPage() {
                         ? "border-emerald-700 bg-emerald-700 text-white shadow-sm"
                         : isCompleted
                           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-slate-200 bg-white text-slate-400",
+                          : "border-border bg-surface-raised text-text-muted",
                     ].join(" ")}
                   >
                     {isCompleted ? (
@@ -158,10 +158,10 @@ export default async function StagesPage() {
                     className={[
                       "mt-2 text-center text-[10px] font-medium leading-tight",
                       isCurrent
-                        ? "font-semibold text-slate-950"
+                        ? "font-semibold text-text-primary"
                         : isCompleted
                           ? "text-emerald-700"
-                          : "text-slate-400",
+                          : "text-text-muted",
                     ].join(" ")}
                   >
                     {formatStageName(stage.name)}
@@ -183,7 +183,7 @@ export default async function StagesPage() {
           CURRENT STAGE HERO
       ============================================================ */}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="grid min-h-[250px] grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
           {/* LEFT */}
           <div className="p-6 sm:p-7">
@@ -192,23 +192,23 @@ export default async function StagesPage() {
                 Stage {currentStage.id}
               </span>
 
-              <span className="text-slate-300">•</span>
+              <span className="text-text-muted">•</span>
 
-              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">
+              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted">
                 Current Stage
               </span>
             </div>
 
-            <h2 className="mt-1 text-[27px] font-semibold tracking-[-0.04em] text-slate-950">
+            <h2 className="mt-1 text-[27px] font-semibold tracking-[-0.04em] text-text-primary">
               {formatStageName(currentStage.name)}
             </h2>
 
-            <p className="mt-2 max-w-xl text-xs leading-5 text-slate-500">
+            <p className="mt-2 max-w-xl text-xs leading-5 text-text-secondary">
               {currentStage.description}
             </p>
 
             <div className="mt-5 flex items-center gap-3">
-              <div className="h-1.5 w-40 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-1.5 w-40 overflow-hidden rounded-full bg-surface-muted">
                 <div
                   className={`h-full rounded-full transition-all ${getProgressColor(
                     progress,
@@ -219,12 +219,12 @@ export default async function StagesPage() {
                 />
               </div>
 
-              <span className="text-[11px] font-semibold text-slate-700">
+              <span className="text-[11px] font-semibold text-text-secondary">
                 {progress}%
               </span>
             </div>
 
-            <p className="mt-2 text-[10px] text-slate-400">
+            <p className="mt-2 text-[10px] text-text-muted">
               {completedTotal} of {totalRequirements} requirements completed
             </p>
 
@@ -234,7 +234,7 @@ export default async function StagesPage() {
                 {completedMandatory} mandatory cleared
               </span>
 
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-600">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-[10px] font-medium text-text-secondary">
                 <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
                 {totalRequirements - completedTotal} remaining
               </span>
@@ -261,12 +261,12 @@ export default async function StagesPage() {
 
           {/* RIGHT — ABSTRACT LANDSCAPE */}
           <div className="relative min-h-[230px] overflow-hidden bg-[#e9eee8] lg:min-h-0">
-            <div className="absolute left-6 top-6 text-[10px] font-medium uppercase tracking-[0.15em] text-slate-500">
+            <div className="absolute left-6 top-6 text-[10px] font-medium uppercase tracking-[0.15em] text-text-secondary">
               Stage {currentStage.id}
             </div>
 
             <div className="absolute left-6 top-16 max-w-[210px]">
-              <p className="text-[19px] font-medium leading-6 tracking-[-0.03em] text-slate-900">
+              <p className="text-[19px] font-medium leading-6 tracking-[-0.03em] text-text-primary">
                 Small steps
                 <br />
                 today, a bigger
@@ -290,20 +290,20 @@ export default async function StagesPage() {
           REQUIREMENTS
       ============================================================ */}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="flex flex-col gap-3 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-slate-950">
+            <h3 className="text-sm font-semibold text-text-primary">
               Requirements
             </h3>
 
-            <p className="mt-0.5 text-[10px] text-slate-400">
+            <p className="mt-0.5 text-[10px] text-text-muted">
               Mandatory gates determine stage readiness. Recommended and
               optional items do not block advancement.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-[9px] font-medium text-slate-500">
+          <div className="flex flex-wrap items-center gap-3 text-[9px] font-medium text-text-secondary">
             <span className="inline-flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
               Mandatory ({mandatoryCount})
@@ -324,9 +324,9 @@ export default async function StagesPage() {
         <div className="divide-y divide-slate-100">
           {requirements.length === 0 ? (
             <div className="px-5 py-10 text-center">
-              <Circle className="mx-auto h-5 w-5 text-slate-300" />
+              <Circle className="mx-auto h-5 w-5 text-text-muted" />
 
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-text-secondary">
                 No requirements configured for this stage.
               </p>
             </div>
@@ -355,17 +355,17 @@ export default async function StagesPage() {
           TRANSITION HISTORY
       ============================================================ */}
 
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="border-b border-slate-200 px-5 py-4">
+      <section className="rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="border-b border-border px-5 py-4">
           <div className="flex items-center gap-2">
-            <Milestone className="h-4 w-4 text-slate-500" />
+            <Milestone className="h-4 w-4 text-text-secondary" />
 
             <div>
-              <h3 className="text-sm font-semibold text-slate-950">
+              <h3 className="text-sm font-semibold text-text-primary">
                 Stage History
               </h3>
 
-              <p className="mt-0.5 text-[10px] text-slate-400">
+              <p className="mt-0.5 text-[10px] text-text-muted">
                 Founder-confirmed stage transitions are preserved as an
                 immutable audit trail.
               </p>
@@ -375,7 +375,7 @@ export default async function StagesPage() {
 
         {transitions.length === 0 ? (
           <div className="px-5 py-8 text-center">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-text-muted">
               No stage transitions have been recorded yet.
             </p>
           </div>
@@ -392,13 +392,13 @@ export default async function StagesPage() {
                   </div>
 
                   <div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-800">
+                    <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-text-primary">
                       <span>
                         Stage {transition.fromStageId} ·{" "}
                         {formatStageName(transition.fromStage.name)}
                       </span>
 
-                      <ArrowRight className="h-3 w-3 text-slate-300" />
+                      <ArrowRight className="h-3 w-3 text-text-muted" />
 
                       <span>
                         Stage {transition.toStageId} ·{" "}
@@ -406,18 +406,18 @@ export default async function StagesPage() {
                       </span>
                     </div>
 
-                    <p className="mt-1 max-w-2xl text-[10px] leading-4 text-slate-500">
+                    <p className="mt-1 max-w-2xl text-[10px] leading-4 text-text-secondary">
                       {transition.reason}
                     </p>
                   </div>
                 </div>
 
                 <div className="shrink-0 text-left sm:text-right">
-                  <p className="text-[10px] font-medium text-slate-500">
+                  <p className="text-[10px] font-medium text-text-secondary">
                     {transition.triggeredBy}
                   </p>
 
-                  <p className="mt-0.5 text-[9px] text-slate-400">
+                  <p className="mt-0.5 text-[9px] text-text-muted">
                     {transition.createdAt.toLocaleString("en-IN")}
                   </p>
                 </div>

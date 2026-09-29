@@ -190,7 +190,7 @@ function StatusBadge({
     CANCELLED: {
       icon: XCircle,
       className:
-        "bg-slate-100 text-slate-500 ring-slate-200",
+        "bg-surface-muted text-text-secondary ring-slate-200",
     },
   }[status];
 
@@ -221,35 +221,36 @@ function SummaryCard({
 }) {
   const iconClass =
     tone === "warning"
-      ? "bg-amber-50 text-amber-700"
+      ? "bg-amber-50 text-amber-700 ring-amber-100"
       : tone === "success"
-        ? "bg-emerald-50 text-emerald-700"
-        : "bg-slate-100 text-slate-700";
+        ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
+        : "bg-surface-muted text-text-secondary ring-slate-200";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <article className="min-w-0 rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-shadow duration-200 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium text-slate-500">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-text-secondary">
             {label}
           </p>
 
-          <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">
+          <p className="mt-2 break-words text-2xl font-semibold tracking-[-0.04em] text-text-primary">
             {value}
           </p>
 
-          <p className="mt-0.5 text-[11px] text-slate-400">
+          <p className="mt-0.5 text-[11px] leading-4 text-text-secondary">
             {description}
           </p>
         </div>
 
         <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${iconClass}`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ${iconClass}`}
+          aria-hidden="true"
         >
           <Icon className="h-4 w-4" />
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -863,21 +864,21 @@ export function ProductionBatchesClient({
       </div>
 
       {/* Main workspace */}
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center justify-between gap-4">
-            <div>
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-border px-4 py-4 sm:px-5 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold tracking-[-0.02em] text-slate-950">
+                <h2 className="text-base font-semibold tracking-[-0.02em] text-text-primary">
                   Production batches
                 </h2>
 
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
                   {filteredBatches.length}
                 </span>
               </div>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs leading-5 text-text-secondary">
                 Plan production, complete batches,
                 and track the exact historical
                 production cost.
@@ -890,7 +891,7 @@ export function ProductionBatchesClient({
                 resetCreateForm();
                 setIsCreateOpen(true);
               }}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-slate-950 px-3.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-slate-950 px-3.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Plus className="h-4 w-4" />
               Create batch
@@ -898,7 +899,7 @@ export function ProductionBatchesClient({
           </div>
 
           {/* Filters */}
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+          <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative">
               <select
                 value={selectedProductId}
@@ -907,7 +908,7 @@ export function ProductionBatchesClient({
                     event.target.value,
                   )
                 }
-                className="h-9 min-w-[210px] appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-9 text-xs text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="h-9 w-full min-w-0 appearance-none rounded-lg border border-border bg-surface-raised pl-3 pr-9 text-xs text-text-primary outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15 sm:min-w-[190px]"
               >
                 <option value="ALL">
                   All products
@@ -923,7 +924,7 @@ export function ProductionBatchesClient({
                 ))}
               </select>
 
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             </div>
 
             <div className="relative">
@@ -934,7 +935,7 @@ export function ProductionBatchesClient({
                     event.target.value as StatusFilter,
                   )
                 }
-                className="h-9 min-w-[170px] appearance-none rounded-lg border border-slate-200 bg-white pl-3 pr-9 text-xs text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="h-9 w-full min-w-0 appearance-none rounded-lg border border-border bg-surface-raised pl-3 pr-9 text-xs text-text-primary outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/15 sm:min-w-[155px]"
               >
                 <option value="ALL">
                   All statuses
@@ -953,7 +954,7 @@ export function ProductionBatchesClient({
                 </option>
               </select>
 
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
             </div>
           </div>
         </div>
@@ -967,15 +968,15 @@ export function ProductionBatchesClient({
 
         {filteredBatches.length === 0 ? (
           <div className="px-5 py-16 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
-              <Factory className="h-5 w-5 text-slate-500" />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-muted">
+              <Factory className="h-5 w-5 text-text-secondary" />
             </div>
 
-            <h3 className="mt-4 text-sm font-semibold text-slate-950">
+            <h3 className="mt-4 text-sm font-semibold text-text-primary">
               No production batches
             </h3>
 
-            <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-500">
+            <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-text-secondary">
               Create your first production batch
               to start tracking planned production,
               actual output, inventory consumption,
@@ -988,7 +989,7 @@ export function ProductionBatchesClient({
                 resetCreateForm();
                 setIsCreateOpen(true);
               }}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl border border-border bg-surface-raised px-4 py-2 text-sm font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted"
             >
               <Plus className="h-4 w-4" />
               Create batch
@@ -998,38 +999,38 @@ export function ProductionBatchesClient({
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] text-left">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50">
+                <tr className="border-b border-border bg-surface-muted/50">
                   <th className="w-10 px-5 py-3" />
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Batch
                   </th>
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Product
                   </th>
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Planned
                   </th>
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Produced
                   </th>
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Status
                   </th>
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Cost / unit
                   </th>
 
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Created
                   </th>
 
-                  <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <th className="px-5 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Action
                   </th>
                 </tr>
@@ -1108,7 +1109,7 @@ export function ProductionBatchesClient({
                       event.target.value,
                     )
                   }
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted"
                 >
                   <option value="">
                     Select product
@@ -1139,7 +1140,7 @@ export function ProductionBatchesClient({
                     )
                   }
                   placeholder="e.g. BATCH-001"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted"
                 />
               </Field>
             </div>
@@ -1164,7 +1165,7 @@ export function ProductionBatchesClient({
                       !createForm.productId ||
                       isLoadingConfigurations
                     }
-                    className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 pr-10"
+                    className="w-full appearance-none rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted pr-10"
                   >
                     <option value="">
                       {isLoadingConfigurations
@@ -1191,7 +1192,7 @@ export function ProductionBatchesClient({
                   </select>
 
                   {isLoadingConfigurations && (
-                    <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />
+                    <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-text-muted" />
                   )}
                 </div>
 
@@ -1232,7 +1233,7 @@ export function ProductionBatchesClient({
                       !createForm.productId ||
                       isLoadingConfigurations
                     }
-                    className="w-full appearance-none rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 pr-10"
+                    className="w-full appearance-none rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted pr-10"
                   >
                     <option value="">
                       {isLoadingConfigurations
@@ -1260,7 +1261,7 @@ export function ProductionBatchesClient({
                   </select>
 
                   {isLoadingConfigurations && (
-                    <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-slate-400" />
+                    <Loader2 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-text-muted" />
                   )}
                 </div>
 
@@ -1303,24 +1304,24 @@ export function ProductionBatchesClient({
                     )
                   }
                   placeholder="e.g. 20"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted"
                 />
               </Field>
 
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <div className="rounded-xl border border-border bg-surface-muted px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                   Selected versions
                 </p>
 
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs font-medium text-slate-700">
+                  <p className="text-xs font-medium text-text-secondary">
                     Formulation:{" "}
                     {activeFormulation
                       ? `v${activeFormulation.version}`
                       : "Not configured"}
                   </p>
 
-                  <p className="text-xs font-medium text-slate-700">
+                  <p className="text-xs font-medium text-text-secondary">
                     Packaging:{" "}
                     {activePackaging
                       ? `v${activePackaging.version}`
@@ -1343,29 +1344,29 @@ export function ProductionBatchesClient({
                 }
                 rows={2}
                 placeholder="Optional production notes..."
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 resize-none"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted resize-none"
               />
             </Field>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+            <div className="rounded-xl border border-border bg-surface-muted/60 p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold text-slate-900">
+                  <p className="text-xs font-semibold text-text-primary">
                     Estimated production cost
                   </p>
 
-                  <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                  <p className="mt-1 text-[11px] leading-5 text-text-secondary">
                     Based on the selected formulation and packaging at
                     their current weighted-average costs.
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Estimated batch
                   </p>
 
-                  <p className="mt-1 text-base font-bold text-slate-950">
+                  <p className="mt-1 text-base font-bold text-text-primary">
                     {estimatedBatchCost !== null
                       ? formatINR(estimatedBatchCost)
                       : "—"}
@@ -1373,12 +1374,12 @@ export function ProductionBatchesClient({
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-3 gap-3 border-t border-slate-200 pt-3">
+              <div className="mt-4 grid grid-cols-3 gap-3 border-t border-border pt-3">
                 <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Raw material / unit
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-800">
+                  <p className="mt-1 text-xs font-semibold text-text-primary">
                     {estimatedRawMaterialCostPerUnit !== null
                       ? formatINR(
                           estimatedRawMaterialCostPerUnit,
@@ -1388,10 +1389,10 @@ export function ProductionBatchesClient({
                 </div>
 
                 <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Packaging / unit
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-800">
+                  <p className="mt-1 text-xs font-semibold text-text-primary">
                     {estimatedPackagingCostPerUnit !== null
                       ? formatINR(
                           estimatedPackagingCostPerUnit,
@@ -1401,10 +1402,10 @@ export function ProductionBatchesClient({
                 </div>
 
                 <div>
-                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     Cost / unit
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-slate-800">
+                  <p className="mt-1 text-xs font-semibold text-text-primary">
                     {estimatedUnitCost !== null
                       ? formatINR(estimatedUnitCost)
                       : "—"}
@@ -1434,14 +1435,14 @@ export function ProductionBatchesClient({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-2 border-t border-border pt-4">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() =>
                   setIsCreateOpen(false)
                 }
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1492,7 +1493,7 @@ export function ProductionBatchesClient({
               </div>
             )}
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="rounded-xl border border-border bg-surface-muted px-4 py-3">
               <div className="grid gap-3 sm:grid-cols-3">
                 <InfoItem
                   label="Product"
@@ -1534,10 +1535,10 @@ export function ProductionBatchesClient({
                     }),
                   )
                 }
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted"
               />
 
-              <p className="mt-1.5 text-[11px] text-slate-400">
+              <p className="mt-1.5 text-[11px] text-text-muted">
                 This is the actual quantity
                 produced. The service will calculate
                 exact raw-material and packaging
@@ -1558,7 +1559,7 @@ export function ProductionBatchesClient({
                 }
                 rows={2}
                 placeholder="Optional completion notes..."
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-400 resize-none"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs text-text-primary shadow-sm outline-none transition placeholder:text-text-muted focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:bg-surface-muted disabled:text-text-muted resize-none"
               />
             </Field>
 
@@ -1582,14 +1583,14 @@ export function ProductionBatchesClient({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-2 border-t border-border pt-4">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() =>
                   setCompleteBatch(null)
                 }
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1653,7 +1654,7 @@ export function ProductionBatchesClient({
               </div>
             </div>
 
-            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-xl border border-border bg-surface-muted p-4 sm:grid-cols-2">
               <InfoItem
                 label="Batch"
                 value={
@@ -1683,14 +1684,14 @@ export function ProductionBatchesClient({
               />
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-2 border-t border-border pt-4">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() =>
                   setCancelBatch(null)
                 }
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
               >
                 Keep batch
               </button>
@@ -1747,7 +1748,7 @@ export function ProductionBatchesClient({
               </div>
             </div>
 
-            <div className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
+            <div className="grid gap-3 rounded-xl border border-border bg-surface-muted p-4 sm:grid-cols-2">
               <InfoItem
                 label="Batch"
                 value={deleteBatch.batchNumber}
@@ -1769,12 +1770,12 @@ export function ProductionBatchesClient({
               />
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-2 border-t border-border pt-4">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => setDeleteBatch(null)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-lg border border-border bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
               >
                 Keep batch
               </button>
@@ -1818,12 +1819,12 @@ function BatchRow({
 }) {
   return (
     <>
-      <tr className="border-b border-slate-100 transition hover:bg-slate-50/50">
+      <tr className="border-b border-border transition hover:bg-surface-muted/50">
         <td className="px-5 py-4 align-top">
           <button
             type="button"
             onClick={onToggle}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-muted hover:text-text-secondary"
             aria-label={
               isExpanded
                 ? "Collapse batch"
@@ -1839,33 +1840,33 @@ function BatchRow({
         </td>
 
         <td className="px-3 py-4 align-top">
-          <p className="text-sm font-semibold text-slate-900">
+          <p className="text-sm font-semibold text-text-primary">
             {batch.batchNumber}
           </p>
 
-          <p className="mt-0.5 text-[11px] text-slate-400">
+          <p className="mt-0.5 text-[11px] text-text-muted">
             {batch.formulationName} · v
             {batch.formulationVersion}
           </p>
         </td>
 
         <td className="px-3 py-4 align-top">
-          <p className="text-sm font-medium text-slate-800">
+          <p className="text-sm font-medium text-text-primary">
             {batch.productName}
           </p>
 
-          <p className="mt-0.5 text-[11px] text-slate-400">
+          <p className="mt-0.5 text-[11px] text-text-muted">
             {batch.productSku}
           </p>
         </td>
 
-        <td className="px-3 py-4 align-top text-sm text-slate-600">
+        <td className="px-3 py-4 align-top text-sm text-text-secondary">
           {formatNumber(
             batch.plannedQuantity,
           )}
         </td>
 
-        <td className="px-3 py-4 align-top text-sm font-medium text-slate-700">
+        <td className="px-3 py-4 align-top text-sm font-medium text-text-secondary">
           {formatNumber(
             batch.producedQuantity,
           )}
@@ -1876,7 +1877,7 @@ function BatchRow({
         </td>
 
         <td className="px-3 py-4 align-top">
-          <p className="text-sm font-medium text-slate-800">
+          <p className="text-sm font-medium text-text-primary">
             {batch.costPerUnit !== null
               ? formatINR(
                   batch.costPerUnit,
@@ -1885,14 +1886,14 @@ function BatchRow({
           </p>
 
           {batch.totalCost !== null && (
-            <p className="mt-0.5 text-[11px] text-slate-400">
+            <p className="mt-0.5 text-[11px] text-text-muted">
               Total{" "}
               {formatINR(batch.totalCost)}
             </p>
           )}
         </td>
 
-        <td className="px-3 py-4 align-top text-xs text-slate-500">
+        <td className="px-3 py-4 align-top text-xs text-text-secondary">
           {formatDate(batch.createdAt)}
         </td>
 
@@ -1913,7 +1914,7 @@ function BatchRow({
                   type="button"
                   disabled={isPending}
                   onClick={onCancel}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -1931,7 +1932,7 @@ function BatchRow({
                 type="button"
                 disabled={isPending}
                 onClick={onDelete}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-surface-raised px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 Delete
@@ -1942,7 +1943,7 @@ function BatchRow({
       </tr>
 
       {isExpanded && (
-        <tr className="border-b border-slate-100 bg-slate-50/50">
+        <tr className="border-b border-border bg-surface-muted/50">
           <td
             colSpan={9}
             className="px-5 py-3.5"
@@ -1962,8 +1963,8 @@ function BatchDetails({
 }) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+      <div className="rounded-xl border border-border bg-surface-raised p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
           Configuration
         </p>
 
@@ -1994,8 +1995,8 @@ function BatchDetails({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+      <div className="rounded-xl border border-border bg-surface-raised p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
           Cost breakdown
         </p>
 
@@ -2047,8 +2048,8 @@ function BatchDetails({
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+      <div className="rounded-xl border border-border bg-surface-raised p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
           Consumption
         </p>
 
@@ -2056,7 +2057,7 @@ function BatchDetails({
           .length === 0 &&
         batch.packagingConsumptions.length ===
           0 ? (
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-text-muted">
             No inventory consumption recorded
             yet.
           </p>
@@ -2069,11 +2070,11 @@ function BatchDetails({
                   className="flex items-center justify-between gap-3"
                 >
                   <div>
-                    <p className="text-xs font-medium text-slate-700">
+                    <p className="text-xs font-medium text-text-secondary">
                       {item.rawMaterialName}
                     </p>
 
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-text-muted">
                       {formatNumber(
                         item.quantity,
                       )}{" "}
@@ -2081,7 +2082,7 @@ function BatchDetails({
                     </p>
                   </div>
 
-                  <p className="text-xs font-semibold text-slate-700">
+                  <p className="text-xs font-semibold text-text-secondary">
                     {formatINR(
                       item.totalCost,
                     )}
@@ -2097,11 +2098,11 @@ function BatchDetails({
                   className="flex items-center justify-between gap-3"
                 >
                   <div>
-                    <p className="text-xs font-medium text-slate-700">
+                    <p className="text-xs font-medium text-text-secondary">
                       {item.packagingMaterialName}
                     </p>
 
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-text-muted">
                       {formatNumber(
                         item.quantity,
                       )}{" "}
@@ -2109,7 +2110,7 @@ function BatchDetails({
                     </p>
                   </div>
 
-                  <p className="text-xs font-semibold text-slate-700">
+                  <p className="text-xs font-semibold text-text-secondary">
                     {formatINR(
                       item.totalCost,
                     )}
@@ -2122,12 +2123,12 @@ function BatchDetails({
       </div>
 
       {batch.notes && (
-        <div className="lg:col-span-3 rounded-xl border border-slate-200 bg-white p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+        <div className="lg:col-span-3 rounded-xl border border-border bg-surface-raised p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
             Notes
           </p>
 
-          <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-slate-600">
+          <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-text-secondary">
             {batch.notes}
           </p>
         </div>
@@ -2145,11 +2146,11 @@ function InfoItem({
 }) {
   return (
     <div>
-      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-slate-400">
+      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-text-muted">
         {label}
       </p>
 
-      <p className="mt-1 text-xs font-medium text-slate-700">
+      <p className="mt-1 text-xs font-medium text-text-secondary">
         {value}
       </p>
     </div>
@@ -2165,7 +2166,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-slate-700">
+      <span className="mb-1 block text-xs font-semibold text-text-secondary">
         {label}
       </span>
 
@@ -2187,14 +2188,14 @@ function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 p-4 backdrop-blur-[2px]">
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 bg-white px-5 py-4">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl">
+        <div className="flex items-start justify-between gap-4 border-b border-border bg-surface-raised px-5 py-4">
           <div>
-            <h2 className="text-base font-semibold tracking-[-0.02em] text-slate-950">
+            <h2 className="text-base font-semibold tracking-[-0.02em] text-text-primary">
               {title}
             </h2>
 
-            <p className="mt-1 text-xs leading-5 text-slate-500">
+            <p className="mt-1 text-xs leading-5 text-text-secondary">
               {description}
             </p>
           </div>
@@ -2202,7 +2203,7 @@ function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-muted hover:text-text-secondary"
             aria-label="Close"
           >
             <XCircle className="h-5 w-5" />

@@ -60,7 +60,7 @@ export const CreateRawMaterialSchema = z.object({
 });
 
 export const RecordRawMaterialPurchaseSchema = z.object({
-  rawMaterialId: z.string().uuid("Invalid raw material ID."),
+  rawMaterialId: z.string().trim().min(1, "Raw material ID is required."),
 
   purchaseDate: z.coerce.date(),
 
@@ -82,7 +82,7 @@ export const RecordRawMaterialPurchaseSchema = z.object({
 });
 
 export const RecordRawMaterialConsumptionSchema = z.object({
-  rawMaterialId: z.string().uuid("Invalid raw material ID."),
+  rawMaterialId: z.string().trim().min(1, "Raw material ID is required."),
 
   quantity: positiveNumber(
     "Consumption quantity must be greater than zero.",
@@ -94,7 +94,7 @@ export const RecordRawMaterialConsumptionSchema = z.object({
 });
 
 export const RawMaterialIdSchema = z.object({
-  id: z.string().uuid("Invalid raw material ID."),
+  id: z.string().trim().min(1, "Raw material ID is required."),
 });
 
 export const RawMaterialPurchaseIdSchema = z.object({

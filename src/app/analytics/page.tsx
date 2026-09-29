@@ -112,13 +112,13 @@ function getPeriodStart(period: string): Date | null {
 
 function emptyState(message: string) {
   return (
-    <div className="flex min-h-[220px] items-center justify-center rounded-2xl bg-slate-50">
+    <div className="flex min-h-[220px] items-center justify-center rounded-2xl bg-surface-muted">
       <div className="text-center">
-        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm">
-          <BarChart3 className="h-5 w-5 text-slate-300" />
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-surface-raised shadow-sm">
+          <BarChart3 className="h-5 w-5 text-text-muted" />
         </div>
 
-        <p className="mt-3 text-sm font-medium text-slate-500">{message}</p>
+        <p className="mt-3 text-sm font-medium text-text-secondary">{message}</p>
       </div>
     </div>
   );
@@ -359,7 +359,7 @@ export default async function AnalyticsPage({
             HEADER
         ============================================================ */}
 
-        <section className="relative overflow-visible rounded-[24px] border border-slate-200 bg-white">
+        <section className="relative overflow-visible rounded-[24px] border border-border bg-surface-raised">
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-emerald-50/80 blur-3xl" />
 
           <div className="pointer-events-none absolute bottom-[-100px] left-[38%] h-56 w-56 rounded-full bg-amber-50/60 blur-3xl" />
@@ -376,17 +376,17 @@ export default async function AnalyticsPage({
                 </p>
               </div>
 
-              <h1 className="mt-4 text-[34px] font-semibold tracking-[-0.06em] text-slate-950 lg:text-[42px]">
+              <h1 className="mt-4 text-[34px] font-semibold tracking-[-0.06em] text-text-primary lg:text-[42px]">
                 Revenue Intelligence
               </h1>
 
-              <p className="mt-3 max-w-[700px] text-sm leading-6 text-slate-600">
+              <p className="mt-3 max-w-[700px] text-sm leading-6 text-text-secondary">
                 See how your sales are moving, which products are generating
                 revenue, and where your orders are coming from.
               </p>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                <span className="rounded-full bg-slate-50 px-3 py-1.5">
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-text-muted">
+                <span className="rounded-full bg-surface-muted px-3 py-1.5">
                   {business.name}
                 </span>
 
@@ -404,7 +404,7 @@ export default async function AnalyticsPage({
             {/* Date range */}
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center rounded-full border border-slate-200 bg-white p-1">
+              <div className="flex items-center rounded-full border border-border bg-surface-raised p-1">
                 {[
                   { value: "ALL", label: "All Time" },
                   { value: "7D", label: "7D" },
@@ -417,8 +417,8 @@ export default async function AnalyticsPage({
                     href={`/analytics?period=${item.value}`}
                     className={`rounded-full px-3 py-1.5 text-[10px] font-medium transition ${
                       period === item.value
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-500 hover:text-slate-900"
+                        ? "bg-surface-muted text-text-primary"
+                        : "text-text-secondary hover:text-text-primary"
                     }`}
                   >
                     {item.label}
@@ -427,7 +427,7 @@ export default async function AnalyticsPage({
               </div>
 
               <details className="relative">
-                <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-[10px] font-medium text-slate-600">
+                <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-border bg-surface-raised px-3 py-2 text-[10px] font-medium text-text-secondary">
                   <CalendarDays className="h-3.5 w-3.5" />
                   Custom
                   <span>⌄</span>
@@ -435,14 +435,14 @@ export default async function AnalyticsPage({
 
                 <form
                   action="/analytics"
-                  className="absolute right-0 top-11 z-40 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-xl"
+                  className="absolute right-0 top-11 z-40 w-64 rounded-xl border border-border bg-surface-raised p-4 shadow-xl"
                 >
-                  <p className="text-xs font-semibold text-slate-900">
+                  <p className="text-xs font-semibold text-text-primary">
                     Custom period
                   </p>
 
                   <div className="mt-3 space-y-2">
-                    <label className="block text-[10px] font-medium text-slate-500">
+                    <label className="block text-[10px] font-medium text-text-secondary">
                       From
                       <input
                         type="date"
@@ -450,11 +450,11 @@ export default async function AnalyticsPage({
                         defaultValue={
                           parsed.success ? parsed.data.from ?? "" : ""
                         }
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-slate-400"
+                        className="mt-1 w-full rounded-lg border border-border px-2.5 py-2 text-xs outline-none focus:border-slate-400"
                       />
                     </label>
 
-                    <label className="block text-[10px] font-medium text-slate-500">
+                    <label className="block text-[10px] font-medium text-text-secondary">
                       To
                       <input
                         type="date"
@@ -462,7 +462,7 @@ export default async function AnalyticsPage({
                         defaultValue={
                           parsed.success ? parsed.data.to ?? "" : ""
                         }
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-slate-400"
+                        className="mt-1 w-full rounded-lg border border-border px-2.5 py-2 text-xs outline-none focus:border-slate-400"
                       />
                     </label>
                   </div>
@@ -486,23 +486,23 @@ export default async function AnalyticsPage({
         <section className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {/* Revenue */}
 
-          <div className="relative overflow-hidden rounded-[22px] border border-emerald-100 bg-white p-5">
+          <div className="relative overflow-hidden rounded-[22px] border border-emerald-100 bg-surface-raised p-5">
             <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-emerald-50" />
 
             <div className="relative flex items-start justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Total Revenue
                 </p>
 
-                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-slate-950">
+                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-text-primary">
                   {money(
                     revenue.summary.totalRevenue,
                     currencySymbol,
                   )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Paid orders only
                 </p>
               </div>
@@ -519,22 +519,22 @@ export default async function AnalyticsPage({
 
           {/* Orders */}
 
-          <div className="relative overflow-hidden rounded-[22px] border border-blue-100 bg-white p-5">
+          <div className="relative overflow-hidden rounded-[22px] border border-blue-100 bg-surface-raised p-5">
             <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-blue-50" />
 
             <div className="relative flex items-start justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Paid Orders
                 </p>
 
-                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-slate-950">
+                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-text-primary">
                   {revenue.summary.paidOrderCount.toLocaleString(
                     "en-IN",
                   )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Orders included in revenue
                 </p>
               </div>
@@ -561,20 +561,20 @@ export default async function AnalyticsPage({
 
           {/* Units */}
 
-          <div className="relative overflow-hidden rounded-[22px] border border-amber-100 bg-white p-5">
+          <div className="relative overflow-hidden rounded-[22px] border border-amber-100 bg-surface-raised p-5">
             <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-amber-50" />
 
             <div className="relative flex items-start justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Units Sold
                 </p>
 
-                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-slate-950">
+                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-text-primary">
                   {revenue.summary.unitsSold.toLocaleString("en-IN")}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   From paid order items
                 </p>
               </div>
@@ -599,16 +599,16 @@ export default async function AnalyticsPage({
 
           {/* AOV */}
 
-          <div className="relative overflow-hidden rounded-[22px] border border-violet-100 bg-white p-5">
+          <div className="relative overflow-hidden rounded-[22px] border border-violet-100 bg-surface-raised p-5">
             <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-violet-50" />
 
             <div className="relative flex items-start justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Average Order Value
                 </p>
 
-                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-slate-950">
+                <p className="mt-3 text-[30px] font-semibold tracking-[-0.055em] text-text-primary">
                   {revenue.summary.averageOrderValue === null
                     ? "—"
                     : money(
@@ -617,7 +617,7 @@ export default async function AnalyticsPage({
                       )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Revenue ÷ paid orders
                 </p>
               </div>
@@ -642,14 +642,14 @@ export default async function AnalyticsPage({
         <section className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[0.85fr_2fr]">
           {/* Growth */}
 
-          <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+          <div className="rounded-[22px] border border-border bg-surface-raised p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Revenue Growth
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   {isAllTime
                     ? "No previous-period baseline"
                     : getRevenueGrowthLabel(
@@ -665,7 +665,7 @@ export default async function AnalyticsPage({
                     ? "bg-emerald-50"
                     : growthNegative
                       ? "bg-red-50"
-                      : "bg-slate-50"
+                      : "bg-surface-muted"
                 }`}
               >
                 {growthPositive ? (
@@ -673,7 +673,7 @@ export default async function AnalyticsPage({
                 ) : growthNegative ? (
                   <ArrowDownRight className="h-5 w-5 text-red-600" />
                 ) : (
-                  <TrendingUp className="h-5 w-5 text-slate-400" />
+                  <TrendingUp className="h-5 w-5 text-text-muted" />
                 )}
               </span>
             </div>
@@ -685,7 +685,7 @@ export default async function AnalyticsPage({
                     ? "text-emerald-700"
                     : growthNegative
                       ? "text-red-600"
-                      : "text-slate-950"
+                      : "text-text-primary"
                 }`}
               >
                 {hasGrowthComparison
@@ -695,12 +695,12 @@ export default async function AnalyticsPage({
             </div>
 
             <div className="mt-7 grid grid-cols-2 gap-2">
-              <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400">
+              <div className="rounded-xl bg-surface-muted p-3">
+                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">
                   Current
                 </p>
 
-                <p className="mt-1 text-sm font-semibold text-slate-900">
+                <p className="mt-1 text-sm font-semibold text-text-primary">
                   {money(
                     revenue.growth.currentPeriodRevenue,
                     currencySymbol,
@@ -708,12 +708,12 @@ export default async function AnalyticsPage({
                 </p>
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-3">
-                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-slate-400">
+              <div className="rounded-xl bg-surface-muted p-3">
+                <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">
                   Previous
                 </p>
 
-                <p className="mt-1 text-sm font-semibold text-slate-900">
+                <p className="mt-1 text-sm font-semibold text-text-primary">
                   {money(
                     revenue.growth.previousPeriodRevenue,
                     currencySymbol,
@@ -723,11 +723,11 @@ export default async function AnalyticsPage({
             </div>
 
             {hasGrowthComparison && (
-              <div className="mt-4 border-t border-slate-100 pt-4">
+              <div className="mt-4 border-t border-border pt-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Change</span>
+                  <span className="text-text-secondary">Change</span>
 
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-semibold text-text-primary">
                     {revenue.growth.changeAmount >= 0 ? "+" : ""}
                     {money(
                       revenue.growth.changeAmount,
@@ -741,7 +741,7 @@ export default async function AnalyticsPage({
 
           {/* Revenue trend */}
 
-          <div className="overflow-hidden rounded-[22px] border border-slate-200 bg-white p-6">
+          <div className="overflow-hidden rounded-[22px] border border-border bg-surface-raised p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
@@ -750,11 +750,11 @@ export default async function AnalyticsPage({
                   </span>
 
                   <div>
-                    <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                    <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                       Revenue Trend
                     </h2>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-text-secondary">
                       Paid revenue by order month
                     </p>
                   </div>
@@ -872,11 +872,11 @@ export default async function AnalyticsPage({
                       key={item.month}
                       className="min-w-0 flex-1"
                     >
-                      <p className="truncate text-[10px] font-semibold text-slate-600">
+                      <p className="truncate text-[10px] font-semibold text-text-secondary">
                         {item.month}
                       </p>
 
-                      <p className="mt-0.5 text-[10px] text-slate-400">
+                      <p className="mt-0.5 text-[10px] text-text-muted">
                         {item.orderCount}{" "}
                         {item.orderCount === 1 ? "order" : "orders"}
                       </p>
@@ -895,7 +895,7 @@ export default async function AnalyticsPage({
         <section className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[1.4fr_1fr]">
           {/* Product performance */}
 
-          <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+          <div className="rounded-[22px] border border-border bg-surface-raised p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50">
@@ -903,11 +903,11 @@ export default async function AnalyticsPage({
                 </span>
 
                 <div>
-                  <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Product Performance
                   </h2>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-text-secondary">
                     Revenue generated by each product
                   </p>
                 </div>
@@ -935,16 +935,16 @@ export default async function AnalyticsPage({
                       <div className="flex items-end justify-between gap-4">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-500">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-muted text-[9px] font-bold text-text-secondary">
                               {index + 1}
                             </span>
 
-                            <p className="truncate text-sm font-semibold text-slate-900">
+                            <p className="truncate text-sm font-semibold text-text-primary">
                               {item.productName}
                             </p>
                           </div>
 
-                          <p className="mt-1 ml-8 text-[10px] text-slate-400">
+                          <p className="mt-1 ml-8 text-[10px] text-text-muted">
                             {item.sku} · {item.unitsSold}{" "}
                             {item.unitsSold === 1
                               ? "unit"
@@ -956,12 +956,12 @@ export default async function AnalyticsPage({
                           </p>
                         </div>
 
-                        <p className="shrink-0 text-sm font-bold text-slate-900">
+                        <p className="shrink-0 text-sm font-bold text-text-primary">
                           {money(item.revenue, currencySymbol)}
                         </p>
                       </div>
 
-                      <div className="mt-2 ml-8 h-3 overflow-hidden rounded-full bg-slate-100">
+                      <div className="mt-2 ml-8 h-3 overflow-hidden rounded-full bg-surface-muted">
                         <div
                           className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all"
                           style={{
@@ -981,7 +981,7 @@ export default async function AnalyticsPage({
 
           {/* Channel mix */}
 
-          <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+          <div className="rounded-[22px] border border-border bg-surface-raised p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50">
@@ -989,11 +989,11 @@ export default async function AnalyticsPage({
                 </span>
 
                 <div>
-                  <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Sales Channel Mix
                   </h2>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-text-secondary">
                     Where paid orders came from
                   </p>
                 </div>
@@ -1015,12 +1015,12 @@ export default async function AnalyticsPage({
                       }}
                     />
 
-                    <div className="absolute inset-[25px] flex flex-col items-center justify-center rounded-full bg-white shadow-inner">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <div className="absolute inset-[25px] flex flex-col items-center justify-center rounded-full bg-surface-raised shadow-inner">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Revenue
                       </p>
 
-                      <p className="mt-1 text-lg font-semibold tracking-[-0.04em] text-slate-950">
+                      <p className="mt-1 text-lg font-semibold tracking-[-0.04em] text-text-primary">
                         {money(
                           revenue.summary.totalRevenue,
                           currencySymbol,
@@ -1061,17 +1061,17 @@ export default async function AnalyticsPage({
                             }`}
                           />
 
-                          <span className="truncate text-xs font-medium text-slate-700">
+                          <span className="truncate text-xs font-medium text-text-secondary">
                             {item.channel}
                           </span>
                         </div>
 
                         <div className="flex shrink-0 items-center gap-3">
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-text-muted">
                             {channelPercentage.toFixed(0)}%
                           </span>
 
-                          <span className="text-xs font-semibold text-slate-900">
+                          <span className="text-xs font-semibold text-text-primary">
                             {money(item.revenue, currencySymbol)}
                           </span>
                         </div>
@@ -1088,7 +1088,7 @@ export default async function AnalyticsPage({
             REVENUE + ORDERS COMPARISON
         ============================================================ */}
 
-        <section className="mt-4 rounded-[22px] border border-slate-200 bg-white p-6">
+        <section className="mt-4 rounded-[22px] border border-border bg-surface-raised p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-50">
@@ -1096,23 +1096,23 @@ export default async function AnalyticsPage({
               </span>
 
               <div>
-                <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                   Revenue & Order Volume
                 </h2>
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-text-secondary">
                   Revenue and paid-order activity by month
                 </p>
               </div>
             </div>
 
             <div className="hidden items-center gap-4 sm:flex">
-              <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1.5 text-[10px] text-text-secondary">
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
                 Revenue
               </span>
 
-              <span className="flex items-center gap-1.5 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1.5 text-[10px] text-text-secondary">
                 <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
                 Orders
               </span>
@@ -1137,7 +1137,7 @@ export default async function AnalyticsPage({
                       : undefined,
                 }}
               >
-                <div className="flex h-[250px] items-end gap-4 border-b border-slate-100 px-4">
+                <div className="flex h-[250px] items-end gap-4 border-b border-border px-4">
                   {revenue.byMonth.map((item) => {
                     const revenueHeight =
                       monthlyMax > 0
@@ -1200,7 +1200,7 @@ export default async function AnalyticsPage({
                         </div>
 
                         <div className="mt-3 pb-1 text-center">
-                          <p className="truncate text-[10px] font-semibold text-slate-600">
+                          <p className="truncate text-[10px] font-semibold text-text-secondary">
                             {item.month}
                           </p>
                         </div>
@@ -1221,26 +1221,26 @@ export default async function AnalyticsPage({
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">Product + Production Intelligence</p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">Product Economics & Production</h2>
-              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">Current product economics, paid sales profitability, production output, and production-cost movement for the selected period.</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-text-primary">Product Economics & Production</h2>
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-text-secondary">Current product economics, paid sales profitability, production output, and production-cost movement for the selected period.</p>
             </div>
           </div>
 
           {productIntelligence.products.length === 0 ? (
             <div>{emptyState("No products found.")}</div>
           ) : (
-            <div className="overflow-x-auto rounded-[22px] border border-slate-200 bg-white p-5">
+            <div className="overflow-x-auto rounded-[22px] border border-border bg-surface-raised p-5">
               <table className="w-full min-w-[1180px] border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 text-left">
-                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Product</th>
-                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Sell Price</th>
-                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Pre-Ship Cost</th>
-                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Margin</th>
-                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Revenue</th>
-                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Units</th>
-                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Avg Production Cost</th>
-                    <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Cost Change</th>
+                  <tr className="border-b border-border text-left">
+                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Product</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Sell Price</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Pre-Ship Cost</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Margin</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Revenue</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Units</th>
+                    <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Avg Production Cost</th>
+                    <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">Cost Change</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1249,16 +1249,16 @@ export default async function AnalyticsPage({
                     return (
                       <tr key={item.productId} className="border-b border-slate-50 last:border-b-0">
                         <td className="py-4 pr-4">
-                          <p className="text-xs font-semibold text-slate-800">{item.productName}</p>
-                          <p className="mt-0.5 text-[10px] text-slate-400">{item.sku}</p>
+                          <p className="text-xs font-semibold text-text-primary">{item.productName}</p>
+                          <p className="mt-0.5 text-[10px] text-text-muted">{item.sku}</p>
                         </td>
-                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.currentEconomics.sellingPrice === null ? "Unavailable" : money(item.currentEconomics.sellingPrice, currencySymbol)}</td>
-                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.currentEconomics.preShippingUnitCost === null ? "Unavailable" : money(item.currentEconomics.preShippingUnitCost, currencySymbol)}</td>
-                        <td className="py-4 pr-4 text-right text-xs font-semibold text-slate-900">{item.currentEconomics.contributionMarginPct === null ? "Unavailable" : `${item.currentEconomics.contributionMarginPct.toFixed(1)}%`}</td>
-                        <td className="py-4 pr-4 text-right text-xs font-semibold text-slate-900">{money(item.sales.revenue, currencySymbol)}</td>
-                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.sales.unitsSold.toLocaleString("en-IN")}</td>
-                        <td className="py-4 pr-4 text-right text-xs text-slate-700">{item.production.averageProductionCostPerUnit === null ? "Unavailable" : money(item.production.averageProductionCostPerUnit, currencySymbol)}</td>
-                        <td className="py-4 text-right text-xs font-semibold">{change === null ? <span className="text-slate-400">Unavailable</span> : <span className={change > 0 ? "text-red-600" : change < 0 ? "text-emerald-700" : "text-slate-600"}>{change >= 0 ? "+" : ""}{change.toFixed(1)}%</span>}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-text-secondary">{item.currentEconomics.sellingPrice === null ? "Unavailable" : money(item.currentEconomics.sellingPrice, currencySymbol)}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-text-secondary">{item.currentEconomics.preShippingUnitCost === null ? "Unavailable" : money(item.currentEconomics.preShippingUnitCost, currencySymbol)}</td>
+                        <td className="py-4 pr-4 text-right text-xs font-semibold text-text-primary">{item.currentEconomics.contributionMarginPct === null ? "Unavailable" : `${item.currentEconomics.contributionMarginPct.toFixed(1)}%`}</td>
+                        <td className="py-4 pr-4 text-right text-xs font-semibold text-text-primary">{money(item.sales.revenue, currencySymbol)}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-text-secondary">{item.sales.unitsSold.toLocaleString("en-IN")}</td>
+                        <td className="py-4 pr-4 text-right text-xs text-text-secondary">{item.production.averageProductionCostPerUnit === null ? "Unavailable" : money(item.production.averageProductionCostPerUnit, currencySymbol)}</td>
+                        <td className="py-4 text-right text-xs font-semibold">{change === null ? <span className="text-text-muted">Unavailable</span> : <span className={change > 0 ? "text-red-600" : change < 0 ? "text-emerald-700" : "text-text-secondary"}>{change >= 0 ? "+" : ""}{change.toFixed(1)}%</span>}</td>
                       </tr>
                     );
                   })}
@@ -1279,17 +1279,17 @@ export default async function AnalyticsPage({
                 Inventory Intelligence
               </p>
 
-              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-text-primary">
                 Inventory Position & Movement
               </h2>
 
-              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-text-secondary">
                 Understand what inventory you hold today and how stock moved
                 during the selected period.
               </p>
             </div>
 
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">
+            <span className="rounded-full bg-surface-muted px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary">
               Current position + selected period movement
             </span>
           </div>
@@ -1297,15 +1297,15 @@ export default async function AnalyticsPage({
           {/* Inventory valuation KPIs */}
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="relative overflow-hidden rounded-[22px] border border-emerald-100 bg-white p-5">
+            <div className="relative overflow-hidden rounded-[22px] border border-emerald-100 bg-surface-raised p-5">
               <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-50" />
 
               <div className="relative">
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Total Inventory Value
                 </p>
 
-                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                   {inventory.summary.totalInventoryValue === null
                     ? "Unavailable"
                     : money(
@@ -1314,7 +1314,7 @@ export default async function AnalyticsPage({
                       )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   {inventory.summary.valuationComplete
                     ? "Finished goods + raw + packaging"
                     : "Finished-product valuation is incomplete"}
@@ -1322,15 +1322,15 @@ export default async function AnalyticsPage({
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-[22px] border border-blue-100 bg-white p-5">
+            <div className="relative overflow-hidden rounded-[22px] border border-blue-100 bg-surface-raised p-5">
               <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-blue-50" />
 
               <div className="relative">
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Finished Products
                 </p>
 
-                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                   {inventory.summary.finishedProductValue === null
                     ? "Unavailable"
                     : money(
@@ -1339,7 +1339,7 @@ export default async function AnalyticsPage({
                       )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   {inventory.summary.finishedProductCount}{" "}
                   {inventory.summary.finishedProductCount === 1
                     ? "product"
@@ -1349,15 +1349,15 @@ export default async function AnalyticsPage({
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-[22px] border border-amber-100 bg-white p-5">
+            <div className="relative overflow-hidden rounded-[22px] border border-amber-100 bg-surface-raised p-5">
               <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-amber-50" />
 
               <div className="relative">
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Raw Materials
                 </p>
 
-                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                   {inventory.summary.rawMaterialValue === null
                     ? "Unavailable"
                     : money(
@@ -1366,7 +1366,7 @@ export default async function AnalyticsPage({
                       )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   {inventory.summary.rawMaterialCount}{" "}
                   {inventory.summary.rawMaterialCount === 1
                     ? "material"
@@ -1376,15 +1376,15 @@ export default async function AnalyticsPage({
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-[22px] border border-violet-100 bg-white p-5">
+            <div className="relative overflow-hidden rounded-[22px] border border-violet-100 bg-surface-raised p-5">
               <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-violet-50" />
 
               <div className="relative">
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">
                   Packaging Materials
                 </p>
 
-                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+                <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                   {inventory.summary.packagingMaterialValue === null
                     ? "Unavailable"
                     : money(
@@ -1393,7 +1393,7 @@ export default async function AnalyticsPage({
                       )}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   {inventory.summary.packagingMaterialCount}{" "}
                   {inventory.summary.packagingMaterialCount === 1
                     ? "material"
@@ -1405,31 +1405,31 @@ export default async function AnalyticsPage({
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Inventory Concentration</p>
-              <p className="mt-3 text-lg font-semibold text-slate-950">{inventory.summary.concentration.topItemName ?? "Unavailable"}</p>
-              <p className="mt-1 text-xs text-slate-500">Top item holds {inventory.summary.concentration.topItemSharePct === null ? "—" : `${inventory.summary.concentration.topItemSharePct.toFixed(1)}%`} of current inventory value.</p>
-              <p className="mt-2 text-[10px] text-slate-400">Top 3 share: {inventory.summary.concentration.topThreeItemSharePct === null ? "—" : `${inventory.summary.concentration.topThreeItemSharePct.toFixed(1)}%`}</p>
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Inventory Concentration</p>
+              <p className="mt-3 text-lg font-semibold text-text-primary">{inventory.summary.concentration.topItemName ?? "Unavailable"}</p>
+              <p className="mt-1 text-xs text-text-secondary">Top item holds {inventory.summary.concentration.topItemSharePct === null ? "—" : `${inventory.summary.concentration.topItemSharePct.toFixed(1)}%`} of current inventory value.</p>
+              <p className="mt-2 text-[10px] text-text-muted">Top 3 share: {inventory.summary.concentration.topThreeItemSharePct === null ? "—" : `${inventory.summary.concentration.topThreeItemSharePct.toFixed(1)}%`}</p>
             </div>
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Stock Coverage</p>
-              <p className="mt-3 text-lg font-semibold text-slate-950">{inventory.finishedProducts.filter((item) => item.stockCoverageDays !== null).length} products measurable</p>
-              <p className="mt-1 text-xs text-slate-500">Coverage uses available stock and paid-unit sales over the selected bounded period.</p>
-              <p className="mt-2 text-[10px] text-slate-400">All Time shows unavailable because there is no fixed demand window.</p>
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Stock Coverage</p>
+              <p className="mt-3 text-lg font-semibold text-text-primary">{inventory.finishedProducts.filter((item) => item.stockCoverageDays !== null).length} products measurable</p>
+              <p className="mt-1 text-xs text-text-secondary">Coverage uses available stock and paid-unit sales over the selected bounded period.</p>
+              <p className="mt-2 text-[10px] text-text-muted">All Time shows unavailable because there is no fixed demand window.</p>
             </div>
           </div>
 
           {/* Stock alerts + movement summary */}
 
           <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[0.9fr_2.1fr]">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Stock Alerts
                   </h3>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-text-secondary">
                     Based on available stock after promotional reservations.
                   </p>
                 </div>
@@ -1476,14 +1476,14 @@ export default async function AnalyticsPage({
                     return (
                       <div
                         key={item.productId}
-                        className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-3 py-3"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-muted px-3 py-3"
                       >
                         <div className="min-w-0">
-                          <p className="truncate text-xs font-semibold text-slate-800">
+                          <p className="truncate text-xs font-semibold text-text-primary">
                             {item.productName}
                           </p>
 
-                          <p className="mt-0.5 text-[10px] text-slate-400">
+                          <p className="mt-0.5 text-[10px] text-text-muted">
                             {item.sku} · reorder at{" "}
                             {item.reorderLevel}
                           </p>
@@ -1507,14 +1507,14 @@ export default async function AnalyticsPage({
               )}
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Inventory Movement
                   </h3>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-text-secondary">
                     Recorded stock movements during the selected period.
                   </p>
                 </div>
@@ -1561,13 +1561,13 @@ export default async function AnalyticsPage({
                 ].map(([label, value]) => (
                   <div
                     key={label}
-                    className="rounded-xl bg-slate-50 p-3"
+                    className="rounded-xl bg-surface-muted p-3"
                   >
-                    <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
                       {label}
                     </p>
 
-                    <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-slate-900">
+                    <p className="mt-2 text-lg font-semibold tracking-[-0.03em] text-text-primary">
                       {Number(value).toLocaleString("en-IN")}
                     </p>
                   </div>
@@ -1575,8 +1575,8 @@ export default async function AnalyticsPage({
               </div>
 
               {inventory.movement.byMonth.length === 0 ? (
-                <div className="mt-5 rounded-xl bg-slate-50 p-4 text-center">
-                  <p className="text-xs font-medium text-slate-500">
+                <div className="mt-5 rounded-xl bg-surface-muted p-4 text-center">
+                  <p className="text-xs font-medium text-text-secondary">
                     No inventory movement recorded in this period.
                   </p>
                 </div>
@@ -1584,23 +1584,23 @@ export default async function AnalyticsPage({
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full min-w-[760px] border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-100 text-left">
-                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                      <tr className="border-b border-border text-left">
+                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Month
                         </th>
-                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           RM Purchases
                         </th>
-                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           RM Consumption
                         </th>
-                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Packaging
                         </th>
-                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Production
                         </th>
-                        <th className="pb-3 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Sales
                         </th>
                       </tr>
@@ -1612,20 +1612,20 @@ export default async function AnalyticsPage({
                           key={item.month}
                           className="border-b border-slate-50 last:border-b-0"
                         >
-                          <td className="py-3 pr-4 text-xs font-semibold text-slate-700">
+                          <td className="py-3 pr-4 text-xs font-semibold text-text-secondary">
                             {item.month}
                           </td>
-                          <td className="py-3 pr-4 text-xs text-slate-600">
+                          <td className="py-3 pr-4 text-xs text-text-secondary">
                             {item.rawMaterialPurchases.toLocaleString(
                               "en-IN",
                             )}
                           </td>
-                          <td className="py-3 pr-4 text-xs text-slate-600">
+                          <td className="py-3 pr-4 text-xs text-text-secondary">
                             {item.rawMaterialConsumption.toLocaleString(
                               "en-IN",
                             )}
                           </td>
-                          <td className="py-3 pr-4 text-xs text-slate-600">
+                          <td className="py-3 pr-4 text-xs text-text-secondary">
                             {item.packagingPurchases.toLocaleString(
                               "en-IN",
                             )}{" "}
@@ -1634,12 +1634,12 @@ export default async function AnalyticsPage({
                               "en-IN",
                             )}
                           </td>
-                          <td className="py-3 pr-4 text-xs text-slate-600">
+                          <td className="py-3 pr-4 text-xs text-text-secondary">
                             {item.finishedProductProduction.toLocaleString(
                               "en-IN",
                             )}
                           </td>
-                          <td className="py-3 text-xs text-slate-600">
+                          <td className="py-3 text-xs text-text-secondary">
                             {item.finishedProductSales.toLocaleString(
                               "en-IN",
                             )}
@@ -1655,7 +1655,7 @@ export default async function AnalyticsPage({
 
           {/* Finished-product stock */}
 
-          <div className="mt-4 rounded-[22px] border border-slate-200 bg-white p-6">
+          <div className="mt-4 rounded-[22px] border border-border bg-surface-raised p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50">
@@ -1663,17 +1663,17 @@ export default async function AnalyticsPage({
                 </span>
 
                 <div>
-                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Finished Product Inventory
                   </h3>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-text-secondary">
                     Physical stock, available stock, and current valuation.
                   </p>
                 </div>
               </div>
 
-              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              <span className="rounded-full bg-surface-muted px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary">
                 Current stock
               </span>
             </div>
@@ -1686,26 +1686,26 @@ export default async function AnalyticsPage({
               <div className="mt-6 overflow-x-auto">
                 <table className="w-full min-w-[900px] border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 text-left">
-                      <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <tr className="border-b border-border text-left">
+                      <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Product
                       </th>
-                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Physical
                       </th>
-                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Promotional
                       </th>
-                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Available
                       </th>
-                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Unit Cost
                       </th>
-                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <th className="pb-3 pr-4 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Valuation
                       </th>
-                      <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                         Status
                       </th>
                     </tr>
@@ -1730,36 +1730,36 @@ export default async function AnalyticsPage({
                       return (
                         <tr
                           key={item.productId}
-                          className="border-b border-slate-50 last:border-b-0 hover:bg-slate-50/60"
+                          className="border-b border-slate-50 last:border-b-0 hover:bg-surface-muted/60"
                         >
                           <td className="py-4 pr-4">
-                            <p className="text-xs font-semibold text-slate-800">
+                            <p className="text-xs font-semibold text-text-primary">
                               {item.productName}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-slate-400">
+                            <p className="mt-0.5 text-[10px] text-text-muted">
                               {item.sku}
                             </p>
                           </td>
 
-                          <td className="py-4 pr-4 text-right text-xs text-slate-700">
+                          <td className="py-4 pr-4 text-right text-xs text-text-secondary">
                             {item.physicalStock.toLocaleString(
                               "en-IN",
                             )}
                           </td>
 
-                          <td className="py-4 pr-4 text-right text-xs text-slate-700">
+                          <td className="py-4 pr-4 text-right text-xs text-text-secondary">
                             {item.promotionalStock.toLocaleString(
                               "en-IN",
                             )}
                           </td>
 
-                          <td className="py-4 pr-4 text-right text-xs font-semibold text-slate-900">
+                          <td className="py-4 pr-4 text-right text-xs font-semibold text-text-primary">
                             {item.availableStock.toLocaleString(
                               "en-IN",
                             )}
                           </td>
 
-                          <td className="py-4 pr-4 text-right text-xs text-slate-600">
+                          <td className="py-4 pr-4 text-right text-xs text-text-secondary">
                             {item.valuationUnitCost === null
                               ? "—"
                               : money(
@@ -1768,7 +1768,7 @@ export default async function AnalyticsPage({
                                 )}
                           </td>
 
-                          <td className="py-4 pr-4 text-right text-xs font-semibold text-slate-900">
+                          <td className="py-4 pr-4 text-right text-xs font-semibold text-text-primary">
                             {item.valuation === null
                               ? "Unavailable"
                               : money(
@@ -1777,7 +1777,7 @@ export default async function AnalyticsPage({
                                 )}
                           </td>
 
-                          <td className="py-4 pr-4 text-right text-xs text-slate-600">
+                          <td className="py-4 pr-4 text-right text-xs text-text-secondary">
                             {item.stockCoverageDays === null
                               ? "Unavailable"
                               : `${item.stockCoverageDays.toFixed(1)} days`}
@@ -1802,14 +1802,14 @@ export default async function AnalyticsPage({
           {/* Raw + packaging inventory */}
 
           <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Raw Material Inventory
                   </h3>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-text-secondary">
                     Current quantity and inventory value.
                   </p>
                 </div>
@@ -1832,17 +1832,17 @@ export default async function AnalyticsPage({
                 <div className="mt-5 overflow-x-auto">
                   <table className="w-full min-w-[520px] border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-100 text-left">
-                        <th className="pb-3 pr-3 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                      <tr className="border-b border-border text-left">
+                        <th className="pb-3 pr-3 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Material
                         </th>
-                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Quantity
                         </th>
-                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Avg. Cost
                         </th>
-                        <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Value
                         </th>
                       </tr>
@@ -1855,25 +1855,25 @@ export default async function AnalyticsPage({
                           className="border-b border-slate-50 last:border-b-0"
                         >
                           <td className="py-3 pr-3">
-                            <p className="text-xs font-semibold text-slate-800">
+                            <p className="text-xs font-semibold text-text-primary">
                               {item.name}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-slate-400">
+                            <p className="mt-0.5 text-[10px] text-text-muted">
                               {item.baseUnit}
                             </p>
                           </td>
-                          <td className="py-3 pr-3 text-right text-xs text-slate-700">
+                          <td className="py-3 pr-3 text-right text-xs text-text-secondary">
                             {item.currentQuantity.toLocaleString(
                               "en-IN",
                             )}
                           </td>
-                          <td className="py-3 pr-3 text-right text-xs text-slate-600">
+                          <td className="py-3 pr-3 text-right text-xs text-text-secondary">
                             {money(
                               item.weightedAverageCost,
                               currencySymbol,
                             )}
                           </td>
-                          <td className="py-3 text-right text-xs font-semibold text-slate-900">
+                          <td className="py-3 text-right text-xs font-semibold text-text-primary">
                             {money(
                               item.currentValue,
                               currencySymbol,
@@ -1887,14 +1887,14 @@ export default async function AnalyticsPage({
               )}
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-6">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-6">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                  <h3 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                     Packaging Inventory
                   </h3>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-text-secondary">
                     Current quantity and inventory value.
                   </p>
                 </div>
@@ -1917,17 +1917,17 @@ export default async function AnalyticsPage({
                 <div className="mt-5 overflow-x-auto">
                   <table className="w-full min-w-[520px] border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-100 text-left">
-                        <th className="pb-3 pr-3 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                      <tr className="border-b border-border text-left">
+                        <th className="pb-3 pr-3 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Material
                         </th>
-                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Quantity
                         </th>
-                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 pr-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Avg. Cost
                         </th>
-                        <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                           Value
                         </th>
                       </tr>
@@ -1940,25 +1940,25 @@ export default async function AnalyticsPage({
                           className="border-b border-slate-50 last:border-b-0"
                         >
                           <td className="py-3 pr-3">
-                            <p className="text-xs font-semibold text-slate-800">
+                            <p className="text-xs font-semibold text-text-primary">
                               {item.name}
                             </p>
-                            <p className="mt-0.5 text-[10px] text-slate-400">
+                            <p className="mt-0.5 text-[10px] text-text-muted">
                               {item.baseUnit}
                             </p>
                           </td>
-                          <td className="py-3 pr-3 text-right text-xs text-slate-700">
+                          <td className="py-3 pr-3 text-right text-xs text-text-secondary">
                             {item.currentQuantity.toLocaleString(
                               "en-IN",
                             )}
                           </td>
-                          <td className="py-3 pr-3 text-right text-xs text-slate-600">
+                          <td className="py-3 pr-3 text-right text-xs text-text-secondary">
                             {money(
                               item.weightedAverageCost,
                               currencySymbol,
                             )}
                           </td>
-                          <td className="py-3 text-right text-xs font-semibold text-slate-900">
+                          <td className="py-3 text-right text-xs font-semibold text-text-primary">
                             {money(
                               item.currentValue,
                               currencySymbol,
@@ -1990,19 +1990,19 @@ export default async function AnalyticsPage({
             ORDERS
         ============================================================ */}
 
-        <section className="mt-4 rounded-[22px] border border-slate-200 bg-white p-6">
+        <section className="mt-4 rounded-[22px] border border-border bg-surface-raised p-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                <ShoppingCart className="h-5 w-5 text-slate-700" />
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-muted">
+                <ShoppingCart className="h-5 w-5 text-text-secondary" />
               </span>
 
               <div>
-                <h2 className="text-lg font-semibold tracking-[-0.035em] text-slate-950">
+                <h2 className="text-lg font-semibold tracking-[-0.035em] text-text-primary">
                   Revenue by Order
                 </h2>
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-text-secondary">
                   Individual paid orders in the selected period
                 </p>
               </div>
@@ -2010,7 +2010,7 @@ export default async function AnalyticsPage({
 
             <Link
               href="/orders"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-950"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-2 text-xs font-medium text-text-secondary transition hover:border-border-strong hover:text-text-primary"
             >
               Open orders
               <ArrowRight className="h-3.5 w-3.5" />
@@ -2025,24 +2025,24 @@ export default async function AnalyticsPage({
             <div className="mt-6 overflow-x-auto">
               <table className="w-full min-w-[720px] border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 text-left">
-                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                  <tr className="border-b border-border text-left">
+                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                       Order
                     </th>
 
-                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                       Date
                     </th>
 
-                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                       Customer
                     </th>
 
-                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <th className="pb-3 pr-4 text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                       Channel
                     </th>
 
-                    <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                    <th className="pb-3 text-right text-[9px] font-bold uppercase tracking-[0.14em] text-text-muted">
                       Revenue
                     </th>
                   </tr>
@@ -2052,19 +2052,19 @@ export default async function AnalyticsPage({
                   {revenue.byOrder.map((item) => (
                     <tr
                       key={item.orderId}
-                      className="group border-b border-slate-50 transition hover:bg-slate-50/70 last:border-b-0"
+                      className="group border-b border-slate-50 transition hover:bg-surface-muted/70 last:border-b-0"
                     >
                       <td className="py-4 pr-4">
-                        <span className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-[10px] font-bold text-slate-700">
+                        <span className="rounded-lg bg-surface-muted px-2.5 py-1.5 text-[10px] font-bold text-text-secondary">
                           {item.orderNumber}
                         </span>
                       </td>
 
-                      <td className="py-4 pr-4 text-xs text-slate-500">
+                      <td className="py-4 pr-4 text-xs text-text-secondary">
                         {formatDate(item.orderDate)}
                       </td>
 
-                      <td className="py-4 pr-4 text-xs font-medium text-slate-700">
+                      <td className="py-4 pr-4 text-xs font-medium text-text-secondary">
                         {item.customerName}
                       </td>
 
@@ -2074,7 +2074,7 @@ export default async function AnalyticsPage({
                         </span>
                       </td>
 
-                      <td className="py-4 text-right text-sm font-bold text-slate-900">
+                      <td className="py-4 text-right text-sm font-bold text-text-primary">
                         {money(item.revenue, currencySymbol)}
                       </td>
                     </tr>
@@ -2095,69 +2095,69 @@ export default async function AnalyticsPage({
               <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-700">
                 Expense Intelligence
               </p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-text-primary">
                 Operating Expenses
               </h2>
-              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-text-secondary">
                 Understand where operating money is going and how spending changes across the selected period.
               </p>
             </div>
 
-            <span className="rounded-full bg-slate-100 px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">
+            <span className="rounded-full bg-surface-muted px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary">
               Finance expense ledger
             </span>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-[22px] border border-amber-100 bg-white p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Total Expenses</p>
-              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+            <div className="rounded-[22px] border border-amber-100 bg-surface-raised p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Total Expenses</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                 {money(expenses.summary.totalExpenses, currencySymbol)}
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 {expenses.summary.expenseCount} recorded {expenses.summary.expenseCount === 1 ? "expense" : "expenses"}
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Average Expense</p>
-              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Average Expense</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                 {expenses.summary.averageExpense === null
                   ? "Unavailable"
                   : money(expenses.summary.averageExpense, currencySymbol)}
               </p>
-              <p className="mt-1 text-xs text-slate-500">Per recorded expense</p>
+              <p className="mt-1 text-xs text-text-secondary">Per recorded expense</p>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Recurring Expenses</p>
-              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Recurring Expenses</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                 {money(expenses.summary.recurringExpenseTotal, currencySymbol)}
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 {expenses.summary.recurringExpenseCount} recurring {expenses.summary.recurringExpenseCount === 1 ? "record" : "records"}
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Largest Category Share</p>
-              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-slate-950">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Largest Category Share</p>
+              <p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-text-primary">
                 {expenses.concentration.topCategorySharePct === null
                   ? "Unavailable"
                   : `${expenses.concentration.topCategorySharePct.toFixed(1)}%`}
               </p>
-              <p className="mt-1 truncate text-xs text-slate-500">
+              <p className="mt-1 truncate text-xs text-text-secondary">
                 {expenses.byCategory[0]?.category ?? "No category data"}
               </p>
             </div>
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-950">Expense Trend</h3>
-                  <p className="mt-1 text-xs text-slate-500">Monthly operating expenses in the selected period.</p>
+                  <h3 className="text-sm font-semibold text-text-primary">Expense Trend</h3>
+                  <p className="mt-1 text-xs text-text-secondary">Monthly operating expenses in the selected period.</p>
                 </div>
                 {expenses.trend.changePercentage !== null && (
                   <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold ${
@@ -2165,7 +2165,7 @@ export default async function AnalyticsPage({
                       ? "bg-rose-50 text-rose-700"
                       : expenses.trend.changePercentage < 0
                         ? "bg-emerald-50 text-emerald-700"
-                        : "bg-slate-100 text-slate-500"
+                        : "bg-surface-muted text-text-secondary"
                   }`}>
                     {percentage(expenses.trend.changePercentage)} vs previous period
                   </span>
@@ -2177,7 +2177,7 @@ export default async function AnalyticsPage({
               ) : (
                 <div className="mt-5 overflow-x-auto">
                   <div
-                    className="flex min-w-full items-end gap-4 border-b border-slate-100 px-4"
+                    className="flex min-w-full items-end gap-4 border-b border-border px-4"
                     style={{ minWidth: `${Math.max(expenses.byMonth.length * 105, 650)}px`, height: "250px" }}
                   >
                     {expenses.byMonth.map((item) => {
@@ -2196,7 +2196,7 @@ export default async function AnalyticsPage({
                             </div>
                           </div>
                           <div className="mt-3 pb-1 text-center">
-                            <p className="truncate text-[10px] font-semibold text-slate-600">{item.month}</p>
+                            <p className="truncate text-[10px] font-semibold text-text-secondary">{item.month}</p>
                           </div>
                         </div>
                       );
@@ -2206,10 +2206,10 @@ export default async function AnalyticsPage({
               )}
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
               <div>
-                <h3 className="text-sm font-semibold text-slate-950">Major Spending Categories</h3>
-                <p className="mt-1 text-xs text-slate-500">Categories ordered by recorded expense amount.</p>
+                <h3 className="text-sm font-semibold text-text-primary">Major Spending Categories</h3>
+                <p className="mt-1 text-xs text-text-secondary">Categories ordered by recorded expense amount.</p>
               </div>
 
               {expenses.byCategory.length === 0 ? (
@@ -2224,15 +2224,15 @@ export default async function AnalyticsPage({
                     return (
                       <div key={item.category}>
                         <div className="flex items-center justify-between gap-3">
-                          <p className="truncate text-xs font-semibold text-slate-700">{item.category}</p>
-                          <p className="shrink-0 text-xs font-semibold text-slate-950">
+                          <p className="truncate text-xs font-semibold text-text-secondary">{item.category}</p>
+                          <p className="shrink-0 text-xs font-semibold text-text-primary">
                             {money(item.totalAmount, currencySymbol)}
                           </p>
                         </div>
-                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted">
                           <div className="h-full rounded-full bg-amber-500" style={{ width: `${Math.min(width, 100)}%` }} />
                         </div>
-                        <p className="mt-1 text-[10px] text-slate-400">
+                        <p className="mt-1 text-[10px] text-text-muted">
                           {item.percentageOfTotal === null ? "Unavailable" : `${item.percentageOfTotal.toFixed(1)}%`} · {item.expenseCount} {item.expenseCount === 1 ? "expense" : "expenses"}
                         </p>
                       </div>
@@ -2244,15 +2244,15 @@ export default async function AnalyticsPage({
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1fr_1fr]">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-slate-950">Monthly Expense Detail</h3>
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <h3 className="text-sm font-semibold text-text-primary">Monthly Expense Detail</h3>
               <div className="mt-4 overflow-x-auto">
                 {expenses.byMonth.length === 0 ? (
-                  <p className="py-8 text-center text-xs text-slate-400">No monthly expense data.</p>
+                  <p className="py-8 text-center text-xs text-text-muted">No monthly expense data.</p>
                 ) : (
                   <table className="w-full min-w-[520px] text-left">
                     <thead>
-                      <tr className="border-b border-slate-100 text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">
+                      <tr className="border-b border-border text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">
                         <th className="pb-3">Month</th>
                         <th className="pb-3 text-right">Expenses</th>
                         <th className="pb-3 text-right">Count</th>
@@ -2261,9 +2261,9 @@ export default async function AnalyticsPage({
                     <tbody>
                       {expenses.byMonth.map((item) => (
                         <tr key={item.month} className="border-b border-slate-50 last:border-0">
-                          <td className="py-3 text-xs font-medium text-slate-700">{item.month}</td>
-                          <td className="py-3 text-right text-xs font-semibold text-slate-950">{money(item.totalAmount, currencySymbol)}</td>
-                          <td className="py-3 text-right text-xs text-slate-500">{item.expenseCount}</td>
+                          <td className="py-3 text-xs font-medium text-text-secondary">{item.month}</td>
+                          <td className="py-3 text-right text-xs font-semibold text-text-primary">{money(item.totalAmount, currencySymbol)}</td>
+                          <td className="py-3 text-right text-xs text-text-secondary">{item.expenseCount}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2272,22 +2272,22 @@ export default async function AnalyticsPage({
               </div>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-slate-950">Expense Concentration</h3>
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <h3 className="text-sm font-semibold text-text-primary">Expense Concentration</h3>
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Largest Category</p>
-                  <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-slate-950">
+                <div className="rounded-2xl bg-surface-muted p-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">Largest Category</p>
+                  <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-text-primary">
                     {expenses.concentration.topCategorySharePct === null ? "Unavailable" : `${expenses.concentration.topCategorySharePct.toFixed(1)}%`}
                   </p>
-                  <p className="mt-1 truncate text-xs text-slate-500">{expenses.byCategory[0]?.category ?? "No data"}</p>
+                  <p className="mt-1 truncate text-xs text-text-secondary">{expenses.byCategory[0]?.category ?? "No data"}</p>
                 </div>
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Top 3 Categories</p>
-                  <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-slate-950">
+                <div className="rounded-2xl bg-surface-muted p-4">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">Top 3 Categories</p>
+                  <p className="mt-2 text-xl font-semibold tracking-[-0.04em] text-text-primary">
                     {expenses.concentration.topThreeCategorySharePct === null ? "Unavailable" : `${expenses.concentration.topThreeCategorySharePct.toFixed(1)}%`}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">Share of total expenses</p>
+                  <p className="mt-1 text-xs text-text-secondary">Share of total expenses</p>
                 </div>
               </div>
             </div>
@@ -2302,28 +2302,28 @@ export default async function AnalyticsPage({
           <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-700">Cash Flow Intelligence</p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-slate-950">Cash Movement</h2>
-              <p className="mt-1 max-w-[760px] text-xs leading-5 text-slate-500">Understand cash coming in, cash going out, and the categories driving the movement in the selected period.</p>
+              <h2 className="mt-1 text-2xl font-semibold tracking-[-0.045em] text-text-primary">Cash Movement</h2>
+              <p className="mt-1 max-w-[760px] text-xs leading-5 text-text-secondary">Understand cash coming in, cash going out, and the categories driving the movement in the selected period.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-[22px] border border-emerald-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Cash Inflows</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-emerald-700">{money(cashFlow.summary.totalInflows, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">Customer collections + other income</p></div>
-            <div className="rounded-[22px] border border-red-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Cash Outflows</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-red-600">{money(cashFlow.summary.totalOutflows, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">All recorded cash payments</p></div>
-            <div className="rounded-[22px] border border-blue-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Net Cash Movement</p><p className={`mt-3 text-[28px] font-semibold tracking-[-0.05em] ${cashFlow.summary.netCashFlow >= 0 ? "text-blue-700" : "text-red-600"}`}>{money(cashFlow.summary.netCashFlow, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">Inflows minus outflows</p></div>
-            <div className="rounded-[22px] border border-amber-100 bg-white p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-400">Inventory Cash Outflow</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-amber-700">{money(cashFlow.summary.inventoryCashOutflow, currencySymbol)}</p><p className="mt-1 text-xs text-slate-500">Raw + packaging purchases</p></div>
+            <div className="rounded-[22px] border border-emerald-100 bg-surface-raised p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Cash Inflows</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-emerald-700">{money(cashFlow.summary.totalInflows, currencySymbol)}</p><p className="mt-1 text-xs text-text-secondary">Customer collections + other income</p></div>
+            <div className="rounded-[22px] border border-red-100 bg-surface-raised p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Cash Outflows</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-red-600">{money(cashFlow.summary.totalOutflows, currencySymbol)}</p><p className="mt-1 text-xs text-text-secondary">All recorded cash payments</p></div>
+            <div className="rounded-[22px] border border-blue-100 bg-surface-raised p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Net Cash Movement</p><p className={`mt-3 text-[28px] font-semibold tracking-[-0.05em] ${cashFlow.summary.netCashFlow >= 0 ? "text-blue-700" : "text-red-600"}`}>{money(cashFlow.summary.netCashFlow, currencySymbol)}</p><p className="mt-1 text-xs text-text-secondary">Inflows minus outflows</p></div>
+            <div className="rounded-[22px] border border-amber-100 bg-surface-raised p-5"><p className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-muted">Inventory Cash Outflow</p><p className="mt-3 text-[28px] font-semibold tracking-[-0.05em] text-amber-700">{money(cashFlow.summary.inventoryCashOutflow, currencySymbol)}</p><p className="mt-1 text-xs text-text-secondary">Raw + packaging purchases</p></div>
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.25fr_0.75fr]">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-slate-950">Monthly Cash Movement</h3>
-              <p className="mt-1 text-xs text-slate-500">Inflows, outflows and net movement by month.</p>
-              {cashFlow.byMonth.length === 0 ? <div className="mt-4">{emptyState("No cash movement in this period.")}</div> : <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[620px] text-left"><thead><tr className="border-b border-slate-100 text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400"><th className="pb-3">Month</th><th className="pb-3 text-right">Inflows</th><th className="pb-3 text-right">Outflows</th><th className="pb-3 text-right">Net</th></tr></thead><tbody>{cashFlow.byMonth.map((item) => <tr key={item.month} className="border-b border-slate-50 last:border-0"><td className="py-3 text-xs font-medium text-slate-700">{item.month}</td><td className="py-3 text-right text-xs font-semibold text-emerald-700">{money(item.inflows, currencySymbol)}</td><td className="py-3 text-right text-xs font-semibold text-red-600">{money(item.outflows, currencySymbol)}</td><td className={`py-3 text-right text-xs font-semibold ${item.netCashFlow >= 0 ? "text-slate-950" : "text-red-600"}`}>{money(item.netCashFlow, currencySymbol)}</td></tr>)}</tbody></table></div>}
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <h3 className="text-sm font-semibold text-text-primary">Monthly Cash Movement</h3>
+              <p className="mt-1 text-xs text-text-secondary">Inflows, outflows and net movement by month.</p>
+              {cashFlow.byMonth.length === 0 ? <div className="mt-4">{emptyState("No cash movement in this period.")}</div> : <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[620px] text-left"><thead><tr className="border-b border-border text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted"><th className="pb-3">Month</th><th className="pb-3 text-right">Inflows</th><th className="pb-3 text-right">Outflows</th><th className="pb-3 text-right">Net</th></tr></thead><tbody>{cashFlow.byMonth.map((item) => <tr key={item.month} className="border-b border-slate-50 last:border-0"><td className="py-3 text-xs font-medium text-text-secondary">{item.month}</td><td className="py-3 text-right text-xs font-semibold text-emerald-700">{money(item.inflows, currencySymbol)}</td><td className="py-3 text-right text-xs font-semibold text-red-600">{money(item.outflows, currencySymbol)}</td><td className={`py-3 text-right text-xs font-semibold ${item.netCashFlow >= 0 ? "text-text-primary" : "text-red-600"}`}>{money(item.netCashFlow, currencySymbol)}</td></tr>)}</tbody></table></div>}
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-slate-950">Cash Flow Breakdown</h3>
-              <p className="mt-1 text-xs text-slate-500">Where cash moved during the selected period.</p>
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <h3 className="text-sm font-semibold text-text-primary">Cash Flow Breakdown</h3>
+              <p className="mt-1 text-xs text-text-secondary">Where cash moved during the selected period.</p>
               <div className="mt-5 space-y-4">
                 {[
                   ["Customer Collections", cashFlow.summary.customerCollections],
@@ -2338,23 +2338,23 @@ export default async function AnalyticsPage({
                   const numericAmount = Number(amount);
                   const denominator = cashFlow.summary.totalInflows + cashFlow.summary.totalOutflows;
                   const width = denominator > 0 ? (numericAmount / denominator) * 100 : 0;
-                  return <div key={String(label)}><div className="flex items-center justify-between gap-3"><p className="text-xs font-semibold text-slate-700">{label}</p><p className="text-xs font-semibold text-slate-950">{money(numericAmount, currencySymbol)}</p></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(width, 100)}%` }} /></div></div>;
+                  return <div key={String(label)}><div className="flex items-center justify-between gap-3"><p className="text-xs font-semibold text-text-secondary">{label}</p><p className="text-xs font-semibold text-text-primary">{money(numericAmount, currencySymbol)}</p></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(width, 100)}%` }} /></div></div>;
                 })}
               </div>
             </div>
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1fr_1fr]">
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-slate-950">Cash Flow Categories</h3>
-              <p className="mt-1 text-xs text-slate-500">Recorded cash transactions grouped by category.</p>
-              {cashFlow.byCategory.length === 0 ? <p className="py-8 text-center text-xs text-slate-400">No cash transaction data.</p> : <div className="mt-4 space-y-3">{cashFlow.byCategory.map((item) => <div key={`${item.type}-${item.category}`} className="rounded-xl bg-slate-50 px-3 py-3"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="truncate text-xs font-semibold text-slate-800">{item.category}</p><p className="mt-0.5 text-[10px] text-slate-400">{item.type} · {item.count} {item.count === 1 ? "transaction" : "transactions"}</p></div><p className="shrink-0 text-xs font-semibold text-slate-950">{money(item.amount, currencySymbol)}</p></div><p className="mt-2 text-[10px] text-slate-400">{item.percentageOfTotal === null ? "Unavailable" : `${item.percentageOfTotal.toFixed(1)}% of cash movement`}</p></div>)}</div>}
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <h3 className="text-sm font-semibold text-text-primary">Cash Flow Categories</h3>
+              <p className="mt-1 text-xs text-text-secondary">Recorded cash transactions grouped by category.</p>
+              {cashFlow.byCategory.length === 0 ? <p className="py-8 text-center text-xs text-text-muted">No cash transaction data.</p> : <div className="mt-4 space-y-3">{cashFlow.byCategory.map((item) => <div key={`${item.type}-${item.category}`} className="rounded-xl bg-surface-muted px-3 py-3"><div className="flex items-center justify-between gap-3"><div className="min-w-0"><p className="truncate text-xs font-semibold text-text-primary">{item.category}</p><p className="mt-0.5 text-[10px] text-text-muted">{item.type} · {item.count} {item.count === 1 ? "transaction" : "transactions"}</p></div><p className="shrink-0 text-xs font-semibold text-text-primary">{money(item.amount, currencySymbol)}</p></div><p className="mt-2 text-[10px] text-text-muted">{item.percentageOfTotal === null ? "Unavailable" : `${item.percentageOfTotal.toFixed(1)}% of cash movement`}</p></div>)}</div>}
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-slate-950">Cash Flow Trend</h3>
-              <p className="mt-1 text-xs text-slate-500">Net cash movement compared with the previous equivalent period.</p>
-              {isAllTime ? <div className="mt-5 rounded-2xl bg-slate-50 p-5"><p className="text-sm font-semibold text-slate-800">No previous-period baseline</p><p className="mt-1 text-xs leading-5 text-slate-500">Select a bounded period such as 7D, 30D, 3M, 1Y or Custom to compare cash movement with the previous equivalent period.</p></div> : <div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Current Net</p><p className={`mt-2 text-xl font-semibold tracking-[-0.04em] ${cashFlow.trend.currentPeriodNetCashFlow >= 0 ? "text-emerald-700" : "text-red-600"}`}>{money(cashFlow.trend.currentPeriodNetCashFlow, currencySymbol)}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400">Previous Net</p><p className={`mt-2 text-xl font-semibold tracking-[-0.04em] ${cashFlow.trend.previousPeriodNetCashFlow >= 0 ? "text-slate-950" : "text-red-600"}`}>{money(cashFlow.trend.previousPeriodNetCashFlow, currencySymbol)}</p></div><div className="col-span-2 rounded-2xl border border-slate-100 p-4"><div className="flex items-center justify-between gap-3"><span className="text-xs text-slate-500">Change</span><span className={`text-sm font-semibold ${cashFlow.trend.changeAmount >= 0 ? "text-emerald-700" : "text-red-600"}`}>{cashFlow.trend.changeAmount >= 0 ? "+" : ""}{money(cashFlow.trend.changeAmount, currencySymbol)}</span></div><div className="mt-2 flex items-center justify-between gap-3"><span className="text-xs text-slate-500">Change %</span><span className="text-sm font-semibold text-slate-950">{percentage(cashFlow.trend.changePercentage)}</span></div></div></div>}
+            <div className="rounded-[22px] border border-border bg-surface-raised p-5">
+              <h3 className="text-sm font-semibold text-text-primary">Cash Flow Trend</h3>
+              <p className="mt-1 text-xs text-text-secondary">Net cash movement compared with the previous equivalent period.</p>
+              {isAllTime ? <div className="mt-5 rounded-2xl bg-surface-muted p-5"><p className="text-sm font-semibold text-text-primary">No previous-period baseline</p><p className="mt-1 text-xs leading-5 text-text-secondary">Select a bounded period such as 7D, 30D, 3M, 1Y or Custom to compare cash movement with the previous equivalent period.</p></div> : <div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-2xl bg-surface-muted p-4"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">Current Net</p><p className={`mt-2 text-xl font-semibold tracking-[-0.04em] ${cashFlow.trend.currentPeriodNetCashFlow >= 0 ? "text-emerald-700" : "text-red-600"}`}>{money(cashFlow.trend.currentPeriodNetCashFlow, currencySymbol)}</p></div><div className="rounded-2xl bg-surface-muted p-4"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">Previous Net</p><p className={`mt-2 text-xl font-semibold tracking-[-0.04em] ${cashFlow.trend.previousPeriodNetCashFlow >= 0 ? "text-text-primary" : "text-red-600"}`}>{money(cashFlow.trend.previousPeriodNetCashFlow, currencySymbol)}</p></div><div className="col-span-2 rounded-2xl border border-border p-4"><div className="flex items-center justify-between gap-3"><span className="text-xs text-text-secondary">Change</span><span className={`text-sm font-semibold ${cashFlow.trend.changeAmount >= 0 ? "text-emerald-700" : "text-red-600"}`}>{cashFlow.trend.changeAmount >= 0 ? "+" : ""}{money(cashFlow.trend.changeAmount, currencySymbol)}</span></div><div className="mt-2 flex items-center justify-between gap-3"><span className="text-xs text-text-secondary">Change %</span><span className="text-sm font-semibold text-text-primary">{percentage(cashFlow.trend.changePercentage)}</span></div></div></div>}
             </div>
           </div>
         </section>

@@ -73,7 +73,7 @@ const formulationQuantity = z.preprocess(
  * One raw-material line in a formulation.
  */
 const formulationItemSchema = z.object({
-  rawMaterialId: z.string().uuid("Invalid raw material ID format"),
+  rawMaterialId: z.string().trim().min(1, "Raw material ID is required"),
 
   /**
    * Quantity required to make ONE finished product unit.
@@ -88,7 +88,7 @@ const formulationItemSchema = z.object({
  */
 export const CreateProductFormulationSchema = z
   .object({
-    productId: z.string().uuid("Invalid product ID format"),
+    productId: z.string().trim().min(1, "Product ID is required"),
 
     name: z
       .string({
@@ -138,21 +138,21 @@ export const CreateProductFormulationSchema = z
  * Fetch all formulations for one product.
  */
 export const GetProductFormulationsSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
+  productId: z.string().trim().min(1, "Product ID is required"),
 });
 
 /**
  * Fetch the active formulation for one product.
  */
 export const GetActiveProductFormulationSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
+  productId: z.string().trim().min(1, "Product ID is required"),
 });
 
 /**
  * Delete one formulation version.
  */
 export const DeleteProductFormulationSchema = z.object({
-  id: z.string().uuid("Invalid formulation ID format"),
+  id: z.string().trim().min(1, "Formulation ID is required"),
 });
 
 export type CreateProductFormulationInput = z.infer<

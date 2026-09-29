@@ -1,7 +1,9 @@
+
 "use client";
 
 import { useState } from "react";
 import { Mail, Phone, UserPlus, Users } from "lucide-react";
+import { StatCard } from "@/components/shared/stat-card";
 import type { SerializedCustomer } from "@/modules/customers/types";
 import { CustomerFormDialog } from "./customer-form-dialog";
 import { CustomerTable } from "./customer-table";
@@ -10,9 +12,7 @@ interface CustomerClientProps {
   customers: SerializedCustomer[];
 }
 
-export function CustomerClient({
-  customers,
-}: CustomerClientProps) {
+export function CustomerClient({ customers }: CustomerClientProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] =
     useState<SerializedCustomer | null>(null);
@@ -43,84 +43,37 @@ export function CustomerClient({
   return (
     <>
       <div className="space-y-6">
-        {/* Summary */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Total Customers
-                </p>
+        <section
+          aria-label="Customer summary"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+        >
+          <StatCard
+            title="Total Customers"
+            value={customers.length}
+            subtitle="Customer records"
+            icon={<Users className="h-5 w-5" aria-hidden="true" />}
+          />
+          <StatCard
+            title="Email Available"
+            value={customersWithEmail}
+            subtitle="Records with email"
+            icon={<Mail className="h-5 w-5" aria-hidden="true" />}
+          />
+          <StatCard
+            title="Phone Available"
+            value={customersWithPhone}
+            subtitle="Records with phone"
+            icon={<Phone className="h-5 w-5" aria-hidden="true" />}
+          />
+        </section>
 
-                <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-                  {customers.length}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Customer records
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-slate-50 p-2.5">
-                <Users className="h-5 w-5 text-slate-500" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Email Available
-                </p>
-
-                <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-                  {customersWithEmail}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Records with email
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-slate-50 p-2.5">
-                <Mail className="h-5 w-5 text-slate-500" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                  Phone Available
-                </p>
-
-                <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-                  {customersWithPhone}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Records with phone
-                </p>
-              </div>
-
-              <div className="rounded-lg bg-slate-50 p-2.5">
-                <Phone className="h-5 w-5 text-slate-500" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Customer Directory */}
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900">
+        <section className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-[var(--shadow-card)]">
+          <div className="flex flex-col gap-4 border-b border-border px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-text-primary">
                 Customer Directory
               </h2>
-
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-sm text-text-secondary">
                 Contact records used across your business operations.
               </p>
             </div>
@@ -128,9 +81,9 @@ export function CustomerClient({
             <button
               type="button"
               onClick={handleAddCustomer}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
             >
-              <UserPlus className="h-4 w-4" />
+              <UserPlus className="h-4 w-4" aria-hidden="true" />
               Add Customer
             </button>
           </div>
@@ -139,7 +92,7 @@ export function CustomerClient({
             customers={customers}
             onEdit={handleEditCustomer}
           />
-        </div>
+        </section>
       </div>
 
       <CustomerFormDialog

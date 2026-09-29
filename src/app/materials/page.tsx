@@ -21,11 +21,11 @@ export default async function MaterialsPage() {
           Costing Workspace
         </p>
 
-        <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
+        <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em] text-text-primary">
           Materials
         </h1>
 
-        <p className="mt-1 max-w-2xl text-sm text-slate-500">
+        <p className="mt-1 max-w-2xl text-sm text-text-secondary">
           Manage raw materials and packaging materials,
           track inventory value, and maintain accurate
           weighted-average costs.

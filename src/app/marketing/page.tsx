@@ -50,21 +50,21 @@ function MarketingContent({
               Marketing Workspace
             </p>
 
-            <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em] text-slate-950">
+            <h1 className="mt-1 text-3xl font-semibold tracking-[-0.04em] text-text-primary">
               Marketing
             </h1>
 
-            <p className="mt-1.5 max-w-2xl text-sm text-slate-500">
+            <p className="mt-1.5 max-w-2xl text-sm text-text-secondary">
               Plan, track, publish, and measure your content.
             </p>
           </div>
 
           <div className="hidden shrink-0 text-right sm:block">
-            <p className="text-2xl font-semibold tracking-[-0.03em] text-slate-950">
+            <p className="text-2xl font-semibold tracking-[-0.03em] text-text-primary">
               {summary.totalContent}
             </p>
 
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-xs text-text-muted">
               {summary.totalContent === 1
                 ? "Content item"
                 : "Content items"}

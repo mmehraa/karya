@@ -1,7 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopNav } from "@/components/layout/top-nav";
 
@@ -21,13 +20,16 @@ export function AppShellClient({
   stageId,
 }: AppShellClientProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="min-h-screen bg-[#f7f6f2] text-slate-900">
+    <div className="min-h-screen bg-background text-text-primary">
       <TopNav
         stageName={stageName}
         stageId={stageId}
         onMenuClick={() => setIsMenuOpen(true)}
+        menuButtonRef={menuButtonRef}
+        isMenuOpen={isMenuOpen}
       />
 
       <Sidebar
@@ -35,12 +37,11 @@ export function AppShellClient({
         industry={industry}
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
+        menuButtonRef={menuButtonRef}
       />
 
-      <main className="min-h-[calc(100vh-72px)] px-5 pb-10 pt-6 sm:px-8 lg:px-10">
-        <div className="mx-auto w-full max-w-[1440px]">
-          {children}
-        </div>
+      <main className="min-h-[calc(100vh-68px)] px-4 pb-8 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pb-10">
+        <div className="mx-auto w-full max-w-[1600px]">{children}</div>
       </main>
     </div>
   );

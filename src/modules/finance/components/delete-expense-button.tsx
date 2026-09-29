@@ -80,7 +80,7 @@ export function DeleteExpenseButton({
         type="button"
         onClick={handleDeleteRequest}
         disabled={isPending}
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
         aria-label={`Delete expense: ${description}`}
         title="Delete expense"
       >
@@ -116,7 +116,7 @@ export function DeleteExpenseButton({
             aria-modal="true"
             aria-labelledby="delete-expense-title"
             aria-describedby="delete-expense-description"
-            className="relative w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-2xl"
+            className="relative w-full max-w-sm rounded-2xl border border-border bg-surface-raised p-6 text-left shadow-2xl"
             onMouseDown={(event) => {
               event.stopPropagation();
             }}
@@ -129,7 +129,7 @@ export function DeleteExpenseButton({
             {/* Title */}
             <h3
               id="delete-expense-title"
-              className="mt-4 text-left text-base font-semibold text-slate-950"
+              className="mt-4 text-left text-base font-semibold text-text-primary"
             >
               Delete this expense?
             </h3>
@@ -137,9 +137,9 @@ export function DeleteExpenseButton({
             {/* Description */}
             <p
               id="delete-expense-description"
-              className="mt-2 text-left text-sm leading-6 text-slate-500"
+              className="mt-2 text-left text-sm leading-6 text-text-secondary"
             >
-              <span className="font-medium text-slate-700">
+              <span className="font-medium text-text-secondary">
                 {description}
               </span>{" "}
               will be permanently deleted. This action
@@ -152,7 +152,7 @@ export function DeleteExpenseButton({
                 type="button"
                 onClick={handleDeleteCancel}
                 disabled={isPending}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                className="rounded-xl border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
               >
                 Cancel
               </button>

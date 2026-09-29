@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-const uuidSchema = z.string().uuid();
+const entityIdSchema = z.string().trim().min(1, "ID is required.");
 
 export const CreateProductionBatchSchema = z.object({
-  productId: uuidSchema,
+  productId: entityIdSchema,
 
-  formulationId: uuidSchema,
+  formulationId: entityIdSchema,
 
-  packagingConfigurationId: uuidSchema,
+  packagingConfigurationId: entityIdSchema,
 
   batchNumber: z
     .string()
@@ -35,7 +35,7 @@ export const CreateProductionBatchSchema = z.object({
 });
 
 export const CompleteProductionBatchSchema = z.object({
-  batchId: uuidSchema,
+  batchId: entityIdSchema,
 
   producedQuantity: z
     .number()
@@ -57,19 +57,19 @@ export const CompleteProductionBatchSchema = z.object({
 });
 
 export const ProductionBatchIdSchema = z.object({
-  batchId: uuidSchema,
+  batchId: entityIdSchema,
 });
 
 export const GetProductionBatchSchema = z.object({
-  batchId: uuidSchema,
+  batchId: entityIdSchema,
 });
 
 export const GetProductionBatchesSchema = z.object({
-  productId: uuidSchema.optional(),
+  productId: entityIdSchema.optional(),
 });
 
 export const DeleteProductionBatchSchema = z.object({
-  batchId: uuidSchema,
+  batchId: entityIdSchema,
 });
 
 export type CreateProductionBatchInput =

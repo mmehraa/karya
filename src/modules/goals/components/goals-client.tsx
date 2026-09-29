@@ -148,16 +148,16 @@ export function GoalsClient({
 
   return (
     <>
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
         {/* Header */}
-        <div className="border-b border-slate-100 px-6 py-6 sm:px-7">
-          <div className="flex items-start justify-between gap-5">
+        <div className="border-b border-border px-6 py-6 sm:px-7">
+          <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-start sm:gap-5">
             <div>
-              <h1 className="text-2xl font-semibold tracking-[-0.035em] text-slate-950">
+              <h1 className="text-2xl font-semibold tracking-[-0.035em] text-text-primary">
                 Goals
               </h1>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-text-secondary">
                 Set goals, track progress and stay
                 motivated.
               </p>
@@ -168,7 +168,7 @@ export function GoalsClient({
               onClick={() =>
                 setIsGoalDialogOpen(true)
               }
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-emerald-950 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-900"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-950 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Plus className="h-4 w-4" />
               Add Goal
@@ -176,7 +176,7 @@ export function GoalsClient({
           </div>
 
           {/* Tabs */}
-          <div className="mt-6 flex items-center gap-7 border-b border-slate-100">
+          <div className="mt-6 flex items-center gap-7 overflow-x-auto border-b border-border">
             {tabs.map((tab) => {
               const isActive =
                 activeFilter === tab.id;
@@ -185,14 +185,15 @@ export function GoalsClient({
                 <button
                   key={tab.id}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() =>
                     setActiveFilter(tab.id)
                   }
                   className={[
-                    "relative -mb-px flex items-center gap-2 pb-3 text-xs font-medium transition-colors",
+                    "relative -mb-px flex min-h-10 shrink-0 items-center gap-2 pb-3 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
                     isActive
-                      ? "font-semibold text-slate-950"
-                      : "text-slate-500 hover:text-slate-800",
+                      ? "font-semibold text-text-primary"
+                      : "text-text-secondary hover:text-text-primary",
                   ].join(" ")}
                 >
                   <span>{tab.label}</span>
@@ -201,8 +202,8 @@ export function GoalsClient({
                     className={[
                       "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
                       isActive
-                        ? "bg-slate-100 text-slate-700"
-                        : "text-slate-400",
+                        ? "bg-surface-muted text-text-secondary"
+                        : "text-text-muted",
                     ].join(" ")}
                   >
                     {tab.count}
@@ -220,11 +221,11 @@ export function GoalsClient({
         {/* Goals */}
         {filteredGoals.length === 0 ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-              <Target className="h-6 w-6 text-slate-400" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-muted">
+              <Target className="h-6 w-6 text-text-muted" />
             </div>
 
-            <h2 className="mt-4 text-sm font-semibold text-slate-950">
+            <h2 className="mt-4 text-sm font-semibold text-text-primary">
               {activeFilter === "ALL"
                 ? "No goals yet"
                 : activeFilter === "ACTIVE"
@@ -232,7 +233,7 @@ export function GoalsClient({
                   : "No completed goals"}
             </h2>
 
-            <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+            <p className="mt-1 max-w-sm text-xs leading-5 text-text-secondary">
               {activeFilter === "ALL"
                 ? "Start adding measurable objectives to track your business progress."
                 : activeFilter === "ACTIVE"
@@ -277,12 +278,12 @@ export function GoalsClient({
               return (
                 <article
                   key={goal.id}
-                  className="group min-h-[190px] rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                  className="group min-h-[190px] rounded-2xl border border-border bg-surface-raised p-5 transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md"
                 >
                   {/* Card top */}
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-50">
-                      <Icon className="h-5 w-5 text-slate-500" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-muted">
+                      <Icon className="h-5 w-5 text-text-secondary" />
                     </div>
 
                     <button
@@ -291,7 +292,7 @@ export function GoalsClient({
                         setSelectedGoal(goal)
                       }
                       aria-label={`Open ${goal.name}`}
-                      className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-text-secondary transition hover:border-border-strong hover:bg-surface-muted hover:text-text-primary"
                     >
                       <ArrowRight className="h-4 w-4" />
                     </button>
@@ -299,11 +300,11 @@ export function GoalsClient({
 
                   {/* Goal name */}
                   <div className="mt-5">
-                    <h3 className="text-sm font-semibold text-slate-950">
+                    <h3 className="text-sm font-semibold text-text-primary">
                       {goal.name}
                     </h3>
 
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs text-text-muted">
                       {goal.category}
                     </p>
                   </div>
@@ -311,11 +312,11 @@ export function GoalsClient({
                   {/* Progress */}
                   <div className="mt-5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-600">
+                      <span className="font-semibold text-text-secondary">
                         {progress}%
                       </span>
 
-                      <span className="text-slate-400">
+                      <span className="text-text-muted">
                         {formatValue(
                           goal.currentValue
                         )}{" "}
@@ -327,7 +328,7 @@ export function GoalsClient({
                       </span>
                     </div>
 
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted">
                       <div
                         className="h-full rounded-full bg-slate-800 transition-all"
                         style={{
@@ -349,7 +350,7 @@ export function GoalsClient({
                       {status.label}
                     </span>
 
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-text-muted">
                       Target:{" "}
                       {formatDate(
                         goal.endDate

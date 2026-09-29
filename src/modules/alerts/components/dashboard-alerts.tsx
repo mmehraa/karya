@@ -31,7 +31,7 @@ function severityClasses(
       return "border-blue-200 bg-blue-50";
 
     default:
-      return "border-slate-200 bg-slate-50";
+      return "border-border bg-surface-muted";
   }
 }
 
@@ -49,7 +49,7 @@ function iconClasses(
       return "text-blue-600";
 
     default:
-      return "text-slate-500";
+      return "text-text-secondary";
   }
 }
 
@@ -78,18 +78,18 @@ export function DashboardAlerts({
 
   if (activeAlerts.length === 0) {
     return (
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      <section className="rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="flex items-center gap-3 px-5 py-6 sm:px-7">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
-            <AlertTriangle className="h-5 w-5 text-slate-400" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-muted">
+            <AlertTriangle className="h-5 w-5 text-text-muted" />
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">
+            <h3 className="text-sm font-semibold text-text-primary">
               No active alerts
             </h3>
 
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-text-secondary">
               No operational issues currently require attention.
             </p>
           </div>
@@ -101,7 +101,7 @@ export function DashboardAlerts({
   const visibleAlerts = activeAlerts.slice(0, 5);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
       <div className="divide-y divide-slate-100">
         {visibleAlerts.map((alert) => (
           <div
@@ -118,7 +118,7 @@ export function DashboardAlerts({
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-sm font-semibold text-slate-900">
+                <h3 className="text-sm font-semibold text-text-primary">
                   {alert.title}
                 </h3>
 
@@ -135,7 +135,7 @@ export function DashboardAlerts({
                 )}
               </div>
 
-              <p className="mt-1 text-sm leading-5 text-slate-600">
+              <p className="mt-1 text-sm leading-5 text-text-secondary">
                 {alert.message}
               </p>
             </div>
@@ -143,7 +143,7 @@ export function DashboardAlerts({
             {alert.linkUrl && (
               <Link
                 href={alert.linkUrl}
-                className="mt-1 shrink-0 text-xs font-semibold text-slate-500 transition hover:text-slate-900"
+                className="mt-1 shrink-0 text-xs font-semibold text-text-secondary transition hover:text-text-primary"
               >
                 Open
               </Link>
@@ -153,10 +153,10 @@ export function DashboardAlerts({
       </div>
 
       {activeAlerts.length > 5 && (
-        <div className="flex items-center justify-center border-t border-slate-100 bg-slate-50 px-5 py-3">
+        <div className="flex items-center justify-center border-t border-border bg-surface-muted px-5 py-3">
           <Link
             href="/alerts"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 transition-colors hover:text-slate-900"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary transition-colors hover:text-text-primary"
           >
             View {activeAlerts.length - 5} more{" "}
             {activeAlerts.length - 5 === 1 ? "alert" : "alerts"}

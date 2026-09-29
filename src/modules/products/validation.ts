@@ -91,7 +91,7 @@ export const CreateProductSchema = z.object({
 });
 
 export const UpdateProductSchema = z.object({
-  id: z.string().uuid("Invalid product ID format"),
+  id: z.string().trim().min(1, "Product ID is required"),
 
   name: z
     .string()

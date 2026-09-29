@@ -274,10 +274,10 @@ export function PromotionalStockDialog({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="promotional-stock-dialog-title"
-                className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+                className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl"
             >
                 {/* Header */}
-                <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+                <div className="flex items-start justify-between border-b border-border px-6 py-5">
                     <div className="flex items-start gap-3">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
                             <Gift className="h-5 w-5" />
@@ -286,12 +286,12 @@ export function PromotionalStockDialog({
                         <div>
                             <h2
                                 id="promotional-stock-dialog-title"
-                                className="text-base font-semibold text-slate-900"
+                                className="text-base font-semibold text-text-primary"
                             >
                                 Promotional Stock
                             </h2>
 
-                            <p className="mt-1 text-xs leading-5 text-slate-500">
+                            <p className="mt-1 text-xs leading-5 text-text-secondary">
                                 Reserve, release, or dispatch physical stock
                                 for promotional use.
                             </p>
@@ -302,7 +302,7 @@ export function PromotionalStockDialog({
                         type="button"
                         onClick={handleClose}
                         disabled={isSubmitting}
-                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface-muted hover:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="Close"
                     >
                         <X className="h-5 w-5" />
@@ -315,7 +315,7 @@ export function PromotionalStockDialog({
                     <div>
                         <label
                             htmlFor="promotional-product"
-                            className="mb-1.5 block text-xs font-semibold text-slate-700"
+                            className="mb-1.5 block text-xs font-semibold text-text-secondary"
                         >
                             Product
                         </label>
@@ -330,7 +330,7 @@ export function PromotionalStockDialog({
                                 setDispatchResult(null);
                             }}
                             disabled={isSubmitting}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50"
+                            className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted"
                         >
                             {products.map((item) => (
                                 <option key={item.id} value={item.id}>
@@ -365,7 +365,7 @@ export function PromotionalStockDialog({
 
                     {/* Action */}
                     <div className="mt-5">
-                        <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                        <label className="mb-1.5 block text-xs font-semibold text-text-secondary">
                             Action
                         </label>
 
@@ -418,7 +418,7 @@ export function PromotionalStockDialog({
                     <div className="mt-5">
                         <label
                             htmlFor="promotional-quantity"
-                            className="mb-1.5 block text-xs font-semibold text-slate-700"
+                            className="mb-1.5 block text-xs font-semibold text-text-secondary"
                         >
                             Quantity
                         </label>
@@ -437,10 +437,10 @@ export function PromotionalStockDialog({
                             }}
                             disabled={isSubmitting}
                             placeholder="Enter units"
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50"
+                            className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted"
                         />
 
-                        <p className="mt-1.5 text-[11px] text-slate-500">
+                        <p className="mt-1.5 text-[11px] text-text-secondary">
                             {action === "ALLOCATE"
                                 ? `${product?.availableStock ?? 0} unit${(product?.availableStock ?? 0) === 1
                                     ? ""
@@ -478,7 +478,7 @@ export function PromotionalStockDialog({
                             <div>
                                 <label
                                     htmlFor="promotional-recipient"
-                                    className="mb-1.5 block text-xs font-semibold text-slate-700"
+                                    className="mb-1.5 block text-xs font-semibold text-text-secondary"
                                 >
                                     Recipient
                                 </label>
@@ -493,14 +493,14 @@ export function PromotionalStockDialog({
                                     }}
                                     disabled={isSubmitting}
                                     placeholder="e.g. Creator name, agency, or partner"
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50"
+                                    className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted"
                                 />
                             </div>
 
                             <div>
                                 <label
                                     htmlFor="promotional-purpose"
-                                    className="mb-1.5 block text-xs font-semibold text-slate-700"
+                                    className="mb-1.5 block text-xs font-semibold text-text-secondary"
                                 >
                                     Purpose
                                 </label>
@@ -515,7 +515,7 @@ export function PromotionalStockDialog({
                                     }}
                                     disabled={isSubmitting}
                                     placeholder="e.g. Barter collaboration"
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50"
+                                    className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted"
                                 />
                             </div>
 
@@ -523,10 +523,10 @@ export function PromotionalStockDialog({
                                 <div>
                                     <label
                                         htmlFor="promotional-reference"
-                                        className="mb-1.5 block text-xs font-semibold text-slate-700"
+                                        className="mb-1.5 block text-xs font-semibold text-text-secondary"
                                     >
                                         Reference
-                                        <span className="ml-1 font-normal text-slate-400">
+                                        <span className="ml-1 font-normal text-text-muted">
                                             optional
                                         </span>
                                     </label>
@@ -540,14 +540,14 @@ export function PromotionalStockDialog({
                                         }
                                         disabled={isSubmitting}
                                         placeholder="Campaign / collab ID"
-                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50"
+                                        className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted"
                                     />
                                 </div>
 
                                 <div>
                                     <label
                                         htmlFor="promotional-expense-date"
-                                        className="mb-1.5 block text-xs font-semibold text-slate-700"
+                                        className="mb-1.5 block text-xs font-semibold text-text-secondary"
                                     >
                                         Expense Date
                                     </label>
@@ -560,19 +560,19 @@ export function PromotionalStockDialog({
                                             setExpenseDate(event.target.value)
                                         }
                                         disabled={isSubmitting}
-                                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50"
+                                        className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition-colors focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted"
                                     />
                                 </div>
                             </div>
 
                             {estimatedDispatchCost !== null && (
-                                <div className="flex items-center justify-between rounded-lg border border-violet-200 bg-white px-3.5 py-3">
+                                <div className="flex items-center justify-between rounded-lg border border-violet-200 bg-surface-raised px-3.5 py-3">
                                     <div>
-                                        <p className="text-[11px] font-semibold text-slate-700">
+                                        <p className="text-[11px] font-semibold text-text-secondary">
                                             Estimated Promotional Expense
                                         </p>
 
-                                        <p className="mt-0.5 text-[10px] text-slate-500">
+                                        <p className="mt-0.5 text-[10px] text-text-secondary">
                                             Based on recorded product COGS
                                         </p>
                                     </div>
@@ -610,9 +610,9 @@ export function PromotionalStockDialog({
 
                     {/* Dispatch result */}
                     {dispatchResult && (
-                        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="mt-4 rounded-xl border border-border bg-surface-muted p-4">
                             <div className="flex items-center justify-between">
-                                <p className="text-xs font-semibold text-slate-900">
+                                <p className="text-xs font-semibold text-text-primary">
                                     Dispatch Recorded
                                 </p>
 
@@ -651,12 +651,12 @@ export function PromotionalStockDialog({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/50 px-6 py-4">
+                <div className="flex items-center justify-end gap-2 border-t border-border bg-surface-muted/50 px-6 py-4">
                     <button
                         type="button"
                         onClick={handleClose}
                         disabled={isSubmitting}
-                        className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg border border-border bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {dispatchResult ? "Done" : "Cancel"}
                     </button>
@@ -703,9 +703,9 @@ function StockSummary({
 }) {
     const classes = {
         neutral: {
-            wrapper: "border-slate-200 bg-white",
-            label: "text-slate-500",
-            value: "text-slate-900",
+            wrapper: "border-border bg-surface-raised",
+            label: "text-text-secondary",
+            value: "text-text-primary",
         },
         violet: {
             wrapper: "border-violet-200 bg-violet-50/50",
@@ -758,7 +758,7 @@ function ActionButton({
             disabled={disabled}
             className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${active
                     ? "border-slate-900 bg-slate-900 text-white shadow-sm"
-                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    : "border-border bg-surface-raised text-text-secondary hover:bg-surface-muted hover:text-text-primary"
                 }`}
         >
             {icon}
@@ -776,11 +776,11 @@ function ResultMetric({
 }) {
     return (
         <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
                 {label}
             </p>
 
-            <p className="mt-1 text-xs font-bold text-slate-900">
+            <p className="mt-1 text-xs font-bold text-text-primary">
                 {value}
             </p>
         </div>

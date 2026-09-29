@@ -212,24 +212,24 @@ export function StockMovementDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="stock-movement-dialog-title"
-        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+        <div className="flex items-start justify-between border-b border-border px-6 py-5">
           <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-muted text-text-secondary">
               <PackagePlus className="h-5 w-5" />
             </div>
 
             <div>
               <h2
                 id="stock-movement-dialog-title"
-                className="text-base font-semibold text-slate-900"
+                className="text-base font-semibold text-text-primary"
               >
                 Record Stock Movement
               </h2>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 Every movement creates an inventory ledger entry and updates
                 the current stock balance.
               </p>
@@ -240,7 +240,7 @@ export function StockMovementDialog({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg p-2 text-text-muted transition-colors hover:bg-surface-muted hover:text-text-secondary disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Close dialog"
           >
             <X className="h-4 w-4" />
@@ -253,7 +253,7 @@ export function StockMovementDialog({
             <div>
               <label
                 htmlFor="inventory-product"
-                className="mb-1.5 block text-xs font-semibold text-slate-700"
+                className="mb-1.5 block text-xs font-semibold text-text-secondary"
               >
                 Offering
               </label>
@@ -263,7 +263,7 @@ export function StockMovementDialog({
                 value={productId}
                 onChange={(event) => setProductId(event.target.value)}
                 disabled={isSubmitting}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
               >
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
@@ -278,7 +278,7 @@ export function StockMovementDialog({
             <div>
               <label
                 htmlFor="inventory-movement-type"
-                className="mb-1.5 block text-xs font-semibold text-slate-700"
+                className="mb-1.5 block text-xs font-semibold text-text-secondary"
               >
                 Event Type
               </label>
@@ -290,7 +290,7 @@ export function StockMovementDialog({
                   setType(event.target.value as MovementType)
                 }
                 disabled={isSubmitting}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
               >
                 {movementOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -299,7 +299,7 @@ export function StockMovementDialog({
                 ))}
               </select>
 
-              <p className="mt-1.5 text-[11px] text-slate-500">
+              <p className="mt-1.5 text-[11px] text-text-secondary">
                 {selectedOption?.description}
               </p>
             </div>
@@ -309,7 +309,7 @@ export function StockMovementDialog({
               <div>
                 <label
                   htmlFor="inventory-audit-direction"
-                  className="mb-1.5 block text-xs font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-semibold text-text-secondary"
                 >
                   Audit Direction
                 </label>
@@ -323,16 +323,16 @@ export function StockMovementDialog({
                     )
                   }
                   disabled={isSubmitting}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2.5 text-sm text-text-primary outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
                 >
                   <option value="INCREASE">Increase Stock</option>
                   <option value="DECREASE">Decrease Stock</option>
                 </select>
 
                 {selectedProduct && (
-                  <p className="mt-1.5 text-[11px] text-slate-500">
+                  <p className="mt-1.5 text-[11px] text-text-secondary">
                     Current stock:{" "}
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-text-secondary">
                       {selectedProduct.currentStock}
                     </span>
                   </p>
@@ -345,7 +345,7 @@ export function StockMovementDialog({
               <div>
                 <label
                   htmlFor="inventory-quantity"
-                  className="mb-1.5 block text-xs font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-semibold text-text-secondary"
                 >
                   Quantity
                 </label>
@@ -360,17 +360,17 @@ export function StockMovementDialog({
                   onChange={(event) => setQuantity(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="e.g. 25"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="inventory-unit-cost"
-                  className="mb-1.5 block text-xs font-semibold text-slate-700"
+                  className="mb-1.5 block text-xs font-semibold text-text-secondary"
                 >
                   Unit Cost
-                  <span className="ml-1 font-normal text-slate-400">
+                  <span className="ml-1 font-normal text-text-muted">
                     (optional)
                   </span>
                 </label>
@@ -385,7 +385,7 @@ export function StockMovementDialog({
                   onChange={(event) => setUnitCost(event.target.value)}
                   disabled={isSubmitting}
                   placeholder="e.g. 150.00"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
                 />
               </div>
             </div>
@@ -394,10 +394,10 @@ export function StockMovementDialog({
             <div>
               <label
                 htmlFor="inventory-reference"
-                className="mb-1.5 block text-xs font-semibold text-slate-700"
+                className="mb-1.5 block text-xs font-semibold text-text-secondary"
               >
                 Reference / Batch
-                <span className="ml-1 font-normal text-slate-400">
+                <span className="ml-1 font-normal text-text-muted">
                   (optional)
                 </span>
               </label>
@@ -410,7 +410,7 @@ export function StockMovementDialog({
                 onChange={(event) => setReferenceId(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="e.g. PO-001 or BATCH-2026-01"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                className="w-full rounded-lg border border-border-strong px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
               />
             </div>
 
@@ -418,10 +418,10 @@ export function StockMovementDialog({
             <div>
               <label
                 htmlFor="inventory-notes"
-                className="mb-1.5 block text-xs font-semibold text-slate-700"
+                className="mb-1.5 block text-xs font-semibold text-text-secondary"
               >
                 Notes
-                <span className="ml-1 font-normal text-slate-400">
+                <span className="ml-1 font-normal text-text-muted">
                   (optional)
                 </span>
               </label>
@@ -434,7 +434,7 @@ export function StockMovementDialog({
                 onChange={(event) => setNotes(event.target.value)}
                 disabled={isSubmitting}
                 placeholder="Add any relevant operational context..."
-                className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-slate-50"
+                className="w-full resize-none rounded-lg border border-border-strong px-3 py-2.5 text-sm text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-500 focus:ring-2 focus:ring-slate-200 disabled:bg-surface-muted"
               />
             </div>
 
@@ -449,12 +449,12 @@ export function StockMovementDialog({
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50/50 px-6 py-4">
+          <div className="flex items-center justify-end gap-3 border-t border-border bg-surface-muted/50 px-6 py-4">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancel
             </button>

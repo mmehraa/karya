@@ -256,7 +256,7 @@ export function GoalActionDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="goal-dialog-title"
-        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl"
       >
         {/* Main dialog */}
         <div
@@ -267,7 +267,7 @@ export function GoalActionDialog({
           }
         >
           {/* Header */}
-          <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+          <div className="flex items-start justify-between border-b border-border px-6 py-5">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-700">
                 Goal
@@ -275,14 +275,14 @@ export function GoalActionDialog({
 
               <h2
                 id="goal-dialog-title"
-                className="mt-1 text-lg font-semibold tracking-tight text-slate-950"
+                className="mt-1 text-lg font-semibold tracking-tight text-text-primary"
               >
                 {mode === "edit"
                   ? "Edit Goal"
                   : currentGoal.name}
               </h2>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 {currentGoal.category}
               </p>
             </div>
@@ -291,7 +291,7 @@ export function GoalActionDialog({
               type="button"
               onClick={onClose}
               disabled={isPending || isDeleteConfirmOpen}
-              className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+              className="rounded-lg p-2 text-text-muted transition hover:bg-surface-muted hover:text-text-primary disabled:opacity-50"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -304,18 +304,18 @@ export function GoalActionDialog({
               <div className="space-y-5 px-6 py-6">
                 <div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-text-secondary">
                       Progress
                     </span>
 
-                    <span className="text-slate-500">
+                    <span className="text-text-secondary">
                       {currentGoal.currentValue} /{" "}
                       {currentGoal.targetValue}{" "}
                       {currentGoal.unit}
                     </span>
                   </div>
 
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div
                       className="h-full rounded-full bg-emerald-800 transition-all"
                       style={{
@@ -330,28 +330,28 @@ export function GoalActionDialog({
                     />
                   </div>
 
-                  <p className="mt-2 text-xs font-semibold text-slate-500">
+                  <p className="mt-2 text-xs font-semibold text-text-secondary">
                     {currentGoal.progressPercent}% complete
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                  <div className="rounded-xl border border-border bg-surface-muted p-4">
+                    <p className="text-[10px] uppercase tracking-wide text-text-muted">
                       Start
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="mt-1 text-sm font-semibold text-text-primary">
                       {formatDate(currentGoal.startDate)}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                  <div className="rounded-xl border border-border bg-surface-muted p-4">
+                    <p className="text-[10px] uppercase tracking-wide text-text-muted">
                       Target
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="mt-1 text-sm font-semibold text-text-primary">
                       {formatDate(currentGoal.endDate)}
                     </p>
                   </div>
@@ -365,7 +365,7 @@ export function GoalActionDialog({
               </div>
 
               {/* Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/50 px-6 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface-muted/50 px-6 py-4">
                 <button
                   type="button"
                   onClick={handleDeleteRequest}
@@ -381,7 +381,7 @@ export function GoalActionDialog({
                     type="button"
                     onClick={() => setMode("edit")}
                     disabled={isPending}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
                   >
                     <Pencil className="h-4 w-4" />
                     Edit
@@ -407,7 +407,7 @@ export function GoalActionDialog({
               {/* Edit form */}
               <div className="space-y-4 px-6 py-6">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                  <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                     Goal Name
                   </label>
 
@@ -417,13 +417,13 @@ export function GoalActionDialog({
                       setName(event.target.value)
                     }
                     disabled={isPending}
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                    className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                   />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                    <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                       Category
                     </label>
 
@@ -433,12 +433,12 @@ export function GoalActionDialog({
                         setCategory(event.target.value)
                       }
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                    <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                       Unit
                     </label>
 
@@ -448,14 +448,14 @@ export function GoalActionDialog({
                         setUnit(event.target.value)
                       }
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                    <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                       Target Value
                     </label>
 
@@ -468,12 +468,12 @@ export function GoalActionDialog({
                         setTargetValue(event.target.value)
                       }
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                    <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                       Current Value
                     </label>
 
@@ -486,14 +486,14 @@ export function GoalActionDialog({
                         setCurrentValue(event.target.value)
                       }
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                    <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                       Start Date
                     </label>
 
@@ -504,12 +504,12 @@ export function GoalActionDialog({
                         setStartDate(event.target.value)
                       }
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">
+                    <label className="mb-1.5 block text-xs font-medium text-text-secondary">
                       End Date
                     </label>
 
@@ -520,7 +520,7 @@ export function GoalActionDialog({
                         setEndDate(event.target.value)
                       }
                       disabled={isPending}
-                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                      className="w-full rounded-xl border border-border px-3.5 py-2.5 text-sm outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
                     />
                   </div>
                 </div>
@@ -533,12 +533,12 @@ export function GoalActionDialog({
               </div>
 
               {/* Edit actions */}
-              <div className="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50/50 px-6 py-4">
+              <div className="flex items-center justify-end gap-2 border-t border-border bg-surface-muted/50 px-6 py-4">
                 <button
                   type="button"
                   onClick={() => setMode("view")}
                   disabled={isPending}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-xl border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-muted disabled:opacity-50"
                 >
                   Cancel
                 </button>
@@ -566,7 +566,7 @@ export function GoalActionDialog({
               aria-modal="true"
               aria-labelledby="delete-goal-title"
               aria-describedby="delete-goal-description"
-              className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl"
+              className="w-full max-w-sm rounded-2xl border border-border bg-surface-raised p-6 shadow-2xl"
               onMouseDown={(event) => {
                 event.stopPropagation();
               }}
@@ -577,16 +577,16 @@ export function GoalActionDialog({
 
               <h3
                 id="delete-goal-title"
-                className="mt-4 text-base font-semibold text-slate-950"
+                className="mt-4 text-base font-semibold text-text-primary"
               >
                 Delete this goal?
               </h3>
 
               <p
                 id="delete-goal-description"
-                className="mt-2 text-sm leading-6 text-slate-500"
+                className="mt-2 text-sm leading-6 text-text-secondary"
               >
-                <span className="font-medium text-slate-700">
+                <span className="font-medium text-text-secondary">
                   {currentGoal.name}
                 </span>{" "}
                 will be permanently deleted. This action
@@ -598,7 +598,7 @@ export function GoalActionDialog({
                   type="button"
                   onClick={handleDeleteCancel}
                   disabled={isPending}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded-xl border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary transition hover:bg-surface-muted disabled:opacity-50"
                 >
                   Cancel
                 </button>

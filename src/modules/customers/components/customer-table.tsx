@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Mail, MapPin, Pencil, Phone, Users } from "lucide-react";
@@ -14,17 +15,17 @@ export function CustomerTable({
 }: CustomerTableProps) {
   if (customers.length === 0) {
     return (
-      <div className="flex min-h-[260px] items-center justify-center px-6 py-10">
+      <div className="flex min-h-[260px] items-center justify-center px-6 py-12">
         <div className="max-w-sm text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50">
-            <Users className="h-6 w-6 text-slate-400" />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent">
+            <Users className="h-6 w-6" aria-hidden="true" />
           </div>
 
-          <h3 className="mt-4 text-sm font-semibold text-slate-900">
+          <h3 className="mt-4 text-sm font-semibold text-text-primary">
             No customers yet
           </h3>
 
-          <p className="mx-auto mt-1.5 max-w-xs text-xs leading-5 text-slate-500">
+          <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-text-secondary">
             Customer records will appear here when you add them manually or
             begin recording orders.
           </p>
@@ -35,80 +36,108 @@ export function CustomerTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] text-left">
+      <table className="w-full min-w-[720px] text-left">
+        <caption className="sr-only">Customer directory</caption>
         <thead>
-          <tr className="border-b border-slate-100 bg-slate-50/70">
-            <th className="px-6 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          <tr className="border-b border-border bg-surface-muted/70">
+            <th
+              scope="col"
+              className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary sm:px-6"
+            >
               Customer
             </th>
-
-            <th className="px-6 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <th
+              scope="col"
+              className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary sm:px-6"
+            >
               Contact
             </th>
-
-            <th className="px-6 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <th
+              scope="col"
+              className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary sm:px-6"
+            >
               Location
             </th>
-
-            <th className="px-6 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <th
+              scope="col"
+              className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary sm:px-6"
+            >
               Added
             </th>
-
-            <th className="px-6 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+            <th
+              scope="col"
+              className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-text-secondary sm:px-6"
+            >
               Action
             </th>
           </tr>
         </thead>
 
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-border">
           {customers.map((customer) => (
             <tr
               key={customer.id}
-              className="transition-colors hover:bg-slate-50/60"
+              className="transition-colors hover:bg-surface-muted/50"
             >
-              <td className="px-6 py-4">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
+              <td className="px-4 py-4 sm:px-6">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">
                     {customer.name}
                   </p>
 
-                  {customer.notes && (
-                    <p className="mt-1 max-w-[260px] truncate text-xs text-slate-400">
+                  {customer.notes ? (
+                    <p
+                      title={customer.notes}
+                      className="mt-1 max-w-[260px] truncate text-xs text-text-muted"
+                    >
                       {customer.notes}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </td>
 
-              <td className="px-6 py-4">
-                <div className="space-y-1.5 text-xs text-slate-500">
+              <td className="px-4 py-4 sm:px-6">
+                <div className="space-y-1.5 text-sm text-text-secondary">
                   {customer.phone ? (
                     <div className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-slate-400" />
+                      <Phone
+                        className="h-3.5 w-3.5 shrink-0 text-text-muted"
+                        aria-hidden="true"
+                      />
                       <span>{customer.phone}</span>
                     </div>
                   ) : null}
 
                   {customer.email ? (
                     <div className="flex items-center gap-2">
-                      <Mail className="h-3.5 w-3.5 text-slate-400" />
-                      <span className="max-w-[220px] truncate">
+                      <Mail
+                        className="h-3.5 w-3.5 shrink-0 text-text-muted"
+                        aria-hidden="true"
+                      />
+                      <span
+                        title={customer.email}
+                        className="max-w-[220px] truncate"
+                      >
                         {customer.email}
                       </span>
                     </div>
                   ) : null}
 
-                  {!customer.phone && !customer.email && (
-                    <span className="text-slate-400">No contact details</span>
-                  )}
+                  {!customer.phone && !customer.email ? (
+                    <span className="text-xs text-text-muted">
+                      No contact details
+                    </span>
+                  ) : null}
                 </div>
               </td>
 
-              <td className="px-6 py-4">
+              <td className="px-4 py-4 sm:px-6">
                 {customer.city || customer.state ? (
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <MapPin className="h-3.5 w-3.5 text-slate-400" />
-
+                  <div className="flex items-center gap-2 text-sm text-text-secondary">
+                    <MapPin
+                      className="h-3.5 w-3.5 shrink-0 text-text-muted"
+                      aria-hidden="true"
+                    />
                     <span>
                       {[customer.city, customer.state]
                         .filter(Boolean)
@@ -116,13 +145,13 @@ export function CustomerTable({
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-text-muted">
                     Not recorded
                   </span>
                 )}
               </td>
 
-              <td className="px-6 py-4 text-xs text-slate-500">
+              <td className="whitespace-nowrap px-4 py-4 text-sm text-text-secondary sm:px-6">
                 {new Intl.DateTimeFormat("en-IN", {
                   day: "2-digit",
                   month: "short",
@@ -130,13 +159,14 @@ export function CustomerTable({
                 }).format(new Date(customer.createdAt))}
               </td>
 
-              <td className="px-6 py-4 text-right">
+              <td className="px-4 py-4 text-right sm:px-6">
                 <button
                   type="button"
                   onClick={() => onEdit(customer)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  aria-label={`Edit ${customer.name}`}
+                  className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-border bg-surface-raised px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:bg-surface-muted hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
                 >
-                  <Pencil className="h-3.5 w-3.5" />
+                  <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                   Edit
                 </button>
               </td>

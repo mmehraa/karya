@@ -21,22 +21,22 @@ export function StatCard({
       : value;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-border bg-surface-raised p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-text-secondary">{title}</p>
 
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">
+          <p className="mt-2 break-words text-2xl font-semibold tracking-tight text-text-primary">
             {displayValue}
           </p>
 
           {subtitle ? (
-            <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+            <p className="mt-1 text-xs text-text-muted">{subtitle}</p>
           ) : null}
         </div>
 
         {icon ? (
-          <div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+          <div className="shrink-0 rounded-lg bg-accent-soft p-2 text-accent">
             {icon}
           </div>
         ) : null}

@@ -73,7 +73,7 @@ const unitCostValue = z.preprocess(
  * Existing normal inventory movement validation.
  */
 export const RecordStockMovementSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
+  productId: z.string().trim().min(1, "Product ID is required"),
 
   type: z.nativeEnum(InventoryTransactionType, {
     message: "Invalid inventory transaction type",
@@ -107,7 +107,7 @@ export type RecordStockMovementInput =
  * It simply reserves part of the physical stock for promotion.
  */
 export const AllocatePromotionalStockSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
+  productId: z.string().trim().min(1, "Product ID is required"),
 
   quantity: z.coerce
     .number({
@@ -125,7 +125,7 @@ export type AllocatePromotionalStockInput =
  * normally available stock.
  */
 export const ReleasePromotionalStockSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
+  productId: z.string().trim().min(1, "Product ID is required"),
 
   quantity: z.coerce
     .number({
@@ -148,7 +148,7 @@ export type ReleasePromotionalStockInput =
  * - creates a PromotionalDispatch record
  */
 export const PromotionalDispatchSchema = z.object({
-  productId: z.string().uuid("Invalid product ID format"),
+  productId: z.string().trim().min(1, "Product ID is required"),
 
   quantity: z.coerce
     .number({

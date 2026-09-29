@@ -4,7 +4,7 @@ const ProductPackagingConfigurationItemSchema =
   z.object({
     packagingMaterialId: z
       .string()
-      .uuid("Invalid packaging material ID."),
+      .min(1, "Packaging material ID is required."),
 
     quantity: z.coerce
       .number()
@@ -39,7 +39,7 @@ export const CreateProductPackagingConfigurationSchema =
   z.object({
     productId: z
       .string()
-      .uuid("Invalid product ID."),
+      .min(1, "Product ID is required."),
 
     name: z
       .string()
@@ -108,14 +108,14 @@ export const ProductPackagingConfigurationIdSchema =
   z.object({
     id: z
       .string()
-      .uuid("Invalid configuration ID."),
+      .min(1, "Configuration ID is required."),
   });
 
 export const ProductPackagingConfigurationProductIdSchema =
   z.object({
     productId: z
       .string()
-      .uuid("Invalid product ID."),
+      .min(1, "Product ID is required."),
   });
 
 export type CreateProductPackagingConfigurationInput =

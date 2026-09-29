@@ -61,9 +61,9 @@ function priorityClasses(priority: Priority): string {
     case Priority.MEDIUM:
       return "bg-amber-50 text-amber-700";
     case Priority.LOW:
-      return "bg-slate-100 text-slate-600";
+      return "bg-surface-muted text-text-secondary";
     default:
-      return "bg-slate-100 text-slate-600";
+      return "bg-surface-muted text-text-secondary";
   }
 }
 
@@ -79,7 +79,7 @@ function statusClasses(status: TaskStatus): string {
       return "bg-amber-50 text-amber-700";
 
     default:
-      return "bg-slate-100 text-slate-600";
+      return "bg-surface-muted text-text-secondary";
   }
 }
 
@@ -182,16 +182,16 @@ export function TasksClient({
 
   return (
     <>
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
         {/* ───────────────── Header ───────────────── */}
         <div className="px-6 pb-0 pt-6 sm:px-7">
-          <div className="flex items-start justify-between gap-6">
+          <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-start sm:gap-6">
             <div>
-              <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.035em] text-slate-950">
+              <h1 className="text-[22px] font-semibold leading-tight tracking-[-0.035em] text-text-primary">
                 Tasks
               </h1>
 
-              <p className="mt-1.5 text-sm text-slate-500">
+              <p className="mt-1.5 text-sm text-text-secondary">
                 Stay on top of what needs to be done.
               </p>
             </div>
@@ -199,7 +199,7 @@ export function TasksClient({
             <button
               type="button"
               onClick={openCreateDialog}
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-emerald-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-emerald-900 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Task
@@ -207,7 +207,7 @@ export function TasksClient({
           </div>
 
           {/* ───────────────── Tabs ───────────────── */}
-          <div className="mt-5 flex items-center gap-1 border-b border-slate-200">
+          <div className="mt-5 flex items-center gap-1 overflow-x-auto border-b border-border">
             {tabs.map((tab) => {
               const isActive = activeFilter === tab.key;
 
@@ -215,15 +215,16 @@ export function TasksClient({
                 <button
                   key={tab.key}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() => {
                     setActiveFilter(tab.key);
                     setOpenMenuId(null);
                   }}
                   className={[
-                    "relative flex items-center gap-1.5 px-3 pb-3 pt-1 text-xs transition-colors",
+                    "relative flex min-h-10 shrink-0 items-center gap-1.5 px-3 pb-3 pt-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
                     isActive
-                      ? "font-semibold text-slate-900"
-                      : "font-medium text-slate-500 hover:text-slate-800",
+                      ? "font-semibold text-text-primary"
+                      : "font-medium text-text-secondary hover:text-text-primary",
                   ].join(" ")}
                 >
                   <span>{tab.label}</span>
@@ -232,8 +233,8 @@ export function TasksClient({
                     className={[
                       "text-[10px]",
                       isActive
-                        ? "text-slate-500"
-                        : "text-slate-400",
+                        ? "text-text-secondary"
+                        : "text-text-muted",
                     ].join(" ")}
                   >
                     {tab.count}
@@ -250,17 +251,17 @@ export function TasksClient({
 
         {/* ───────────────── Empty State ───────────────── */}
         {filteredTasks.length === 0 ? (
-          <div className="flex min-h-[210px] items-center justify-center border-t border-slate-100 px-6 py-8">
+          <div className="flex min-h-[210px] items-center justify-center border-t border-border px-6 py-8">
             <div className="flex max-w-md flex-col items-center text-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-muted">
                 {activeFilter === "COMPLETED" ? (
-                  <CheckCircle2 className="h-5 w-5 text-slate-400" />
+                  <CheckCircle2 className="h-5 w-5 text-text-muted" />
                 ) : (
-                  <ListTodo className="h-5 w-5 text-slate-400" />
+                  <ListTodo className="h-5 w-5 text-text-muted" />
                 )}
               </div>
 
-              <h2 className="mt-4 text-sm font-semibold text-slate-900">
+              <h2 className="mt-4 text-sm font-semibold text-text-primary">
                 {activeFilter === "COMPLETED"
                   ? "No completed tasks"
                   : activeFilter === "PENDING"
@@ -268,7 +269,7 @@ export function TasksClient({
                     : "No tasks yet"}
               </h2>
 
-              <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+              <p className="mt-1 max-w-sm text-xs leading-5 text-text-secondary">
                 {activeFilter === "COMPLETED"
                   ? "Completed tasks will appear here."
                   : activeFilter === "PENDING"
@@ -281,8 +282,8 @@ export function TasksClient({
           /* ───────────────── Task Table ───────────────── */
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left">
-              <thead className="border-t border-slate-100 bg-slate-50/60">
-                <tr className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+              <thead className="border-t border-border bg-surface-muted/60">
+                <tr className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
                   <th className="w-[34%] px-6 py-3.5">
                     Task
                   </th>
@@ -319,7 +320,7 @@ export function TasksClient({
                   return (
                     <tr
                       key={task.id}
-                      className="group text-xs text-slate-700 transition-colors hover:bg-slate-50/60"
+                      className="group text-xs text-text-secondary transition-colors hover:bg-surface-muted/60"
                     >
                       {/* Task */}
                       <td className="px-6 py-3.5">
@@ -329,7 +330,7 @@ export function TasksClient({
                               "flex h-4 w-4 shrink-0 items-center justify-center rounded border",
                               task.status === TaskStatus.DONE
                                 ? "border-emerald-500 bg-emerald-50"
-                                : "border-slate-300 bg-white",
+                                : "border-border-strong bg-surface-raised",
                             ].join(" ")}
                           >
                             {task.status === TaskStatus.DONE && (
@@ -342,15 +343,15 @@ export function TasksClient({
                               className={[
                                 "truncate font-medium",
                                 task.status === TaskStatus.DONE
-                                  ? "text-slate-400 line-through"
-                                  : "text-slate-900",
+                                  ? "text-text-muted line-through"
+                                  : "text-text-primary",
                               ].join(" ")}
                             >
                               {task.title}
                             </p>
 
                             {task.description && (
-                              <p className="mt-0.5 max-w-[360px] truncate text-[10px] text-slate-400">
+                              <p className="mt-0.5 max-w-[360px] truncate text-[10px] text-text-muted">
                                 {task.description}
                               </p>
                             )}
@@ -359,7 +360,7 @@ export function TasksClient({
                       </td>
 
                       {/* Category */}
-                      <td className="px-4 py-3.5 text-slate-500">
+                      <td className="px-4 py-3.5 text-text-secondary">
                         —
                       </td>
 
@@ -369,7 +370,7 @@ export function TasksClient({
                           className={
                             overdue
                               ? "font-medium text-red-600"
-                              : "text-slate-600"
+                              : "text-text-secondary"
                           }
                         >
                           {formatDate(task.dueDate)}
@@ -412,19 +413,19 @@ export function TasksClient({
                                 : task.id
                             )
                           }
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-muted hover:text-text-secondary"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
 
                         {openMenuId === task.id && (
-                          <div className="absolute right-4 top-11 z-20 w-32 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 text-left shadow-lg">
+                          <div className="absolute right-4 top-11 z-20 w-32 overflow-hidden rounded-xl border border-border bg-surface-raised p-1 text-left shadow-lg">
                             <button
                               type="button"
                               onClick={() => openEditDialog(task)}
-                              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-muted"
                             >
-                              <Pencil className="h-3.5 w-3.5 text-slate-400" />
+                              <Pencil className="h-3.5 w-3.5 text-text-muted" />
                               Edit
                             </button>
                           </div>

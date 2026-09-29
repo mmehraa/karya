@@ -409,26 +409,26 @@ export function ProductFormDialog({
       aria-modal="true"
       aria-labelledby="product-dialog-title"
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-900/50 p-2 backdrop-blur-sm sm:p-3"
     >
       <div
         ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
-        className="my-8 w-full max-w-2xl space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-xl"
+        className="my-0 max-h-[calc(100dvh-1rem)] w-full max-w-4xl space-y-3 overflow-y-auto rounded-xl border border-border bg-surface-raised p-4 shadow-xl sm:max-h-[calc(100dvh-1.5rem)] sm:p-5"
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+        <div className="flex items-start justify-between border-b border-border pb-4">
           <div>
             <h2
               id="product-dialog-title"
-              className="text-lg font-bold tracking-tight text-slate-900"
+              className="text-lg font-bold tracking-tight text-text-primary"
             >
               {isEditMode
                 ? "Edit Catalog Offering"
                 : "Add New Offering"}
             </h2>
 
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-text-secondary">
               {isEditMode
                 ? `Updating product details for SKU: ${productToEdit?.sku}`
                 : "Register a core offering with pricing and product details."}
@@ -439,7 +439,7 @@ export function ProductFormDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50"
+            className="rounded-lg p-1 text-text-muted hover:bg-surface-muted hover:text-text-secondary disabled:opacity-50"
             aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
@@ -454,19 +454,19 @@ export function ProductFormDialog({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Basic Information */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
               Basic Information
             </h3>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {/* Product Name */}
               <div className="space-y-1 sm:col-span-2">
                 <label
                   htmlFor="product-name"
-                  className="block text-xs font-semibold text-slate-700"
+                  className="block text-xs font-semibold text-text-secondary"
                 >
                   Product Name *
                 </label>
@@ -481,10 +481,10 @@ export function ProductFormDialog({
                   }
                   placeholder="e.g., Brightening Face Pack"
                   disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
+                  className={`w-full rounded-lg border px-3 py-2 text-xs text-text-primary shadow-sm focus:outline-none focus:ring-1 ${
                     fieldErrors.name
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                      : "border-border-strong focus:border-blue-500 focus:ring-blue-500"
                   }`}
                 />
 
@@ -500,12 +500,12 @@ export function ProductFormDialog({
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="product-sku"
-                    className="block text-xs font-semibold text-slate-700"
+                    className="block text-xs font-semibold text-text-secondary"
                   >
                     SKU *
                   </label>
 
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-text-muted">
                     Uppercase only
                   </span>
                 </div>
@@ -519,10 +519,10 @@ export function ProductFormDialog({
                   }
                   placeholder="e.g., PR-BFP-100"
                   disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 font-mono text-xs uppercase text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
+                  className={`w-full rounded-lg border px-3 py-2 font-mono text-xs uppercase text-text-primary shadow-sm focus:outline-none focus:ring-1 ${
                     fieldErrors.sku
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                      : "border-border-strong focus:border-blue-500 focus:ring-blue-500"
                   }`}
                 />
 
@@ -537,7 +537,7 @@ export function ProductFormDialog({
               <div className="space-y-1">
                 <label
                   htmlFor="product-category"
-                  className="block text-xs font-semibold text-slate-700"
+                  className="block text-xs font-semibold text-text-secondary"
                 >
                   Category
                 </label>
@@ -551,7 +551,7 @@ export function ProductFormDialog({
                   }
                   placeholder="Skincare"
                   disabled={isPending}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
 
                 {fieldErrors.category && (
@@ -565,7 +565,7 @@ export function ProductFormDialog({
               <div className="space-y-1">
                 <label
                   htmlFor="product-status"
-                  className="block text-xs font-semibold text-slate-700"
+                  className="block text-xs font-semibold text-text-secondary"
                 >
                   Status
                 </label>
@@ -575,7 +575,7 @@ export function ProductFormDialog({
                   value={formData.status}
                   onChange={handleStatusChange}
                   disabled={isPending}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-medium text-text-primary shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
                   <option value={ProductStatus.DRAFT}>
                     Draft
@@ -596,12 +596,12 @@ export function ProductFormDialog({
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="product-reorder"
-                    className="block text-xs font-semibold text-slate-700"
+                    className="block text-xs font-semibold text-text-secondary"
                   >
                     Reorder Alert Threshold
                   </label>
 
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-text-muted">
                     Stock cache trigger
                   </span>
                 </div>
@@ -619,10 +619,10 @@ export function ProductFormDialog({
                     )
                   }
                   disabled={isPending}
-                  className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
+                  className={`w-full rounded-lg border px-3 py-2 text-xs text-text-primary shadow-sm focus:outline-none focus:ring-1 ${
                     fieldErrors.reorderLevel
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                      : "border-border-strong focus:border-blue-500 focus:ring-blue-500"
                   }`}
                 />
 
@@ -637,7 +637,7 @@ export function ProductFormDialog({
               <div className="space-y-1 sm:col-span-2">
                 <label
                   htmlFor="product-supplier"
-                  className="block text-xs font-semibold text-slate-700"
+                  className="block text-xs font-semibold text-text-secondary"
                 >
                   Supplier / Vendor (Optional)
                 </label>
@@ -651,7 +651,7 @@ export function ProductFormDialog({
                   }
                   placeholder="e.g., Supplier name"
                   disabled={isPending}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
@@ -659,7 +659,7 @@ export function ProductFormDialog({
               <div className="space-y-1 sm:col-span-2">
                 <label
                   htmlFor="product-description"
-                  className="block text-xs font-semibold text-slate-700"
+                  className="block text-xs font-semibold text-text-secondary"
                 >
                   Product Description (Optional)
                 </label>
@@ -676,20 +676,20 @@ export function ProductFormDialog({
                   }
                   placeholder="Key specifications, formulation details, or packaging volume..."
                   disabled={isPending}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Pricing */}
-          <div className="space-y-4 border-t border-slate-100 pt-4">
+          <div className="space-y-3 border-t border-border pt-3">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
                 Pricing
               </h3>
 
-              <p className="mt-1 text-[11px] leading-5 text-slate-400">
+              <p className="mt-1 text-[11px] leading-5 text-text-muted">
                 Selling price is the only product-level pricing input.
                 Product costs are calculated automatically from your
                 formulation and packaging configuration.
@@ -699,7 +699,7 @@ export function ProductFormDialog({
             <div className="max-w-sm space-y-1">
               <label
                 htmlFor="product-sp"
-                className="block text-xs font-semibold text-slate-700"
+                className="block text-xs font-semibold text-text-secondary"
               >
                 Target Selling Price (₹)
               </label>
@@ -718,10 +718,10 @@ export function ProductFormDialog({
                 }
                 placeholder="e.g., 650.00"
                 disabled={isPending}
-                className={`w-full rounded-lg border px-3 py-2 text-xs text-slate-900 shadow-sm focus:outline-none focus:ring-1 ${
+                className={`w-full rounded-lg border px-3 py-2 text-xs text-text-primary shadow-sm focus:outline-none focus:ring-1 ${
                   fieldErrors.sellingPrice
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                    : "border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+                    : "border-border-strong focus:border-blue-500 focus:ring-blue-500"
                 }`}
               />
 
@@ -734,9 +734,9 @@ export function ProductFormDialog({
           </div>
 
           {/* Dynamic Product Economics */}
-          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="space-y-2 rounded-xl border border-border bg-surface-muted p-3">
             <div className="flex items-start gap-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-raised text-blue-600 shadow-sm">
                 <Calculator className="h-4 w-4" />
               </div>
 
@@ -744,12 +744,12 @@ export function ProductFormDialog({
                 <div className="flex items-center gap-1.5">
                   <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
 
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
                     Product Economics
                   </h3>
                 </div>
 
-                <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                <p className="mt-1 text-[11px] leading-5 text-text-secondary">
                   Costs are calculated automatically from the active
                   formulation and active packaging configuration.
                 </p>
@@ -777,7 +777,7 @@ export function ProductFormDialog({
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <EconomicsValue
                     label="Raw material"
                     value={liveEconomics.rawMaterialCost}
@@ -857,10 +857,10 @@ export function ProductFormDialog({
                   />
                 </div>
 
-                <div className="border-t border-slate-200 pt-3">
-                  <div className="grid gap-2 text-[10px] text-slate-500 sm:grid-cols-2">
+                <div className="border-t border-border pt-3">
+                  <div className="grid gap-2 text-[10px] text-text-secondary sm:grid-cols-2">
                     <div>
-                      <span className="font-semibold text-slate-600">
+                      <span className="font-semibold text-text-secondary">
                         Formulation:
                       </span>{" "}
                       {economics.activeFormulationVersion !== null
@@ -869,7 +869,7 @@ export function ProductFormDialog({
                     </div>
 
                     <div>
-                      <span className="font-semibold text-slate-600">
+                      <span className="font-semibold text-text-secondary">
                         Packaging:
                       </span>{" "}
                       {economics.activePackagingConfigurationVersion !==
@@ -884,12 +884,12 @@ export function ProductFormDialog({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-2">
+          <div className="flex items-center justify-end gap-3 border-t border-border pt-2">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:opacity-50"
             >
               Cancel
             </button>
@@ -938,11 +938,11 @@ function EconomicsValue({
       ? "text-amber-700"
       : tone === "positive"
         ? "text-emerald-700"
-        : "text-slate-900";
+        : "text-text-primary";
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-3">
-      <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+    <div className="rounded-lg border border-border bg-surface-raised px-2.5 py-2">
+      <span className="block text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
         {label}
       </span>
 
@@ -959,7 +959,7 @@ function EconomicsValue({
       </span>
 
       {value === null && missingReason && (
-        <span className="mt-1 block text-[9px] leading-4 text-slate-400">
+        <span className="mt-1 block text-[9px] leading-4 text-text-muted">
           {missingReason}
         </span>
       )}

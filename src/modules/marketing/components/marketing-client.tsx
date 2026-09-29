@@ -78,11 +78,11 @@ export function MarketingClient({
         <section>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-text-muted">
                 Marketing Snapshot
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-text-secondary">
                 Monitor content production and publication activity.
               </p>
             </div>
@@ -104,25 +104,25 @@ export function MarketingClient({
               return (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm"
+                  className="rounded-2xl border border-border bg-surface-raised px-4 py-4 shadow-sm"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] font-medium text-slate-500">
+                      <p className="text-[11px] font-medium text-text-secondary">
                         {stat.label}
                       </p>
 
-                      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950">
+                      <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-text-primary">
                         {stat.value}
                       </p>
 
-                      <p className="mt-1 text-[10px] text-slate-400">
+                      <p className="mt-1 text-[10px] text-text-muted">
                         {stat.description}
                       </p>
                     </div>
 
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50">
-                      <Icon className="h-4 w-4 text-slate-500" />
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
+                      <Icon className="h-4 w-4 text-text-secondary" />
                     </div>
                   </div>
                 </div>
@@ -132,24 +132,24 @@ export function MarketingClient({
         </section>
 
         {/* Content Calendar */}
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-6">
+        <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
+          <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4 sm:px-6">
             <div>
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                  <CalendarDays className="h-4 w-4 text-slate-600" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-muted">
+                  <CalendarDays className="h-4 w-4 text-text-secondary" />
                 </div>
 
-                <h2 className="text-sm font-semibold text-slate-950">
+                <h2 className="text-sm font-semibold text-text-primary">
                   Content Calendar
                 </h2>
 
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
                   {contentList.length}
                 </span>
               </div>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 Track content from idea through publication.
               </p>
             </div>
@@ -166,15 +166,15 @@ export function MarketingClient({
 
           {contentList.length === 0 ? (
             <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-12 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-                <CalendarDays className="h-6 w-6 text-slate-400" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-muted">
+                <CalendarDays className="h-6 w-6 text-text-muted" />
               </div>
 
-              <h3 className="mt-4 text-sm font-semibold text-slate-950">
+              <h3 className="mt-4 text-sm font-semibold text-text-primary">
                 No content yet
               </h3>
 
-              <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
+              <p className="mt-1 max-w-md text-xs leading-5 text-text-secondary">
                 Your content pieces will appear here once you start adding
                 them to the marketing system.
               </p>
@@ -191,8 +191,8 @@ export function MarketingClient({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left">
-                <thead className="border-b border-slate-100 bg-slate-50/70">
-                  <tr className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <thead className="border-b border-border bg-surface-muted/70">
+                  <tr className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     <th className="px-5 py-3 sm:px-6">Content</th>
                     <th className="px-5 py-3 sm:px-6">Type</th>
                     <th className="px-5 py-3 sm:px-6">Status</th>
@@ -206,9 +206,9 @@ export function MarketingClient({
                   {contentList.map((content) => (
                     <tr
                       key={content.id}
-                      className="text-xs text-slate-700 transition-colors hover:bg-slate-50/60"
+                      className="text-xs text-text-secondary transition-colors hover:bg-surface-muted/60"
                     >
-                      <td className="px-5 py-4 font-medium text-slate-950 sm:px-6">
+                      <td className="px-5 py-4 font-medium text-text-primary sm:px-6">
                         {content.title}
                       </td>
 
@@ -246,19 +246,19 @@ export function MarketingClient({
         </section>
 
         {/* Platform Performance */}
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+        <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
+          <div className="border-b border-border px-5 py-4 sm:px-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
-                <BarChart3 className="h-4 w-4 text-slate-600" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-muted">
+                <BarChart3 className="h-4 w-4 text-text-secondary" />
               </div>
 
               <div>
-                <h2 className="text-sm font-semibold text-slate-950">
+                <h2 className="text-sm font-semibold text-text-primary">
                   Platform Performance
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Manually recorded performance metrics by platform.
                 </p>
               </div>
@@ -267,15 +267,15 @@ export function MarketingClient({
 
           {platformSummary.length === 0 ? (
             <div className="flex min-h-[240px] flex-col items-center justify-center px-6 py-10 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50">
-                <BarChart3 className="h-5 w-5 text-slate-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted">
+                <BarChart3 className="h-5 w-5 text-text-muted" />
               </div>
 
-              <h3 className="mt-4 text-sm font-semibold text-slate-950">
+              <h3 className="mt-4 text-sm font-semibold text-text-primary">
                 No platform data yet
               </h3>
 
-              <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
+              <p className="mt-1 max-w-md text-xs leading-5 text-text-secondary">
                 Platform performance will appear after content publications
                 and their metrics are recorded.
               </p>
@@ -283,8 +283,8 @@ export function MarketingClient({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left">
-                <thead className="border-b border-slate-100 bg-slate-50/70">
-                  <tr className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <thead className="border-b border-border bg-surface-muted/70">
+                  <tr className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                     <th className="px-5 py-3 sm:px-6">Platform</th>
                     <th className="px-5 py-3 sm:px-6">Publications</th>
                     <th className="px-5 py-3 sm:px-6">Published</th>
@@ -301,9 +301,9 @@ export function MarketingClient({
                   {platformSummary.map((platform) => (
                     <tr
                       key={platform.platform}
-                      className="text-xs text-slate-700 transition-colors hover:bg-slate-50/60"
+                      className="text-xs text-text-secondary transition-colors hover:bg-surface-muted/60"
                     >
-                      <td className="px-5 py-4 font-medium text-slate-950 sm:px-6">
+                      <td className="px-5 py-4 font-medium text-text-primary sm:px-6">
                         {platform.platform}
                       </td>
 

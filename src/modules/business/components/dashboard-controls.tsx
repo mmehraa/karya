@@ -163,14 +163,14 @@ export function DashboardControls({
               (open) => !open,
             )
           }
-          className="inline-flex items-center gap-2 rounded-lg px-1 py-1 text-left transition hover:bg-white/60"
+          className="inline-flex items-center gap-2 rounded-lg px-1 py-1 text-left transition hover:bg-surface-raised/60"
         >
-          <span className="text-[25px] font-medium tracking-[-0.035em] text-slate-950">
+          <span className="text-[25px] font-medium tracking-[-0.035em] text-text-primary">
             {businessName}
           </span>
 
           <ChevronDown
-            className={`h-5 w-5 text-slate-500 transition-transform ${
+            className={`h-5 w-5 text-text-secondary transition-transform ${
               isBusinessOpen
                 ? "rotate-180"
                 : ""
@@ -179,36 +179,36 @@ export function DashboardControls({
         </button>
 
         {isBusinessOpen && (
-          <div className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+          <div className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-border bg-surface-raised p-1.5 shadow-xl">
             <div className="px-3 py-2">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted">
                 Active business
               </p>
 
-              <p className="mt-1 text-sm font-semibold text-slate-900">
+              <p className="mt-1 text-sm font-semibold text-text-primary">
                 {businessName}
               </p>
             </div>
 
-            <div className="my-1 border-t border-slate-100" />
+            <div className="my-1 border-t border-border" />
 
             <a
               href="/select-business"
-              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+              className="block rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition hover:bg-surface-muted hover:text-text-primary"
             >
               Switch business
             </a>
           </div>
         )}
 
-        <p className="mt-0.5 text-sm text-slate-500">
+        <p className="mt-0.5 text-sm text-text-secondary">
           Simple Skincare. Thoughtful Ritual.
         </p>
       </div>
 
       {/* Period controls */}
       <div className="flex items-center gap-2">
-        <div className="flex items-center rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+        <div className="flex items-center rounded-full border border-border bg-surface-raised p-1 shadow-sm">
           {PERIODS.map((period) => {
             const active =
               activeRange === period.value;
@@ -222,8 +222,8 @@ export function DashboardControls({
                 }
                 className={`rounded-full px-4 py-2 text-xs font-medium transition ${
                   active
-                    ? "bg-slate-200 text-slate-900"
-                    : "text-slate-500 hover:text-slate-900"
+                    ? "bg-slate-200 text-text-primary"
+                    : "text-text-secondary hover:text-text-primary"
                 }`}
               >
                 {period.label}
@@ -239,10 +239,10 @@ export function DashboardControls({
           <button
             type="button"
             onClick={openCustomRange}
-            className={`inline-flex items-center gap-2 rounded-full border bg-white px-4 py-3 text-xs font-medium shadow-sm transition ${
+            className={`inline-flex items-center gap-2 rounded-full border bg-surface-raised px-4 py-3 text-xs font-medium shadow-sm transition ${
               activeRange === "custom"
-                ? "border-slate-300 text-slate-900"
-                : "border-slate-200 text-slate-600"
+                ? "border-border-strong text-text-primary"
+                : "border-border text-text-secondary"
             }`}
           >
             <CalendarDays className="h-4 w-4" />
@@ -251,14 +251,14 @@ export function DashboardControls({
           </button>
 
           {isCustomOpen && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
-              <p className="text-sm font-semibold text-slate-900">
+            <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border border-border bg-surface-raised p-4 shadow-xl">
+              <p className="text-sm font-semibold text-text-primary">
                 Custom period
               </p>
 
               <div className="mt-4 space-y-3">
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-slate-500">
+                  <span className="mb-1 block text-xs font-medium text-text-secondary">
                     From
                   </span>
 
@@ -270,12 +270,12 @@ export function DashboardControls({
                         event.target.value,
                       )
                     }
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600"
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-secondary outline-none focus:border-emerald-600"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-slate-500">
+                  <span className="mb-1 block text-xs font-medium text-text-secondary">
                     To
                   </span>
 
@@ -287,7 +287,7 @@ export function DashboardControls({
                         event.target.value,
                       )
                     }
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-emerald-600"
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text-secondary outline-none focus:border-emerald-600"
                   />
                 </label>
 

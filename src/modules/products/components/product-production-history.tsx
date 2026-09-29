@@ -95,14 +95,14 @@ export function ProductProductionHistory({
   }
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-5 py-5">
+    <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
+      <div className="border-b border-border px-5 py-5">
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold tracking-[-0.02em] text-slate-950">
+          <h2 className="text-base font-semibold tracking-[-0.02em] text-text-primary">
             Production history
           </h2>
 
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+          <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-text-secondary">
             {summaries.reduce(
               (total, summary) =>
                 total + summary.totalBatches,
@@ -111,7 +111,7 @@ export function ProductProductionHistory({
           </span>
         </div>
 
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-text-secondary">
           Historical production runs, actual output, and recorded
           production costs by product.
         </p>
@@ -133,11 +133,11 @@ export function ProductProductionHistory({
                       : summary.product.id,
                   )
                 }
-                className="w-full px-5 py-4 text-left transition-colors hover:bg-slate-50/60"
+                className="w-full px-5 py-4 text-left transition-colors hover:bg-surface-muted/60"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-text-secondary">
                       {isExpanded ? (
                         <ChevronDown className="h-4 w-4" />
                       ) : (
@@ -146,11 +146,11 @@ export function ProductProductionHistory({
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-slate-900">
+                      <p className="truncate text-xs font-semibold text-text-primary">
                         {summary.product.name}
                       </p>
 
-                      <p className="mt-0.5 font-mono text-[10px] text-slate-400">
+                      <p className="mt-0.5 font-mono text-[10px] text-text-muted">
                         {summary.product.sku}
                       </p>
                     </div>
@@ -209,11 +209,11 @@ function Metric({
 }) {
   return (
     <div>
-      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+      <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
         {label}
       </p>
 
-      <p className="mt-1 text-xs font-semibold text-slate-800">
+      <p className="mt-1 text-xs font-semibold text-text-primary">
         {value}
       </p>
     </div>
@@ -227,14 +227,14 @@ function ProductionBatchList({
 }) {
   if (batches.length === 0) {
     return (
-      <div className="border-t border-slate-100 bg-slate-50/40 px-5 py-8 text-center">
-        <Factory className="mx-auto h-5 w-5 text-slate-300" />
+      <div className="border-t border-border bg-surface-muted/40 px-5 py-8 text-center">
+        <Factory className="mx-auto h-5 w-5 text-text-muted" />
 
-        <p className="mt-2 text-xs font-semibold text-slate-600">
+        <p className="mt-2 text-xs font-semibold text-text-secondary">
           No production batches yet
         </p>
 
-        <p className="mt-1 text-[11px] text-slate-400">
+        <p className="mt-1 text-[11px] text-text-muted">
           Production runs for this product will appear here.
         </p>
       </div>
@@ -242,44 +242,44 @@ function ProductionBatchList({
   }
 
   return (
-    <div className="border-t border-slate-100 bg-slate-50/30 px-5 py-4">
+    <div className="border-t border-border bg-surface-muted/30 px-5 py-4">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1050px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-slate-200">
-              <th className="px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+            <tr className="border-b border-border">
+              <th className="px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Batch
               </th>
 
-              <th className="px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Status
               </th>
 
-              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Planned
               </th>
 
-              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Produced
               </th>
 
-              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Raw material
               </th>
 
-              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Packaging
               </th>
 
-              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Total cost
               </th>
 
-              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-right text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Cost / unit
               </th>
 
-              <th className="px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+              <th className="px-3 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 Configuration
               </th>
             </tr>
@@ -290,11 +290,11 @@ function ProductionBatchList({
               <tr key={batch.id}>
                 <td className="px-3 py-3">
                   <div>
-                    <p className="text-xs font-semibold text-slate-800">
+                    <p className="text-xs font-semibold text-text-primary">
                       {batch.batchNumber}
                     </p>
 
-                    <p className="mt-0.5 text-[10px] text-slate-400">
+                    <p className="mt-0.5 text-[10px] text-text-muted">
                       {formatDate(
                         batch.completedAt ??
                           batch.createdAt,
@@ -309,15 +309,15 @@ function ProductionBatchList({
                   />
                 </td>
 
-                <td className="px-3 py-3 text-right text-xs text-slate-600">
+                <td className="px-3 py-3 text-right text-xs text-text-secondary">
                   {batch.plannedQuantity}
                 </td>
 
-                <td className="px-3 py-3 text-right text-xs font-semibold text-slate-800">
+                <td className="px-3 py-3 text-right text-xs font-semibold text-text-primary">
                   {batch.producedQuantity ?? "—"}
                 </td>
 
-                <td className="px-3 py-3 text-right text-xs text-slate-600">
+                <td className="px-3 py-3 text-right text-xs text-text-secondary">
                   {batch.rawMaterialCost !== null
                     ? formatINR(
                         batch.rawMaterialCost,
@@ -325,7 +325,7 @@ function ProductionBatchList({
                     : "—"}
                 </td>
 
-                <td className="px-3 py-3 text-right text-xs text-slate-600">
+                <td className="px-3 py-3 text-right text-xs text-text-secondary">
                   {batch.packagingMaterialCost !==
                   null
                     ? formatINR(
@@ -334,13 +334,13 @@ function ProductionBatchList({
                     : "—"}
                 </td>
 
-                <td className="px-3 py-3 text-right text-xs font-semibold text-slate-800">
+                <td className="px-3 py-3 text-right text-xs font-semibold text-text-primary">
                   {batch.totalCost !== null
                     ? formatINR(batch.totalCost)
                     : "—"}
                 </td>
 
-                <td className="px-3 py-3 text-right text-xs font-semibold text-slate-800">
+                <td className="px-3 py-3 text-right text-xs font-semibold text-text-primary">
                   {batch.costPerUnit !== null
                     ? formatINR(
                         batch.costPerUnit,
@@ -350,12 +350,12 @@ function ProductionBatchList({
 
                 <td className="px-3 py-3">
                   <div className="space-y-1">
-                    <p className="text-[10px] text-slate-600">
+                    <p className="text-[10px] text-text-secondary">
                       Formulation · v
                       {batch.formulationVersion}
                     </p>
 
-                    <p className="text-[10px] text-slate-600">
+                    <p className="text-[10px] text-text-secondary">
                       Packaging · v
                       {batch.packagingConfigurationVersion}
                     </p>
@@ -386,7 +386,7 @@ function StatusBadge({
 
     case "CANCELLED":
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-[9px] font-semibold text-slate-500">
+        <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2 py-1 text-[9px] font-semibold text-text-secondary">
           <XCircle className="h-3 w-3" />
           Cancelled
         </span>

@@ -59,7 +59,7 @@ function getSeverityStyles(
     default:
       return {
         dot: "bg-slate-400",
-        pill: "bg-slate-100 text-slate-600",
+        pill: "bg-surface-muted text-text-secondary",
       };
   }
 }
@@ -136,16 +136,16 @@ export function AlertsClient({
   ];
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
       {/* Header */}
-      <div className="border-b border-slate-100 px-6 py-5">
+      <div className="border-b border-border px-6 py-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-950">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
               Alerts
             </h1>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-text-secondary">
               Important things that need your attention.
             </p>
           </div>
@@ -160,14 +160,15 @@ export function AlertsClient({
                 <button
                   key={item.key}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() =>
                     setFilter(item.key)
                   }
                   className={[
-                    "rounded-full border px-4 py-2 text-xs font-medium transition-all",
+                    "min-h-10 rounded-full border px-4 py-2 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2",
                     isActive
                       ? "border-emerald-900 bg-emerald-900 text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900",
+                      : "border-border bg-surface-raised text-text-secondary hover:border-border-strong hover:bg-surface-muted hover:text-text-primary",
                   ].join(" ")}
                 >
                   {item.label}
@@ -199,7 +200,7 @@ export function AlertsClient({
                     "flex items-center gap-4 py-4",
                     index !==
                       filteredAlerts.length - 1
-                      ? "border-b border-slate-100"
+                      ? "border-b border-border"
                       : "",
                   ].join(" ")}
                 >
@@ -216,12 +217,12 @@ export function AlertsClient({
                   {/* Alert information */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start gap-2">
-                      <h2 className="truncate text-sm font-semibold text-slate-900">
+                      <h2 className="truncate text-sm font-semibold text-text-primary">
                         {alert.title}
                       </h2>
                     </div>
 
-                    <p className="mt-0.5 truncate text-xs text-slate-500">
+                    <p className="mt-0.5 truncate text-xs text-text-secondary">
                       {alert.message}
                     </p>
                   </div>
@@ -242,7 +243,7 @@ export function AlertsClient({
 
                   {/* Date */}
                   <div className="w-[92px] shrink-0 text-right">
-                    <p className="text-xs font-medium text-slate-400">
+                    <p className="text-xs font-medium text-text-muted">
                       {formatAlertDate(
                         alert.createdAt,
                       )}
@@ -252,7 +253,7 @@ export function AlertsClient({
                   {/* Mobile severity icon */}
                   <div className="flex sm:hidden">
                     <SeverityIcon
-                      className="h-4 w-4 text-slate-400"
+                      className="h-4 w-4 text-text-muted"
                     />
                   </div>
                 </div>
@@ -263,7 +264,7 @@ export function AlertsClient({
                   <a
                     key={alert.id}
                     href={alert.linkUrl}
-                    className="block transition-colors hover:bg-slate-50/70"
+                    className="block transition-colors hover:bg-surface-muted/70"
                   >
                     {rowContent}
                   </a>
@@ -280,11 +281,11 @@ export function AlertsClient({
         </div>
       ) : (
         <div className="flex min-h-[300px] flex-col items-center justify-center px-6 py-12 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50">
-            <Bell className="h-5 w-5 text-slate-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted">
+            <Bell className="h-5 w-5 text-text-muted" />
           </div>
 
-          <h2 className="mt-4 text-sm font-semibold text-slate-900">
+          <h2 className="mt-4 text-sm font-semibold text-text-primary">
             {filter === "ALL"
               ? "No active alerts"
               : `No ${getSeverityLabel(
@@ -292,7 +293,7 @@ export function AlertsClient({
                 ).toLowerCase()} alerts`}
           </h2>
 
-          <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">
+          <p className="mt-1 max-w-sm text-xs leading-5 text-text-secondary">
             {filter === "ALL"
               ? "Nothing currently requires your attention."
               : "There are no active alerts in this severity category."}

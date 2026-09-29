@@ -137,10 +137,10 @@ export default async function DashboardPage({
 
   const period =
     params?.period === "ALL" ||
-      params?.period === "7D" ||
-      params?.period === "30D" ||
-      params?.period === "3M" ||
-      params?.period === "1Y"
+    params?.period === "7D" ||
+    params?.period === "30D" ||
+    params?.period === "3M" ||
+    params?.period === "1Y"
       ? params.period
       : "ALL";
 
@@ -162,8 +162,7 @@ export default async function DashboardPage({
       ? customTo
       : new Date();
 
-  const { business, businessId } =
-    await getDashboardContext();
+  const { business, businessId } = await getDashboardContext();
 
   /*
    * BusinessSettings is intentionally fetched separately.
@@ -238,106 +237,77 @@ export default async function DashboardPage({
     }),
   ]);
 
-  const currencySymbol =
-    settings?.currencySymbol ?? "₹";
+  const currencySymbol = settings?.currencySymbol ?? "₹";
 
-  const requirements =
-    stageData?.requirements ?? [];
-
+  const requirements = stageData?.requirements ?? [];
   const metrics = stageData?.metrics;
 
   const activeAlerts = alerts.filter(
     (alert) => !alert.isResolved,
   );
 
-  const completedRequirements =
-    requirements.filter(
-      (req) =>
-        req.status === RequirementStatus.COMPLETED,
-    ).length;
+  const completedRequirements = requirements.filter(
+    (req) => req.status === RequirementStatus.COMPLETED,
+  ).length;
 
-  const blockerCount =
-    metrics?.blockerCount ?? 0;
+  const blockerCount = metrics?.blockerCount ?? 0;
 
   const remainingCount = Math.max(
     requirements.length -
-    completedRequirements -
-    blockerCount,
+      completedRequirements -
+      blockerCount,
     0,
   );
 
-  const nextUpRequirements =
-    requirements
-      .filter(
-        (req) =>
-          req.status !==
-          RequirementStatus.COMPLETED,
-      )
-      .slice(0, 5);
+  const nextUpRequirements = requirements
+    .filter(
+      (req) => req.status !== RequirementStatus.COMPLETED,
+    )
+    .slice(0, 5);
 
   const revenue = paidOrders.reduce(
-    (total, order) =>
-      total + Number(order.totalAmount),
+    (total, order) => total + Number(order.totalAmount),
     0,
   );
 
   const expenses = periodExpenses.reduce(
-    (total, expense) =>
-      total + Number(expense.amount),
+    (total, expense) => total + Number(expense.amount),
     0,
   );
 
-  const periodOrderCount =
-    paidOrders.length;
+  const periodOrderCount = paidOrders.length;
 
-  const completedOrders =
-    paidOrders.filter(
-      (order) =>
-        order.fulfillmentStatus ===
-        "DELIVERED",
-    ).length;
+  const completedOrders = paidOrders.filter(
+    (order) => order.fulfillmentStatus === "DELIVERED",
+  ).length;
 
-  const processingOrders =
-    paidOrders.filter(
-      (order) =>
-        order.fulfillmentStatus ===
-        "PROCESSING" ||
-        order.fulfillmentStatus ===
-        "PACKED" ||
-        order.fulfillmentStatus ===
-        "SHIPPED",
-    ).length;
+  const processingOrders = paidOrders.filter(
+    (order) =>
+      order.fulfillmentStatus === "PROCESSING" ||
+      order.fulfillmentStatus === "PACKED" ||
+      order.fulfillmentStatus === "SHIPPED",
+  ).length;
 
   const pendingOrders = Math.max(
     periodOrderCount -
-    completedOrders -
-    processingOrders,
+      completedOrders -
+      processingOrders,
     0,
   );
 
-  const inventoryProducts =
-    inventoryOverview.products;
+  const inventoryProducts = inventoryOverview.products;
 
-  const stockHealthy =
-    inventoryProducts.filter(
-      (product) =>
-        product.stockStatus ===
-        "HEALTHY",
-    ).length;
+  const stockHealthy = inventoryProducts.filter(
+    (product) => product.stockStatus === "HEALTHY",
+  ).length;
 
-  const stockLow =
-    inventoryProducts.filter(
-      (product) =>
-        product.stockStatus ===
-        "LOW_STOCK",
-    ).length;
+  const stockLow = inventoryProducts.filter(
+    (product) => product.stockStatus === "LOW_STOCK",
+  ).length;
 
-  const stockOut =
-    inventoryProducts.filter(
-      (product) =>
-        product.stockStatus ===
-        "OUT_OF_STOCK",
-    ).length;
+  const stockOut = inventoryProducts.filter(
+    (product) => product.stockStatus === "OUT_OF_STOCK",
+  ).length;
 
   const today = new Date();
 
@@ -348,31 +318,21 @@ export default async function DashboardPage({
         ? "Good afternoon!"
         : "Good evening!";
 
-  const dateLabel =
-    today.toLocaleDateString("en-IN", {
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+  const dateLabel = today.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
-  const progress =
-    metrics?.overallProgressPct ?? 0;
+  const progress = metrics?.overallProgressPct ?? 0;
 
   return (
     <div className="min-h-[calc(100vh-72px)] overflow-hidden bg-[#f7f6f2] text-slate-950">
-
-      {/* =====================================================
-          MAIN COMMAND CENTER
-      ===================================================== */}
-
       <main className="mx-auto flex w-full max-w-[1480px] flex-col px-5 pb-4 pt-5 lg:px-8">
-        {/* ===================================================
-            LIFECYCLE HERO
-        =================================================== */}
-
+        {/* Lifecycle hero */}
         <section className="grid shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white lg:grid-cols-[1.45fr_0.55fr_1.15fr]">
-          {/* LEFT */}
+          {/* Left: stage overview */}
           <div className="p-6 lg:p-8">
             <p className="text-[9px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               Business Lifecycle
@@ -388,7 +348,8 @@ export default async function DashboardPage({
                 Stage {business.currentStage.id} ·{" "}
                 {business.currentStage.name}
               </strong>
-              . Complete the mandatory requirements to move to the next stage.
+              . Complete the mandatory requirements to move to the next
+              stage.
             </p>
 
             <div className="mt-5 flex flex-wrap items-center gap-5">
@@ -441,15 +402,17 @@ export default async function DashboardPage({
             </Link>
           </div>
 
-          {/* CENTER */}
+          {/* Center: stage progress */}
           <div className="flex items-center justify-center border-y border-slate-100 px-5 py-6 lg:border-x lg:border-y-0">
             <div className="text-center">
               <div
                 className="relative mx-auto flex h-28 w-28 items-center justify-center rounded-full"
                 style={{
-                  background: `conic-gradient(#496846 ${progress * 3.6
-                    }deg, #e2e6e2 ${progress * 3.6
-                    }deg 360deg)`,
+                  background: `conic-gradient(#496846 ${
+                    progress * 3.6
+                  }deg, #e2e6e2 ${
+                    progress * 3.6
+                  }deg 360deg)`,
                 }}
               >
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white">
@@ -468,15 +431,14 @@ export default async function DashboardPage({
               </p>
 
               <p className="mt-2 text-[10px] leading-4 text-slate-500">
-                {completedRequirements} of{" "}
-                {requirements.length} requirements
+                {completedRequirements} of {requirements.length} requirements
                 <br />
                 completed
               </p>
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* Right: next requirements and decorative panel */}
           <div className="grid grid-cols-[1fr_150px] gap-5 p-6 lg:p-7">
             <div className="min-w-0">
               <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -484,23 +446,19 @@ export default async function DashboardPage({
               </p>
 
               <div className="mt-3 space-y-2.5">
-                {nextUpRequirements.map(
-                  (requirement) => (
-                    <Link
-                      key={requirement.id}
-                      href="/stages"
-                      className="flex items-start gap-2.5"
-                    >
-                      {requirementIcon(
-                        requirement.type,
-                      )}
+                {nextUpRequirements.map((requirement) => (
+                  <Link
+                    key={requirement.id}
+                    href="/stages"
+                    className="flex items-start gap-2.5"
+                  >
+                    {requirementIcon(requirement.type)}
 
-                      <span className="min-w-0 text-[10px] leading-3.5 text-slate-700">
-                        {requirement.title}
-                      </span>
-                    </Link>
-                  ),
-                )}
+                    <span className="min-w-0 text-[10px] leading-3.5 text-slate-700">
+                      {requirement.title}
+                    </span>
+                  </Link>
+                ))}
               </div>
 
               <Link
@@ -514,9 +472,7 @@ export default async function DashboardPage({
 
             <div className="relative hidden overflow-hidden rounded-xl bg-[#e7ebe5] sm:block">
               <div className="relative z-10 p-4">
-                <span className="text-[10px] text-slate-500">
-                  —
-                </span>
+                <span className="text-[10px] text-slate-500">—</span>
 
                 <p className="mt-4 text-[17px] font-medium leading-5 tracking-[-0.03em] text-slate-900">
                   Small steps
@@ -536,10 +492,7 @@ export default async function DashboardPage({
           </div>
         </section>
 
-        {/* ===================================================
-            BUSINESS HEADER + FILTERS
-        =================================================== */}
-
+        {/* Business header and date filters */}
         <div className="mt-4 flex shrink-0 items-end justify-between">
           <div>
             <Link
@@ -556,8 +509,7 @@ export default async function DashboardPage({
             </Link>
 
             <p className="mt-0.5 text-xs text-slate-500">
-              {business.tagline ||
-                "Business Operating System"}
+              {business.tagline || "Business Operating System"}
             </p>
           </div>
 
@@ -569,20 +521,19 @@ export default async function DashboardPage({
                 { value: "30D", label: "30D" },
                 { value: "3M", label: "3M" },
                 { value: "1Y", label: "1Y" },
-              ].map(
-                (item) => (
-                  <Link
-                    key={item.value}
-                    href={`/dashboard?period=${item.value}`}
-                    className={`rounded-full px-3 py-1.5 text-[10px] font-medium transition ${period === item.value
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-500 hover:text-slate-900"
-                      }`}
-                  >
-                    {item.label}
-                  </Link>
-                ),
-              )}
+              ].map((item) => (
+                <Link
+                  key={item.value}
+                  href={`/dashboard?period=${item.value}`}
+                  className={`rounded-full px-3 py-1.5 text-[10px] font-medium transition ${
+                    period === item.value
+                      ? "bg-slate-100 text-slate-900"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
 
             <details className="relative">
@@ -631,20 +582,11 @@ export default async function DashboardPage({
           </div>
         </div>
 
-        {/* ===================================================
-    ANALYTICS + ALERTS
-=================================================== */}
-
+        {/* Analytics and alerts */}
         <section className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr]">
-
-          {/* =================================================
-      LEFT — 4 ANALYTICS CARDS
-  ================================================= */}
-
+          {/* Four analytics cards */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-            {/* ANALYTICS 1 — REVENUE */}
-
+            {/* Revenue */}
             <Link
               href="/orders"
               className="group relative min-h-[210px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300"
@@ -672,8 +614,9 @@ export default async function DashboardPage({
 
                 <p className="mt-0.5 text-xs text-slate-500">
                   {periodOrderCount > 0
-                    ? `${periodOrderCount} paid order${periodOrderCount === 1 ? "" : "s"
-                    }`
+                    ? `${periodOrderCount} paid order${
+                        periodOrderCount === 1 ? "" : "s"
+                      }`
                     : "No sales yet"}
                 </p>
               </div>
@@ -698,9 +641,7 @@ export default async function DashboardPage({
               </svg>
             </Link>
 
-
-            {/* ANALYTICS 2 — EXPENSES */}
-
+            {/* Expenses */}
             <Link
               href="/finance"
               className="group relative min-h-[210px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300"
@@ -728,8 +669,9 @@ export default async function DashboardPage({
 
                 <p className="mt-0.5 text-xs text-slate-500">
                   {periodExpenses.length > 0
-                    ? `${periodExpenses.length} recorded expense${periodExpenses.length === 1 ? "" : "s"
-                    }`
+                    ? `${periodExpenses.length} recorded expense${
+                        periodExpenses.length === 1 ? "" : "s"
+                      }`
                     : "No expenses yet"}
                 </p>
               </div>
@@ -754,9 +696,7 @@ export default async function DashboardPage({
               </svg>
             </Link>
 
-
-            {/* ANALYTICS 3 — INVENTORY */}
-
+            {/* Inventory */}
             <Link
               href="/inventory"
               className="group min-h-[210px] rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300"
@@ -792,10 +732,11 @@ export default async function DashboardPage({
                       <div
                         className="bg-emerald-500"
                         style={{
-                          width: `${(stockHealthy /
+                          width: `${
+                            (stockHealthy /
                               Math.max(inventoryProducts.length, 1)) *
                             100
-                            }%`,
+                          }%`,
                         }}
                       />
                     )}
@@ -804,10 +745,11 @@ export default async function DashboardPage({
                       <div
                         className="bg-amber-400"
                         style={{
-                          width: `${(stockLow /
+                          width: `${
+                            (stockLow /
                               Math.max(inventoryProducts.length, 1)) *
                             100
-                            }%`,
+                          }%`,
                         }}
                       />
                     )}
@@ -816,10 +758,11 @@ export default async function DashboardPage({
                       <div
                         className="bg-red-500"
                         style={{
-                          width: `${(stockOut /
+                          width: `${
+                            (stockOut /
                               Math.max(inventoryProducts.length, 1)) *
                             100
-                            }%`,
+                          }%`,
                         }}
                       />
                     )}
@@ -854,9 +797,7 @@ export default async function DashboardPage({
               </div>
             </Link>
 
-
-            {/* ANALYTICS 4 — ORDERS */}
-
+            {/* Orders */}
             <Link
               href="/orders"
               className="group min-h-[210px] rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300"
@@ -906,11 +847,9 @@ export default async function DashboardPage({
                   </div>
 
                   <div className="flex items-center justify-between gap-5">
-                    <span className="flex items-center justify-between gap-5">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                        Pending
-                      </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                      Pending
                     </span>
                     <strong>{pendingOrders}</strong>
                   </div>
@@ -919,12 +858,7 @@ export default async function DashboardPage({
             </Link>
           </div>
 
-
-          {/* =================================================
-      RIGHT — ALERTS
-      FULL HEIGHT OF THE FOUR ANALYTICS CARDS
-  ================================================= */}
-
+          {/* Alerts */}
           <Link
             href="/alerts"
             className="group min-h-[423px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-slate-300"
@@ -986,10 +920,7 @@ export default async function DashboardPage({
           </Link>
         </section>
 
-        {/* ===================================================
-            QUICK ACTIONS
-        =================================================== */}
-
+        {/* Quick actions */}
         <section className="mt-3 flex shrink-0 items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3">
           <div className="flex items-center gap-3">
             <Zap className="h-5 w-5 text-slate-900" />

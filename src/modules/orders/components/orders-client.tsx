@@ -599,16 +599,16 @@ export function OrdersClient({
 
   return (
     <>
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-sm">
         {/* Header */}
-        <div className="border-b border-slate-100 px-5 pb-4 pt-5 sm:px-6">
+        <div className="border-b border-border px-5 pb-4 pt-5 sm:px-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-[22px] font-semibold tracking-[-0.04em] text-slate-950">
+              <h1 className="text-[22px] font-semibold tracking-[-0.04em] text-text-primary">
                 Orders
               </h1>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-text-secondary">
                 Manage and track your customer orders.
               </p>
             </div>
@@ -618,7 +618,7 @@ export function OrdersClient({
                 type="button"
                 onClick={exportOrders}
                 disabled={orders.length === 0}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-3 text-[11px] font-medium text-text-secondary transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Download className="h-3.5 w-3.5" />
                 Export
@@ -637,7 +637,7 @@ export function OrdersClient({
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-slate-100 px-5 sm:px-6">
+        <div className="border-b border-border px-5 sm:px-6">
           <div className="flex items-center gap-1 overflow-x-auto">
             <OrderTabButton
               label="All Orders"
@@ -706,16 +706,16 @@ export function OrdersClient({
             }
           }}
         >
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                   Order Management
                 </p>
-                <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950">
+                <h2 className="mt-1 text-lg font-semibold tracking-tight text-text-primary">
                   Edit {editingOrder.orderNumber}
                 </h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Update payment and fulfillment status for this order.
                 </p>
               </div>
@@ -724,7 +724,7 @@ export function OrdersClient({
                 type="button"
                 onClick={closeEditOrder}
                 disabled={isPending}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 disabled:opacity-40"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-text-muted transition hover:bg-surface-muted hover:text-text-secondary disabled:opacity-40"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -732,16 +732,16 @@ export function OrdersClient({
             </div>
 
             <form onSubmit={handleEditSubmit} className="space-y-6 px-6 py-6">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="rounded-xl border border-border bg-surface-muted p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                       Order
                     </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-950">
+                    <p className="mt-1 text-sm font-semibold text-text-primary">
                       {editingOrder.orderNumber}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-text-secondary">
                       {editingOrder.customerName} -{" "}
                       {formatCurrency(editingOrder.totalAmount)}
                     </p>
@@ -816,12 +816,12 @@ export function OrdersClient({
                 </p>
               </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-5">
+              <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
                 <button
                   type="button"
                   onClick={closeEditOrder}
                   disabled={isPending}
-                  className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                  className="rounded-lg border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-muted disabled:opacity-40"
                 >
                   Cancel
                 </button>
@@ -852,15 +852,15 @@ export function OrdersClient({
             }
           }}
         >
-          <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+          <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-surface-raised shadow-2xl">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+            <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-slate-950">
+                <h2 className="text-lg font-semibold tracking-tight text-text-primary">
                   Add Order
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-text-secondary">
                   Record a customer sale using your active
                   product catalog.
                 </p>
@@ -870,7 +870,7 @@ export function OrdersClient({
                 type="button"
                 onClick={closeNewOrder}
                 disabled={isPending}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 disabled:opacity-40"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-text-muted transition hover:bg-surface-muted hover:text-text-secondary disabled:opacity-40"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -902,7 +902,7 @@ export function OrdersClient({
                           closeNewOrder();
                           router.push("/customers");
                         }}
-                        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-amber-900 shadow-sm ring-1 ring-amber-200 hover:bg-amber-50"
+                        className="mt-4 inline-flex items-center gap-2 rounded-lg bg-surface-raised px-3 py-2 text-xs font-semibold text-amber-900 shadow-sm ring-1 ring-amber-200 hover:bg-amber-50"
                       >
                         <UserPlus className="h-4 w-4" />
                         Go to Customers
@@ -915,11 +915,11 @@ export function OrdersClient({
                   {/* Order Details */}
                   <section>
                     <div className="mb-4">
-                      <h3 className="text-sm font-semibold text-slate-950">
+                      <h3 className="text-sm font-semibold text-text-primary">
                         Order Details
                       </h3>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-text-secondary">
                         Basic information about this sale.
                       </p>
                     </div>
@@ -957,7 +957,7 @@ export function OrdersClient({
 
                       <FormField label="Order Date">
                         <div className="relative">
-                          <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                          <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
 
                           <input
                             type="date"
@@ -1012,11 +1012,11 @@ export function OrdersClient({
                   <section>
                     <div className="mb-4 flex items-center justify-between gap-4">
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-950">
+                        <h3 className="text-sm font-semibold text-text-primary">
                           Products
                         </h3>
 
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-text-secondary">
                           Add active products included in this
                           order.
                         </p>
@@ -1029,7 +1029,7 @@ export function OrdersClient({
                           isPending ||
                           activeProducts.length === 0
                         }
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-raised px-3 py-2 text-xs font-semibold text-text-secondary hover:bg-surface-muted disabled:opacity-40"
                       >
                         <Plus className="h-3.5 w-3.5" />
                         Add Product
@@ -1066,7 +1066,7 @@ export function OrdersClient({
                             return (
                               <div
                                 key={index}
-                                className="rounded-xl border border-slate-200 bg-slate-50/50 p-4"
+                                className="rounded-xl border border-border bg-surface-muted/50 p-4"
                               >
                                 <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_100px_130px_120px_40px] md:items-end">
                                   <FormField label="Product">
@@ -1106,7 +1106,7 @@ export function OrdersClient({
                                     </select>
 
                                     {selectedProduct && (
-                                      <p className="mt-1.5 text-[10px] text-slate-400">
+                                      <p className="mt-1.5 text-[10px] text-text-muted">
                                         Stock:{" "}
                                         {
                                           selectedProduct.currentStock
@@ -1165,7 +1165,7 @@ export function OrdersClient({
                                   </FormField>
 
                                   <FormField label="Line Total">
-                                    <div className="flex h-10 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900">
+                                    <div className="flex h-10 items-center rounded-lg border border-border bg-surface-raised px-3 text-sm font-semibold text-text-primary">
                                       {formatCurrency(
                                         lineTotal,
                                       )}
@@ -1182,7 +1182,7 @@ export function OrdersClient({
                                       formData.items
                                         .length === 1
                                     }
-                                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
+                                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
                                     aria-label="Remove product"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -1199,7 +1199,7 @@ export function OrdersClient({
                   {/* Additional Details */}
                   <section className="grid gap-6 md:grid-cols-[1fr_300px]">
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-950">
+                      <h3 className="text-sm font-semibold text-text-primary">
                         Additional Details
                       </h3>
 
@@ -1323,20 +1323,20 @@ export function OrdersClient({
                     </div>
 
                     {/* Summary */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                      <h3 className="text-sm font-semibold text-slate-950">
+                    <div className="rounded-xl border border-border bg-surface-muted p-5">
+                      <h3 className="text-sm font-semibold text-text-primary">
                         Order Summary
                       </h3>
 
                       <div className="mt-4 space-y-3 text-xs">
-                        <div className="flex justify-between text-slate-500">
+                        <div className="flex justify-between text-text-secondary">
                           <span>Subtotal</span>
                           <span>
                             {formatCurrency(subtotal)}
                           </span>
                         </div>
 
-                        <div className="flex justify-between text-slate-500">
+                        <div className="flex justify-between text-text-secondary">
                           <span>Discount</span>
                           <span>
                             -
@@ -1346,7 +1346,7 @@ export function OrdersClient({
                           </span>
                         </div>
 
-                        <div className="flex justify-between text-slate-500">
+                        <div className="flex justify-between text-text-secondary">
                           <span>Shipping</span>
                           <span>
                             {formatCurrency(
@@ -1355,13 +1355,13 @@ export function OrdersClient({
                           </span>
                         </div>
 
-                        <div className="border-t border-slate-200 pt-3">
+                        <div className="border-t border-border pt-3">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-semibold text-text-primary">
                               Total
                             </span>
 
-                            <span className="text-lg font-bold text-slate-950">
+                            <span className="text-lg font-bold text-text-primary">
                               {formatCurrency(total)}
                             </span>
                           </div>
@@ -1377,12 +1377,12 @@ export function OrdersClient({
                     </div>
                   )}
 
-                  <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-5">
+                  <div className="flex items-center justify-end gap-3 border-t border-border pt-5">
                     <button
                       type="button"
                       onClick={closeNewOrder}
                       disabled={isPending}
-                      className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                      className="rounded-lg border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary hover:bg-surface-muted disabled:opacity-40"
                     >
                       Cancel
                     </button>
@@ -1433,8 +1433,8 @@ function OrderTabButton({
       onClick={onClick}
       className={`relative shrink-0 px-4 py-3 text-[10px] font-medium transition ${
         active
-          ? "text-slate-950"
-          : "text-slate-500 hover:text-slate-800"
+          ? "text-text-primary"
+          : "text-text-secondary hover:text-text-primary"
       }`}
     >
       {label}
@@ -1443,8 +1443,8 @@ function OrderTabButton({
         <span
           className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] ${
             active
-              ? "bg-slate-100 text-slate-700"
-              : "bg-slate-50 text-slate-400"
+              ? "bg-surface-muted text-text-secondary"
+              : "bg-surface-muted text-text-muted"
           }`}
         >
           {count}
@@ -1467,17 +1467,17 @@ function EmptyOrdersState({
 }) {
   return (
     <div className="flex min-h-[310px] flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
-        <ShoppingCart className="h-6 w-6 text-slate-500" />
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-muted">
+        <ShoppingCart className="h-6 w-6 text-text-secondary" />
       </div>
 
-      <h2 className="mt-4 text-sm font-semibold text-slate-950">
+      <h2 className="mt-4 text-sm font-semibold text-text-primary">
         {hasAnyOrders
           ? "No orders in this view"
           : "No orders yet"}
       </h2>
 
-      <p className="mt-1 max-w-sm text-[11px] leading-5 text-slate-400">
+      <p className="mt-1 max-w-sm text-[11px] leading-5 text-text-muted">
         {hasAnyOrders
           ? "There are no orders matching the selected status."
           : "Your orders will appear here once you start receiving sales."}
@@ -1508,7 +1508,7 @@ function OrdersTable({
     <div className="overflow-x-auto">
       <table className="w-full min-w-[850px] text-left">
         <thead>
-          <tr className="border-b border-slate-100 bg-slate-50/60">
+          <tr className="border-b border-border bg-surface-muted/60">
             <TableHeader>Order</TableHeader>
             <TableHeader>Customer</TableHeader>
             <TableHeader>Date</TableHeader>
@@ -1524,17 +1524,17 @@ function OrdersTable({
           {orders.map((order) => (
             <tr
               key={order.id}
-              className="transition-colors hover:bg-slate-50/60"
+              className="transition-colors hover:bg-surface-muted/60"
             >
-              <td className="px-5 py-4 text-xs font-semibold text-slate-950">
+              <td className="px-5 py-4 text-xs font-semibold text-text-primary">
                 {order.orderNumber}
               </td>
 
-              <td className="px-5 py-4 text-xs font-medium text-slate-700">
+              <td className="px-5 py-4 text-xs font-medium text-text-secondary">
                 {order.customerName}
               </td>
 
-              <td className="px-5 py-4 text-xs text-slate-500">
+              <td className="px-5 py-4 text-xs text-text-secondary">
                 {new Intl.DateTimeFormat("en-IN", {
                   day: "2-digit",
                   month: "short",
@@ -1542,11 +1542,11 @@ function OrdersTable({
                 }).format(order.orderDate)}
               </td>
 
-              <td className="px-5 py-4 text-xs text-slate-500">
+              <td className="px-5 py-4 text-xs text-text-secondary">
                 {order.itemCount}
               </td>
 
-              <td className="px-5 py-4 text-xs font-semibold text-slate-950">
+              <td className="px-5 py-4 text-xs font-semibold text-text-primary">
                 {formatCurrency(order.totalAmount)}
               </td>
 
@@ -1585,7 +1585,7 @@ function OrdersTable({
                 <button
                   type="button"
                   onClick={() => onEditOrder(order)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted transition hover:border-border-strong hover:bg-surface-muted hover:text-text-secondary"
                   aria-label={`Edit ${order.orderNumber}`}
                   title={`Edit ${order.orderNumber}`}
                 >
@@ -1606,7 +1606,7 @@ function TableHeader({
   children: React.ReactNode;
 }) {
   return (
-    <th className="px-5 py-3 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+    <th className="px-5 py-3 text-[9px] font-semibold uppercase tracking-[0.12em] text-text-muted">
       {children}
     </th>
   );
@@ -1625,7 +1625,7 @@ function StatusBadge({
     danger:
       "border-red-200 bg-red-50 text-red-700",
     neutral:
-      "border-slate-200 bg-slate-50 text-slate-600",
+      "border-border bg-surface-muted text-text-secondary",
   };
 
   return (
@@ -1646,7 +1646,7 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[11px] font-semibold text-slate-700">
+      <label className="mb-1.5 block text-[11px] font-semibold text-text-secondary">
         {label}
       </label>
 
@@ -1656,4 +1656,4 @@ function FormField({
 }
 
 const inputClass =
-  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-50";
+  "w-full rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-xs text-text-primary outline-none transition placeholder:text-text-muted focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-surface-muted";
