@@ -24,6 +24,7 @@ import { formatINR, formatDate } from "@/lib/formatters";
 
 import {
   createRawMaterialAction,
+  deleteRawMaterialAction,
   getRawMaterialPurchasesAction,
   getRawMaterialInventoryHistoryAction,
   recordRawMaterialPurchaseAction,
@@ -127,6 +128,13 @@ export function RawMaterialsClient({
 
   const [historyMaterial, setHistoryMaterial] =
     useState<SerializedRawMaterial | null>(null);
+
+  const [materialToDelete, setMaterialToDelete] =
+    useState<SerializedRawMaterial | null>(null);
+  const [deleteMaterialError, setDeleteMaterialError] =
+    useState<string | null>(null);
+  const [isDeletingMaterial, startDeleteMaterialTransition] =
+    useTransition();
 
   const [isPending, startTransition] =
     useTransition();
@@ -367,6 +375,19 @@ export function RawMaterialsClient({
                           <Plus className="h-3.5 w-3.5" />
                           Purchase
                         </button>
+                        <button
+                          type="button"
+                          title="Delete raw material"
+                          aria-label={`Delete ${material.name}`}
+                          disabled={isDeletingMaterial}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          onClick={() => {
+                            setDeleteMaterialError(null);
+                            setMaterialToDelete(material);
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -438,6 +459,74 @@ export function RawMaterialsClient({
             setHistoryMaterial(null)
           }
         />
+      )}
+
+      {materialToDelete && (
+        <DialogShell
+          title="Delete Material?"
+          description="This will permanently remove the material and its associated records."
+          onClose={() => {
+            if (!isDeletingMaterial) {
+              setMaterialToDelete(null);
+              setDeleteMaterialError(null);
+            }
+          }}
+          maxWidth="max-w-md"
+        >
+          <div className="space-y-5">
+            {deleteMaterialError && (
+              <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{deleteMaterialError}</span>
+              </div>
+            )}
+            <div className="rounded-xl border border-border bg-surface-muted p-4">
+              <p className="text-sm font-semibold text-text-primary">
+                {materialToDelete.name}
+              </p>
+              <p className="mt-1 text-xs text-text-secondary">
+                Current stock: {formatQuantity(materialToDelete.currentQuantity, materialToDelete.baseUnit)}
+                {" · "}{formatINR(materialToDelete.currentValue)} inventory value
+              </p>
+            </div>
+            <p className="text-xs leading-5 text-text-secondary">
+              The material, its purchase and inventory records, and linked cash transactions will be permanently deleted. This action cannot be undone. Materials used in formulations or production cannot be deleted.
+            </p>
+            <div className="flex justify-end gap-3 border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setMaterialToDelete(null);
+                  setDeleteMaterialError(null);
+                }}
+                disabled={isDeletingMaterial}
+                className="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:opacity-50"
+              >Cancel</button>
+              <button
+                type="button"
+                disabled={isDeletingMaterial}
+                onClick={() => {
+                  if (!materialToDelete) return;
+                  const materialId = materialToDelete.id;
+                  startDeleteMaterialTransition(async () => {
+                    const result = await deleteRawMaterialAction({ id: materialId });
+                    if (!result.success) {
+                      setDeleteMaterialError(result.error ?? "Unable to delete raw material.");
+                      return;
+                    }
+                    setMaterialToDelete(null);
+                    setDeleteMaterialError(null);
+                    router.refresh();
+                  });
+                }}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeletingMaterial && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {isDeletingMaterial ? "Deleting..." : "Delete Material"}
+              </button>
+            </div>
+          </div>
+        </DialogShell>
       )}
     </div>
   );

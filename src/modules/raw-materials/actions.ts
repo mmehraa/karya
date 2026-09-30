@@ -7,6 +7,7 @@ import { getDashboardContext } from "@/modules/business/dashboard-context";
 
 import {
   createRawMaterial,
+  deleteRawMaterial,
   deleteRawMaterialPurchase,
   deleteRawMaterialConsumption,
   getRawMaterials,
@@ -525,4 +526,16 @@ export async function deleteRawMaterialConsumptionAction(
         "An unexpected error occurred while deleting the raw material consumption.",
     };
   }
+}
+
+
+export async function deleteRawMaterialAction(input: unknown): Promise<ActionResponse> {
+  try {
+    const { businessId } = await getDashboardContext();
+    const parsed = RawMaterialIdSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: "Invalid raw material ID." };
+    await deleteRawMaterial(businessId, parsed.data.id);
+    revalidatePath("/raw-materials"); revalidatePath("/materials"); revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Unable to delete raw material." }; }
 }

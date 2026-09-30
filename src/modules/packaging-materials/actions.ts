@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getDashboardContext } from "@/modules/business/dashboard-context";
 import {
   createPackagingMaterial,
+  deletePackagingMaterial,
   deletePackagingMaterialConsumption,
   deletePackagingMaterialPurchase,
   getPackagingMaterialInventoryHistory,
@@ -328,4 +329,15 @@ export async function deletePackagingMaterialConsumptionAction(
           : "Unable to delete packaging material consumption.",
     };
   }
+}
+
+export async function deletePackagingMaterialAction(input: unknown): Promise<ActionResponse> {
+  try {
+    const { businessId } = await getDashboardContext();
+    const parsed = PackagingMaterialIdSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: "Invalid packaging material ID." };
+    await deletePackagingMaterial(businessId, parsed.data.id);
+    revalidatePath("/materials"); revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Unable to delete packaging material." }; }
 }

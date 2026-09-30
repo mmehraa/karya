@@ -849,3 +849,22 @@ async function rebuildPackagingMaterialInventory(
     },
   });
 }
+
+/** Permanently removes an unused packaging material and its linked purchase ledger/cash outflows. */
+export async function deletePackagingMaterial(businessId: string, packagingMaterialId: string): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const material = await tx.packagingMaterial.findFirst({ where: { id: packagingMaterialId, businessId }, select: { id: true } });
+    if (!material) throw new Error("Packaging material not found.");
+    const [configuration, consumption] = await Promise.all([
+      tx.productPackagingConfigurationItem.findFirst({ where: { businessId, packagingMaterialId }, select: { id: true } }),
+      tx.productionBatchPackagingConsumption.findFirst({ where: { businessId, packagingMaterialId }, select: { id: true } }),
+    ]);
+    if (configuration || consumption) throw new Error("This packaging material is used in a product packaging configuration or production batch and cannot be deleted.");
+    const purchases = await tx.packagingMaterialPurchase.findMany({ where: { businessId, packagingMaterialId }, select: { id: true } });
+    const purchaseIds = purchases.map((p) => p.id);
+    if (purchaseIds.length) await tx.cashTransaction.deleteMany({ where: { businessId, sourceType: "PACKAGING_MATERIAL_PURCHASE", sourceId: { in: purchaseIds } } });
+    await tx.packagingMaterialInventoryTransaction.deleteMany({ where: { businessId, packagingMaterialId } });
+    await tx.packagingMaterialPurchase.deleteMany({ where: { businessId, packagingMaterialId } });
+    await tx.packagingMaterial.delete({ where: { id: material.id } });
+  });
+}

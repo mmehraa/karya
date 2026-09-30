@@ -882,3 +882,22 @@ export async function deleteRawMaterialConsumption(
     });
   });
 }
+
+/** Permanently removes an unused raw material and its linked purchase ledger/cash outflows. */
+export async function deleteRawMaterial(businessId: string, rawMaterialId: string): Promise<void> {
+  await db.$transaction(async (tx) => {
+    const material = await tx.rawMaterial.findFirst({ where: { id: rawMaterialId, businessId }, select: { id: true } });
+    if (!material) throw new Error("Raw material not found.");
+    const [formulation, consumption] = await Promise.all([
+      tx.productFormulationItem.findFirst({ where: { businessId, rawMaterialId }, select: { id: true } }),
+      tx.productionBatchRawMaterialConsumption.findFirst({ where: { businessId, rawMaterialId }, select: { id: true } }),
+    ]);
+    if (formulation || consumption) throw new Error("This raw material is used in a product formulation or production batch and cannot be deleted.");
+    const purchases = await tx.rawMaterialPurchase.findMany({ where: { businessId, rawMaterialId }, select: { id: true } });
+    const purchaseIds = purchases.map((p) => p.id);
+    if (purchaseIds.length) await tx.cashTransaction.deleteMany({ where: { businessId, sourceType: "RAW_MATERIAL_PURCHASE", sourceId: { in: purchaseIds } } });
+    await tx.rawMaterialInventoryTransaction.deleteMany({ where: { businessId, rawMaterialId } });
+    await tx.rawMaterialPurchase.deleteMany({ where: { businessId, rawMaterialId } });
+    await tx.rawMaterial.delete({ where: { id: material.id } });
+  });
+}
