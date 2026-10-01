@@ -1,8 +1,5 @@
 /**
- * Serialized representation of a Customer.
- *
- * Kept as a plain data structure so customer records can safely
- * cross the Server Component → Client Component boundary.
+ * Serialized customer record used across Server → Client boundaries.
  */
 export interface SerializedCustomer {
   id: string;
@@ -10,8 +7,12 @@ export interface SerializedCustomer {
   name: string;
   email: string | null;
   phone: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
   city: string | null;
   state: string | null;
+  postalCode: string | null;
+  country: string | null;
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
