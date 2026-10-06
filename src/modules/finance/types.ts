@@ -11,6 +11,15 @@ export interface SerializedExpense {
   paymentMethod: string | null;
   isRecurring: boolean;
   notes: string | null;
+
+  // False for expenses such as material wastage that affect
+  // accounting but do not represent a new cash outflow.
+  isCashExpense: boolean;
+
+  // Used to link system-generated expenses back to their source record.
+  sourceType: string | null;
+  sourceId: string | null;
+
   createdAt: Date;
   updatedAt: Date;
 }

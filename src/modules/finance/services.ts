@@ -34,6 +34,9 @@ function serializeExpense(expense: {
   paymentMethod: string | null;
   isRecurring: boolean;
   notes: string | null;
+  isCashExpense: boolean;
+  sourceType: string | null;
+  sourceId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): SerializedExpense {
@@ -48,6 +51,9 @@ function serializeExpense(expense: {
     paymentMethod: expense.paymentMethod,
     isRecurring: expense.isRecurring,
     notes: expense.notes,
+    isCashExpense: expense.isCashExpense,
+    sourceType: expense.sourceType,
+    sourceId: expense.sourceId,
     createdAt: expense.createdAt,
     updatedAt: expense.updatedAt,
   };
@@ -125,6 +131,12 @@ export async function createExpense(
             input.isRecurring,
           notes:
             input.notes ?? null,
+
+          // Expenses created through the normal
+          // finance form represent an actual cash outflow.
+          isCashExpense: true,
+          sourceType: null,
+          sourceId: null,
         },
       });
 
@@ -160,10 +172,8 @@ export async function createExpense(
  * Updates an expense and keeps its linked cash transaction
  * synchronized.
  *
- * The cash transaction is identified using:
- *
- * sourceType = EXPENSE
- * sourceId   = expense.id
+ * Cash transactions are only maintained for expenses where
+ * isCashExpense = true.
  */
 export async function updateExpense(
   businessId: string,
@@ -248,6 +258,24 @@ export async function updateExpense(
       });
 
     /**
+     * Non-cash expenses, such as material wastage,
+     * must never create a cash transaction.
+     */
+    if (!existing.isCashExpense) {
+      await tx.cashTransaction.deleteMany({
+        where: {
+          businessId,
+          sourceType: "EXPENSE",
+          sourceId: existing.id,
+        },
+      });
+
+      return serializeExpense(
+        updated,
+      );
+    }
+
+    /**
      * Find the automatically generated
      * cash transaction for this expense.
      */
@@ -261,7 +289,7 @@ export async function updateExpense(
       });
 
     /**
-     * Existing expenses created before Phase 3B
+     * Existing cash expenses created before Phase 3B
      * may not have a cash transaction.
      *
      * In that case, create one now so the ledger
@@ -326,6 +354,9 @@ export async function updateExpense(
 /**
  * Deletes an expense and its automatically generated
  * cash transaction atomically.
+ *
+ * Non-cash expenses do not have a cash transaction,
+ * so only the expense itself is removed.
  */
 export async function deleteExpense(
   businessId: string,
@@ -340,6 +371,7 @@ export async function deleteExpense(
         },
         select: {
           id: true,
+          isCashExpense: true,
           promotionalDispatch: {
             select: {
               id: true,
@@ -362,15 +394,17 @@ export async function deleteExpense(
 
     /**
      * Remove the generated cash movement
-     * before removing the source expense.
+     * only when this expense represents cash.
      */
-    await tx.cashTransaction.deleteMany({
-      where: {
-        businessId,
-        sourceType: "EXPENSE",
-        sourceId: existing.id,
-      },
-    });
+    if (existing.isCashExpense) {
+      await tx.cashTransaction.deleteMany({
+        where: {
+          businessId,
+          sourceType: "EXPENSE",
+          sourceId: existing.id,
+        },
+      });
+    }
 
     await tx.expense.delete({
       where: {

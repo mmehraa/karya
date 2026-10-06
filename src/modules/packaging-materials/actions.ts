@@ -8,12 +8,15 @@ import {
   deletePackagingMaterial,
   deletePackagingMaterialConsumption,
   deletePackagingMaterialPurchase,
+  deletePackagingMaterialWastage,
   getPackagingMaterialInventoryHistory,
   getPackagingMaterialPurchases,
   getPackagingMaterials,
   recordPackagingMaterialConsumption,
   recordPackagingMaterialPurchase,
+  recordPackagingMaterialWastage,
 } from "./services";
+
 import {
   CreatePackagingMaterialSchema,
   PackagingMaterialIdSchema,
@@ -21,6 +24,7 @@ import {
   PackagingMaterialPurchaseIdSchema,
   RecordPackagingMaterialConsumptionSchema,
   RecordPackagingMaterialPurchaseSchema,
+  RecordPackagingMaterialWastageSchema,
 } from "./validation";
 
 export type ActionResponse<T = unknown> = {
@@ -41,7 +45,8 @@ export async function createPackagingMaterialAction(
     if (!parsed.success) {
       return {
         success: false,
-        error: parsed.error.issues[0]?.message ??
+        error:
+          parsed.error.issues[0]?.message ??
           "Invalid packaging material details.",
       };
     }
@@ -144,7 +149,8 @@ export async function recordPackagingMaterialPurchaseAction(
     if (!parsed.success) {
       return {
         success: false,
-        error: parsed.error.issues[0]?.message ??
+        error:
+          parsed.error.issues[0]?.message ??
           "Invalid purchase details.",
       };
     }
@@ -187,7 +193,8 @@ export async function recordPackagingMaterialConsumptionAction(
     if (!parsed.success) {
       return {
         success: false,
-        error: parsed.error.issues[0]?.message ??
+        error:
+          parsed.error.issues[0]?.message ??
           "Invalid consumption details.",
       };
     }
@@ -212,6 +219,51 @@ export async function recordPackagingMaterialConsumptionAction(
         error instanceof Error
           ? error.message
           : "Unable to record packaging material consumption.",
+    };
+  }
+}
+
+export async function recordPackagingMaterialWastageAction(
+  input: unknown,
+): Promise<ActionResponse> {
+  try {
+    const { businessId } = await getDashboardContext();
+
+    const parsed =
+      RecordPackagingMaterialWastageSchema.safeParse(
+        input,
+      );
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ??
+          "Invalid wastage details.",
+      };
+    }
+
+    const material =
+      await recordPackagingMaterialWastage(
+        businessId,
+        parsed.data,
+      );
+
+    revalidatePath("/materials");
+    revalidatePath("/dashboard");
+    revalidatePath("/finance");
+
+    return {
+      success: true,
+      data: material,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to record packaging material wastage.",
     };
   }
 }
@@ -331,13 +383,81 @@ export async function deletePackagingMaterialConsumptionAction(
   }
 }
 
-export async function deletePackagingMaterialAction(input: unknown): Promise<ActionResponse> {
+export async function deletePackagingMaterialWastageAction(
+  input: unknown,
+): Promise<ActionResponse> {
   try {
     const { businessId } = await getDashboardContext();
-    const parsed = PackagingMaterialIdSchema.safeParse(input);
-    if (!parsed.success) return { success: false, error: "Invalid packaging material ID." };
-    await deletePackagingMaterial(businessId, parsed.data.id);
-    revalidatePath("/materials"); revalidatePath("/dashboard");
-    return { success: true };
-  } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Unable to delete packaging material." }; }
+
+    const parsed =
+      PackagingMaterialInventoryTransactionIdSchema.safeParse(
+        input,
+      );
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Invalid packaging material transaction ID.",
+      };
+    }
+
+    await deletePackagingMaterialWastage(
+      businessId,
+      parsed.data.id,
+    );
+
+    revalidatePath("/materials");
+    revalidatePath("/dashboard");
+    revalidatePath("/finance");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to delete packaging material wastage.",
+    };
+  }
+}
+
+export async function deletePackagingMaterialAction(
+  input: unknown,
+): Promise<ActionResponse> {
+  try {
+    const { businessId } = await getDashboardContext();
+
+    const parsed =
+      PackagingMaterialIdSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Invalid packaging material ID.",
+      };
+    }
+
+    await deletePackagingMaterial(
+      businessId,
+      parsed.data.id,
+    );
+
+    revalidatePath("/materials");
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to delete packaging material.",
+    };
+  }
 }

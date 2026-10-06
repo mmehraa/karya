@@ -17,28 +17,7 @@ const nullableString = (maxLength: number) =>
     z.string().max(maxLength).nullable(),
   );
 
-const moneyValue = z.preprocess(
-  (value) => {
-    if (value === undefined || value === null || value === "") {
-      return 0;
-    }
-
-    if (typeof value === "string") {
-      return Number(value);
-    }
-
-    return value;
-  },
-  z
-    .number()
-    .finite()
-    .min(0, "Amount cannot be negative.")
-    .refine(
-      (value) => Number.isInteger(value * 100),
-      "Amount can have at most two decimal places.",
-    )
-    .max(9999999999.99, "Amount is too large."),
-);
+const moneyValue = z.coerce.number().finite();
 
 const expenseCategorySchema = z.enum([
   "PRODUCT_FORMULATION",
@@ -52,6 +31,7 @@ const expenseCategorySchema = z.enum([
   "WEBSITE_SOFTWARE",
   "LEGAL_COMPLIANCE",
   "OPERATIONS",
+  "MATERIAL_WASTAGE",
   "OTHER",
 ]);
 
@@ -63,8 +43,8 @@ export const CreateExpenseSchema = z.object({
   description: z
     .string()
     .trim()
-    .min(2, "Description must be at least 2 characters.")
-    .max(200, "Description cannot exceed 200 characters."),
+    .min(1, "Expense description is required.")
+    .max(200, "Expense description cannot exceed 200 characters."),
 
   amount: moneyValue.refine(
     (value) => value > 0,
@@ -80,52 +60,22 @@ export const CreateExpenseSchema = z.object({
   notes: nullableString(500).optional(),
 });
 
-export const UpdateExpenseSchema = z
-  .object({
-    id: z.string().uuid(),
-
-    expenseDate: z.coerce.date().optional(),
-
-    category: expenseCategorySchema.optional(),
-
-    description: z
-      .string()
-      .trim()
-      .min(2, "Description must be at least 2 characters.")
-      .max(200, "Description cannot exceed 200 characters.")
-      .optional(),
-
-    amount: moneyValue.optional(),
-
-    vendor: nullableString(150).optional(),
-
-    paymentMethod: nullableString(80).optional(),
-
-    isRecurring: z.boolean().optional(),
-
-    notes: nullableString(500).optional(),
-  })
-  .refine(
-    (data) =>
-      data.expenseDate !== undefined ||
-      data.category !== undefined ||
-      data.description !== undefined ||
-      data.amount !== undefined ||
-      data.vendor !== undefined ||
-      data.paymentMethod !== undefined ||
-      data.isRecurring !== undefined ||
-      data.notes !== undefined,
-    {
-      message: "At least one expense field must be provided for an update.",
-    },
-  );
-
-export const DeleteExpenseSchema = z.object({
-  id: z.string().uuid(),
+export const UpdateExpenseSchema = CreateExpenseSchema.extend({
+  id: z.string().uuid("Invalid expense ID."),
 });
 
-export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>;
+export const DeleteExpenseSchema = z.object({
+  id: z.string().uuid("Invalid expense ID."),
+});
 
-export type UpdateExpenseInput = z.infer<typeof UpdateExpenseSchema>;
+export type CreateExpenseInput = z.infer<
+  typeof CreateExpenseSchema
+>;
 
-export type DeleteExpenseInput = z.infer<typeof DeleteExpenseSchema>;
+export type UpdateExpenseInput = z.infer<
+  typeof UpdateExpenseSchema
+>;
+
+export type DeleteExpenseInput = z.infer<
+  typeof DeleteExpenseSchema
+>;

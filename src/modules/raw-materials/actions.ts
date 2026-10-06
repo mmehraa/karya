@@ -10,11 +10,13 @@ import {
   deleteRawMaterial,
   deleteRawMaterialPurchase,
   deleteRawMaterialConsumption,
+  deleteRawMaterialWastage,
   getRawMaterials,
   getRawMaterialPurchases,
   getRawMaterialInventoryHistory,
   recordRawMaterialPurchase,
   recordRawMaterialConsumption,
+  recordRawMaterialWastage,
 } from "./services";
 
 import {
@@ -24,12 +26,14 @@ import {
   RawMaterialInventoryTransactionIdSchema,
   RecordRawMaterialPurchaseSchema,
   RecordRawMaterialConsumptionSchema,
+  RecordRawMaterialWastageSchema,
   type CreateRawMaterialInput,
   type RawMaterialIdInput,
   type RawMaterialPurchaseIdInput,
   type RawMaterialInventoryTransactionIdInput,
   type RecordRawMaterialPurchaseInput,
   type RecordRawMaterialConsumptionInput,
+  type RecordRawMaterialWastageInput,
 } from "./validation";
 
 import type {
@@ -157,14 +161,20 @@ export async function getRawMaterialPurchasesAction(
       data: purchases,
     };
   } catch (error) {
-    if (error instanceof Error && error.message === "Raw material not found.") {
+    if (
+      error instanceof Error &&
+      error.message === "Raw material not found."
+    ) {
       return {
         success: false,
         error: "Raw material not found or access denied.",
       };
     }
 
-    console.error("Failed to load raw material purchases:", error);
+    console.error(
+      "Failed to load raw material purchases:",
+      error,
+    );
 
     return {
       success: false,
@@ -173,7 +183,6 @@ export async function getRawMaterialPurchasesAction(
     };
   }
 }
-
 
 /**
  * Retrieves the complete inventory movement history for a raw material.
@@ -205,7 +214,10 @@ export async function getRawMaterialInventoryHistoryAction(
       data: history,
     };
   } catch (error) {
-    if (error instanceof Error && error.message === "Raw material not found.") {
+    if (
+      error instanceof Error &&
+      error.message === "Raw material not found."
+    ) {
       return {
         success: false,
         error: "Raw material not found or access denied.",
@@ -285,7 +297,10 @@ export async function recordRawMaterialPurchaseAction(
       }
     }
 
-    console.error("Failed to record raw material purchase:", error);
+    console.error(
+      "Failed to record raw material purchase:",
+      error,
+    );
 
     return {
       success: false,
@@ -372,6 +387,85 @@ export async function recordRawMaterialConsumptionAction(
 }
 
 /**
+ * Records raw-material wastage.
+ *
+ * Wastage reduces inventory and creates a non-cash
+ * MATERIAL_WASTAGE expense.
+ */
+export async function recordRawMaterialWastageAction(
+  input: RecordRawMaterialWastageInput,
+): Promise<ActionResponse<SerializedRawMaterial>> {
+  try {
+    const { businessId } = await getDashboardContext();
+
+    const parsed =
+      RecordRawMaterialWastageSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ||
+          "Invalid raw material wastage input.",
+      };
+    }
+
+    const material = await recordRawMaterialWastage(
+      businessId,
+      parsed.data,
+    );
+
+    revalidatePath("/raw-materials");
+    revalidatePath("/dashboard");
+    revalidatePath("/finance");
+
+    return {
+      success: true,
+      data: material,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.message === "Raw material not found.") {
+        return {
+          success: false,
+          error: "Raw material not found or access denied.",
+        };
+      }
+
+      if (
+        error.message.startsWith("Insufficient stock.")
+      ) {
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      if (
+        error.message ===
+        "Raw material has no available inventory."
+      ) {
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+    }
+
+    console.error(
+      "Failed to record raw material wastage:",
+      error,
+    );
+
+    return {
+      success: false,
+      error:
+        "An unexpected error occurred while recording raw material wastage.",
+    };
+  }
+}
+
+/**
  * Deletes a raw-material purchase and recalculates the material's
  * inventory quantity, value and weighted-average cost.
  */
@@ -450,7 +544,6 @@ export async function deleteRawMaterialPurchaseAction(
   }
 }
 
-
 /**
  * Deletes a raw-material consumption transaction and recalculates the
  * material's inventory state from the remaining ledger.
@@ -461,9 +554,10 @@ export async function deleteRawMaterialConsumptionAction(
   try {
     const { businessId } = await getDashboardContext();
 
-    const parsed = RawMaterialInventoryTransactionIdSchema.safeParse(
-      input,
-    );
+    const parsed =
+      RawMaterialInventoryTransactionIdSchema.safeParse(
+        input,
+      );
 
     if (!parsed.success) {
       return {
@@ -528,14 +622,120 @@ export async function deleteRawMaterialConsumptionAction(
   }
 }
 
-
-export async function deleteRawMaterialAction(input: unknown): Promise<ActionResponse> {
+/**
+ * Deletes a raw-material wastage transaction and its linked
+ * non-cash material-wastage expense.
+ */
+export async function deleteRawMaterialWastageAction(
+  input: RawMaterialInventoryTransactionIdInput,
+): Promise<ActionResponse> {
   try {
     const { businessId } = await getDashboardContext();
-    const parsed = RawMaterialIdSchema.safeParse(input);
-    if (!parsed.success) return { success: false, error: "Invalid raw material ID." };
-    await deleteRawMaterial(businessId, parsed.data.id);
-    revalidatePath("/raw-materials"); revalidatePath("/materials"); revalidatePath("/dashboard");
-    return { success: true };
-  } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Unable to delete raw material." }; }
+
+    const parsed =
+      RawMaterialInventoryTransactionIdSchema.safeParse(
+        input,
+      );
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error:
+          parsed.error.issues[0]?.message ||
+          "Invalid raw material wastage ID.",
+      };
+    }
+
+    await deleteRawMaterialWastage(
+      businessId,
+      parsed.data.id,
+    );
+
+    revalidatePath("/raw-materials");
+    revalidatePath("/dashboard");
+    revalidatePath("/finance");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message ===
+        "Raw material wastage not found."
+      ) {
+        return {
+          success: false,
+          error: "Wastage not found or access denied.",
+        };
+      }
+
+      if (error.message === "Raw material not found.") {
+        return {
+          success: false,
+          error: "Raw material not found or access denied.",
+        };
+      }
+
+      if (
+        error.message ===
+        "Deleting this wastage would leave the material inventory in an invalid state."
+      ) {
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+    }
+
+    console.error(
+      "Failed to delete raw material wastage:",
+      error,
+    );
+
+    return {
+      success: false,
+      error:
+        "An unexpected error occurred while deleting raw material wastage.",
+    };
+  }
+}
+
+export async function deleteRawMaterialAction(
+  input: unknown,
+): Promise<ActionResponse> {
+  try {
+    const { businessId } = await getDashboardContext();
+
+    const parsed =
+      RawMaterialIdSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: "Invalid raw material ID.",
+      };
+    }
+
+    await deleteRawMaterial(
+      businessId,
+      parsed.data.id,
+    );
+
+    revalidatePath("/raw-materials");
+    revalidatePath("/materials");
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unable to delete raw material.",
+    };
+  }
 }

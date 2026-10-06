@@ -29,13 +29,16 @@ import {
   getRawMaterialInventoryHistoryAction,
   recordRawMaterialPurchaseAction,
   recordRawMaterialConsumptionAction,
+  recordRawMaterialWastageAction,
   deleteRawMaterialPurchaseAction,
   deleteRawMaterialConsumptionAction,
+  deleteRawMaterialWastageAction,
 } from "@/modules/raw-materials/actions";
 
 import {
   CreateRawMaterialSchema,
   RecordRawMaterialPurchaseSchema,
+  RecordRawMaterialWastageSchema,
 } from "@/modules/raw-materials/validation";
 
 import type {
@@ -45,7 +48,12 @@ import type {
 
 type RawMaterialInventoryHistoryItem = {
   id: string;
-  type: "PURCHASE" | "CONSUMPTION" | "ADJUSTMENT_IN" | "ADJUSTMENT_OUT";
+   type:
+    | "PURCHASE"
+    | "CONSUMPTION"
+    | "WASTAGE"
+    | "ADJUSTMENT_IN"
+    | "ADJUSTMENT_OUT";
   quantity: number;
   unitCost: number;
   totalValue: number;
@@ -124,6 +132,9 @@ export function RawMaterialsClient({
     useState<SerializedRawMaterial | null>(null);
 
   const [consumptionMaterial, setConsumptionMaterial] =
+    useState<SerializedRawMaterial | null>(null);
+
+  const [wastageMaterial, setWastageMaterial] =
     useState<SerializedRawMaterial | null>(null);
 
   const [historyMaterial, setHistoryMaterial] =
@@ -366,6 +377,18 @@ export function RawMaterialsClient({
                         <button
                           type="button"
                           onClick={() =>
+                            setWastageMaterial(material)
+                          }
+                          disabled={material.currentQuantity <= 0}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-[11px] font-semibold text-red-700 shadow-sm hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          <MinusCircle className="h-3.5 w-3.5" />
+                          Wastage
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
                             setPurchaseMaterial(
                               material,
                             )
@@ -444,6 +467,22 @@ export function RawMaterialsClient({
           }
           onSuccess={() => {
             setConsumptionMaterial(null);
+            router.refresh();
+          }}
+        />
+      )}
+
+      {/* =====================================================
+          WASTAGE DIALOG
+      ===================================================== */}
+      {wastageMaterial && (
+        <WastageRawMaterialDialog
+          material={wastageMaterial}
+          onClose={() =>
+            setWastageMaterial(null)
+          }
+          onSuccess={() => {
+            setWastageMaterial(null);
             router.refresh();
           }}
         />
@@ -1647,6 +1686,331 @@ function ConsumptionDialog({
   );
 }
 
+function WastageRawMaterialDialog({
+  material,
+  onClose,
+  onSuccess,
+}: {
+  material: SerializedRawMaterial;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [quantity, setQuantity] = useState("");
+  const [reason, setReason] =
+    useState<
+      | "PRODUCTION_WASTAGE"
+      | "SPILLAGE"
+      | "DAMAGED_MATERIAL"
+      | "FAILED_BATCH"
+      | "SAMPLING_TESTING"
+      | "EXPIRED_MATERIAL"
+      | "OTHER"
+    >("PRODUCTION_WASTAGE");
+  const [notes, setNotes] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  const parsedQuantity = Number(quantity);
+
+  const hasValidQuantity =
+    Number.isFinite(parsedQuantity) &&
+    parsedQuantity > 0;
+
+  const exceedsStock =
+    hasValidQuantity &&
+    parsedQuantity > material.currentQuantity;
+
+  const estimatedCost =
+    hasValidQuantity && !exceedsStock
+      ? parsedQuantity * material.weightedAverageCost
+      : 0;
+
+  const remainingStock =
+    hasValidQuantity && !exceedsStock
+      ? material.currentQuantity - parsedQuantity
+      : material.currentQuantity;
+
+  const unitLabel =
+    material.baseUnit === "GRAM"
+      ? "g"
+      : material.baseUnit === "MILLILITER"
+        ? "ml"
+        : "pcs";
+
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    setError(null);
+
+    const parsed =
+      RecordRawMaterialWastageSchema.safeParse({
+        rawMaterialId: material.id,
+        quantity,
+        reason,
+        notes:
+          notes.trim() === ""
+            ? null
+            : notes.trim(),
+      });
+
+    if (!parsed.success) {
+      setError(
+        parsed.error.issues[0]?.message ??
+          "Please check the wastage details.",
+      );
+      return;
+    }
+
+    startTransition(async () => {
+      const result =
+        await recordRawMaterialWastageAction(
+          parsed.data,
+        );
+
+      if (!result.success) {
+        setError(
+          result.error ??
+            "Failed to record wastage.",
+        );
+        return;
+      }
+
+      onSuccess();
+    });
+  };
+
+  return (
+    <DialogShell
+      title={`Record Wastage — ${material.name}`}
+      description="Remove damaged, lost, expired, or otherwise wasted raw material from inventory."
+      onClose={isPending ? () => {} : onClose}
+      maxWidth="max-w-lg"
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5"
+      >
+        {error && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="rounded-xl border border-border bg-surface-muted p-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-[10px] text-text-secondary">
+                Available Stock
+              </p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">
+                {formatQuantity(
+                  material.currentQuantity,
+                  material.baseUnit,
+                )}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[10px] text-text-secondary">
+                Current Avg. Cost
+              </p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">
+                {formatINR(material.weightedAverageCost)}
+                <span className="ml-1 text-[10px] font-normal text-text-muted">
+                  / {unitLabel}
+                </span>
+              </p>
+            </div>
+
+            <div>
+              <p className="text-[10px] text-text-secondary">
+                Inventory Value
+              </p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">
+                {formatINR(material.currentValue)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="raw-material-wastage-quantity"
+            className="block text-xs font-semibold text-text-secondary"
+          >
+            Quantity Wasted *
+          </label>
+
+          <div className="relative">
+            <input
+              id="raw-material-wastage-quantity"
+              type="number"
+              min="0"
+              step="0.001"
+              value={quantity}
+              onChange={(event) => {
+                setQuantity(event.target.value);
+                setError(null);
+              }}
+              placeholder="e.g. 10"
+              disabled={isPending}
+              autoFocus
+              className={`w-full rounded-lg border border-border-strong px-3 py-2 pr-12 text-xs text-text-primary shadow-sm focus:outline-none focus:ring-1 ${
+                exceedsStock
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-500"
+                  : "focus:border-emerald-600 focus:ring-emerald-600"
+              }`}
+            />
+
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-text-muted">
+              {unitLabel}
+            </span>
+          </div>
+
+          {exceedsStock && (
+            <p className="text-[11px] text-red-600">
+              Quantity exceeds available stock.
+            </p>
+          )}
+
+          <p className="text-[10px] text-text-muted">
+            Wastage must be recorded in the material's base unit.
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <label
+            htmlFor="raw-material-wastage-reason"
+            className="block text-xs font-semibold text-text-secondary"
+          >
+            Reason *
+          </label>
+
+          <select
+            id="raw-material-wastage-reason"
+            value={reason}
+            onChange={(event) =>
+              setReason(
+                event.target.value as typeof reason,
+              )
+            }
+            disabled={isPending}
+            className="w-full rounded-lg border border-border-strong bg-surface-raised px-3 py-2 text-xs font-medium text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+          >
+            <option value="PRODUCTION_WASTAGE">
+              Production Wastage
+            </option>
+            <option value="SPILLAGE">
+              Spillage
+            </option>
+            <option value="DAMAGED_MATERIAL">
+              Damaged Material
+            </option>
+            <option value="FAILED_BATCH">
+              Failed Batch
+            </option>
+            <option value="SAMPLING_TESTING">
+              Sampling / Testing
+            </option>
+            <option value="EXPIRED_MATERIAL">
+              Expired Material
+            </option>
+            <option value="OTHER">
+              Other
+            </option>
+          </select>
+        </div>
+
+        {estimatedCost > 0 &&
+          !exceedsStock && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-700">
+                    Wastage Value
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-red-900">
+                    {formatINR(estimatedCost)}
+                  </p>
+                </div>
+
+                <div className="sm:text-right">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-700">
+                    Remaining Stock
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-red-900">
+                    {formatQuantity(
+                      remainingStock,
+                      material.baseUnit,
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-2 text-[11px] text-red-700">
+                This will be recorded as a material-wastage
+                expense, but it will not create a new cash
+                outflow.
+              </p>
+            </div>
+          )}
+
+        <div className="space-y-1">
+          <label
+            htmlFor="raw-material-wastage-notes"
+            className="block text-xs font-semibold text-text-secondary"
+          >
+            Notes
+          </label>
+
+          <textarea
+            id="raw-material-wastage-notes"
+            rows={3}
+            value={notes}
+            onChange={(event) =>
+              setNotes(event.target.value)
+            }
+            placeholder="Optional wastage notes..."
+            disabled={isPending}
+            className="w-full rounded-lg border border-border-strong px-3 py-2 text-xs text-text-primary shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+          />
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-border pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+            className="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:opacity-50"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            disabled={
+              isPending ||
+              !hasValidQuantity ||
+              exceedsStock
+            }
+            className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending && (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            )}
+
+            {isPending
+              ? "Recording..."
+              : "Record Wastage"}
+          </button>
+        </div>
+      </form>
+    </DialogShell>
+  );
+}
+
 function PurchaseHistoryDialog({
   material,
   onClose,
@@ -1671,10 +2035,16 @@ function PurchaseHistoryDialog({
   const [consumptionToDelete, setConsumptionToDelete] =
     useState<RawMaterialInventoryHistoryItem | null>(null);
 
+  const [wastageToDelete, setWastageToDelete] =
+    useState<RawMaterialInventoryHistoryItem | null>(null);
+
   const [isDeleting, startDeleteTransition] =
     useTransition();
 
   const [isDeletingConsumption, startDeleteConsumptionTransition] =
+    useTransition();
+
+  const [isDeletingWastage, startDeleteWastageTransition] =
     useTransition();
 
   useEffect(() => {
@@ -1770,9 +2140,39 @@ function PurchaseHistoryDialog({
     });
   };
 
+  const handleDeleteWastage = () => {
+    if (!wastageToDelete) return;
+
+    setError(null);
+
+    startDeleteWastageTransition(async () => {
+      const result = await deleteRawMaterialWastageAction({
+        id: wastageToDelete.id,
+      });
+
+      if (!result.success) {
+        setError(
+          result.error ||
+            "Failed to delete wastage.",
+        );
+        return;
+      }
+
+      setWastageToDelete(null);
+      router.refresh();
+
+      setHistory((current) =>
+        current.filter(
+          (entry) => entry.id !== wastageToDelete.id,
+        ),
+      );
+    });
+  };
+
   const typeLabel = (type: RawMaterialInventoryHistoryItem["type"]) => {
     if (type === "PURCHASE") return "Purchase";
     if (type === "CONSUMPTION") return "Consumption";
+    if (type === "WASTAGE") return "Wastage";
     if (type === "ADJUSTMENT_IN") return "Adjustment In";
     return "Adjustment Out";
   };
@@ -1784,6 +2184,10 @@ function PurchaseHistoryDialog({
 
     if (type === "CONSUMPTION") {
       return "border-amber-200 bg-amber-50 text-amber-700";
+    }
+
+    if (type === "WASTAGE") {
+      return "border-red-200 bg-red-50 text-red-700";
     }
 
     return "border-border bg-surface-muted text-text-secondary";
@@ -1814,7 +2218,7 @@ function PurchaseHistoryDialog({
             </p>
 
             <p className="mt-1 text-xs text-text-secondary">
-              Purchases and material consumption will appear here.
+              Purchases, consumption, and wastage will appear here.
             </p>
           </div>
         ) : (
@@ -1873,6 +2277,7 @@ function PurchaseHistoryDialog({
 
                     const signedValue =
                       entry.type === "CONSUMPTION" ||
+                      entry.type === "WASTAGE" ||
                       entry.type === "ADJUSTMENT_OUT"
                         ? -entry.totalValue
                         : entry.totalValue;
@@ -1899,6 +2304,7 @@ function PurchaseHistoryDialog({
 
                         <td className="px-4 py-3 text-right text-xs font-medium text-text-primary">
                           {entry.type === "CONSUMPTION" ||
+                          entry.type === "WASTAGE" ||
                           entry.type === "ADJUSTMENT_OUT"
                             ? "−"
                             : ""}
@@ -1957,7 +2363,11 @@ function PurchaseHistoryDialog({
                                   );
                                 }
                               }}
-                              disabled={isDeleting || isDeletingConsumption}
+                              disabled={
+                                isDeleting ||
+                                isDeletingConsumption ||
+                                isDeletingWastage
+                              }
                               className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label="Delete purchase"
                               title="Delete purchase"
@@ -1971,10 +2381,32 @@ function PurchaseHistoryDialog({
                                 setError(null);
                                 setConsumptionToDelete(entry);
                               }}
-                              disabled={isDeleting || isDeletingConsumption}
+                              disabled={
+                                isDeleting ||
+                                isDeletingConsumption ||
+                                isDeletingWastage
+                              }
                               className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label="Delete consumption"
                               title="Delete consumption"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          ) : entry.type === "WASTAGE" ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setError(null);
+                                setWastageToDelete(entry);
+                              }}
+                              disabled={
+                                isDeleting ||
+                                isDeletingConsumption ||
+                                isDeletingWastage
+                              }
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border bg-surface-raised text-text-muted shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                              aria-label="Delete wastage"
+                              title="Delete wastage"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -2122,6 +2554,85 @@ function PurchaseHistoryDialog({
                 {isDeletingConsumption
                   ? "Deleting..."
                   : "Delete Consumption"}
+              </button>
+            </div>
+          </div>
+        </DialogShell>
+      )}
+
+      {wastageToDelete && (
+        <DialogShell
+          title="Delete Wastage?"
+          description="This will remove the wastage movement and its linked material-wastage expense."
+          onClose={() => {
+            if (!isDeletingWastage) {
+              setWastageToDelete(null);
+            }
+          }}
+          maxWidth="max-w-md"
+        >
+          <div className="space-y-5">
+            {error && (
+              <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                {error}
+              </div>
+            )}
+
+            <div className="rounded-xl border border-border bg-surface-muted p-4">
+              <p className="text-xs font-semibold text-text-primary">
+                {formatQuantity(
+                  wastageToDelete.quantity,
+                  material.baseUnit,
+                )}
+              </p>
+
+              <p className="mt-1 text-xs text-text-secondary">
+                {formatDate(wastageToDelete.createdAt)}
+                {" · "}
+                {formatINR(wastageToDelete.totalValue)}
+              </p>
+
+              {wastageToDelete.notes && (
+                <p className="mt-1 text-[11px] text-text-muted">
+                  {wastageToDelete.notes}
+                </p>
+              )}
+            </div>
+
+            <p className="text-xs leading-5 text-text-secondary">
+              The wastage inventory entry and its linked
+              material-wastage expense will be permanently
+              removed. Karya will recalculate stock,
+              inventory value, and weighted-average cost
+              from the remaining inventory ledger.
+            </p>
+
+            <div className="flex justify-end gap-3 border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={() =>
+                  setWastageToDelete(null)
+                }
+                disabled={isDeletingWastage}
+                className="rounded-lg border border-border-strong bg-surface-raised px-4 py-2 text-xs font-semibold text-text-secondary shadow-sm hover:bg-surface-muted disabled:opacity-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteWastage}
+                disabled={isDeletingWastage}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeletingWastage && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                )}
+
+                {isDeletingWastage
+                  ? "Deleting..."
+                  : "Delete Wastage"}
               </button>
             </div>
           </div>

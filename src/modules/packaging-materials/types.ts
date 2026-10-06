@@ -51,6 +51,7 @@ export interface SerializedPackagingMaterialInventoryTransaction {
   type:
     | "PURCHASE"
     | "CONSUMPTION"
+    | "WASTAGE"
     | "ADJUSTMENT_IN"
     | "ADJUSTMENT_OUT";
 

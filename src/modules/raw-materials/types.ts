@@ -3,7 +3,10 @@ export interface SerializedRawMaterial {
   businessId: string;
   name: string;
   category: string | null;
-  baseUnit: "GRAM" | "MILLILITER" | "PIECE";
+  baseUnit:
+    | "GRAM"
+    | "MILLILITER"
+    | "PIECE";
   supplier: string | null;
   notes: string | null;
 
@@ -23,7 +26,12 @@ export interface SerializedRawMaterialPurchase {
   purchaseDate: Date;
 
   quantity: number;
-  purchaseUnit: "GRAM" | "KILOGRAM" | "MILLILITER" | "LITER" | "PIECE";
+  purchaseUnit:
+    | "GRAM"
+    | "KILOGRAM"
+    | "MILLILITER"
+    | "LITER"
+    | "PIECE";
 
   baseQuantity: number;
   totalAmount: number;
@@ -35,4 +43,27 @@ export interface SerializedRawMaterialPurchase {
 
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface SerializedRawMaterialInventoryTransaction {
+  id: string;
+  businessId: string;
+  rawMaterialId: string;
+
+  type:
+    | "PURCHASE"
+    | "CONSUMPTION"
+    | "WASTAGE"
+    | "ADJUSTMENT_IN"
+    | "ADJUSTMENT_OUT";
+
+  quantity: number;
+  unitCost: number;
+  totalValue: number;
+
+  purchaseId: string | null;
+  referenceId: string | null;
+  notes: string | null;
+
+  createdAt: Date;
 }

@@ -39,8 +39,14 @@ export const CreatePackagingMaterialSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Packaging material name must be at least 2 characters.")
-    .max(120, "Packaging material name cannot exceed 120 characters."),
+    .min(
+      2,
+      "Packaging material name must be at least 2 characters.",
+    )
+    .max(
+      120,
+      "Packaging material name cannot exceed 120 characters.",
+    ),
 
   category: nullableString(80).optional(),
 
@@ -52,9 +58,10 @@ export const CreatePackagingMaterialSchema = z.object({
 });
 
 export const RecordPackagingMaterialPurchaseSchema = z.object({
-  packagingMaterialId: z.string().uuid(
-    "Invalid packaging material ID.",
-  ),
+  packagingMaterialId: z
+    .string()
+    .trim()
+    .min(1, "Packaging material ID is required."),
 
   purchaseDate: z.coerce.date(),
 
@@ -79,22 +86,54 @@ export const RecordPackagingMaterialPurchaseSchema = z.object({
   notes: nullableString(500).optional(),
 });
 
-export const RecordPackagingMaterialConsumptionSchema = z.object({
-  packagingMaterialId: z.string().uuid(
-    "Invalid packaging material ID.",
-  ),
+export const RecordPackagingMaterialConsumptionSchema =
+  z.object({
+    packagingMaterialId: z
+      .string()
+      .trim()
+      .min(1, "Packaging material ID is required."),
 
-  quantity: positiveNumber(
-    "Consumption quantity must be greater than zero.",
-  ),
+    quantity: positiveNumber(
+      "Consumption quantity must be greater than zero.",
+    ),
 
-  referenceId: nullableString(100).optional(),
+    referenceId: nullableString(100).optional(),
 
-  notes: nullableString(500).optional(),
-});
+    notes: nullableString(500).optional(),
+  });
+
+export const PackagingMaterialWastageReasonSchema =
+  z.enum([
+    "PRODUCTION_WASTAGE",
+    "SPILLAGE",
+    "DAMAGED_MATERIAL",
+    "FAILED_BATCH",
+    "SAMPLING_TESTING",
+    "EXPIRED_MATERIAL",
+    "OTHER",
+  ]);
+
+export const RecordPackagingMaterialWastageSchema =
+  z.object({
+    packagingMaterialId: z
+      .string()
+      .trim()
+      .min(1, "Packaging material ID is required."),
+
+    quantity: positiveNumber(
+      "Wastage quantity must be greater than zero.",
+    ),
+
+    reason: PackagingMaterialWastageReasonSchema,
+
+    notes: nullableString(500).optional(),
+  });
 
 export const PackagingMaterialIdSchema = z.object({
-  id: z.string().uuid("Invalid packaging material ID."),
+  id: z
+    .string()
+    .trim()
+    .min(1, "Packaging material ID is required."),
 });
 
 export const PackagingMaterialPurchaseIdSchema = z.object({
@@ -103,32 +142,44 @@ export const PackagingMaterialPurchaseIdSchema = z.object({
   ),
 });
 
-export const PackagingMaterialInventoryTransactionIdSchema = z.object({
-  id: z.string().uuid(
-    "Invalid packaging material inventory transaction ID.",
-  ),
-});
+export const PackagingMaterialInventoryTransactionIdSchema =
+  z.object({
+    id: z.string().uuid(
+      "Invalid packaging material inventory transaction ID.",
+    ),
+  });
 
 export type CreatePackagingMaterialInput = z.infer<
   typeof CreatePackagingMaterialSchema
 >;
 
-export type RecordPackagingMaterialPurchaseInput = z.infer<
-  typeof RecordPackagingMaterialPurchaseSchema
->;
+export type RecordPackagingMaterialPurchaseInput =
+  z.infer<
+    typeof RecordPackagingMaterialPurchaseSchema
+  >;
 
-export type RecordPackagingMaterialConsumptionInput = z.infer<
-  typeof RecordPackagingMaterialConsumptionSchema
+export type RecordPackagingMaterialConsumptionInput =
+  z.infer<
+    typeof RecordPackagingMaterialConsumptionSchema
+  >;
+
+export type RecordPackagingMaterialWastageInput =
+  z.infer<
+    typeof RecordPackagingMaterialWastageSchema
+  >;
+
+export type PackagingMaterialWastageReason = z.infer<
+  typeof PackagingMaterialWastageReasonSchema
 >;
 
 export type PackagingMaterialIdInput = z.infer<
   typeof PackagingMaterialIdSchema
 >;
 
-export type PackagingMaterialPurchaseIdInput = z.infer<
-  typeof PackagingMaterialPurchaseIdSchema
->;
+export type PackagingMaterialPurchaseIdInput =
+  z.infer<typeof PackagingMaterialPurchaseIdSchema>;
 
-export type PackagingMaterialInventoryTransactionIdInput = z.infer<
-  typeof PackagingMaterialInventoryTransactionIdSchema
->;
+export type PackagingMaterialInventoryTransactionIdInput =
+  z.infer<
+    typeof PackagingMaterialInventoryTransactionIdSchema
+  >;

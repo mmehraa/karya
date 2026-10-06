@@ -7,6 +7,7 @@ import type {
   CreatePackagingMaterialInput,
   RecordPackagingMaterialConsumptionInput,
   RecordPackagingMaterialPurchaseInput,
+  RecordPackagingMaterialWastageInput,
 } from "./validation";
 
 import type {
@@ -557,6 +558,194 @@ export async function recordPackagingMaterialConsumption(
   });
 }
 
+/**
+ * Records packaging-material wastage.
+ *
+ * Wastage reduces inventory and creates a P&L expense,
+ * but does NOT create a cash outflow because the material
+ * was already purchased.
+ */
+export async function recordPackagingMaterialWastage(
+  businessId: string,
+  input: RecordPackagingMaterialWastageInput,
+): Promise<SerializedPackagingMaterial> {
+  return db.$transaction(async (tx) => {
+    const material =
+      await tx.packagingMaterial.findFirst({
+        where: {
+          id: input.packagingMaterialId,
+          businessId,
+        },
+      });
+
+    if (!material) {
+      throw new Error(
+        "Packaging material not found.",
+      );
+    }
+
+    const quantity =
+      new Prisma.Decimal(
+        input.quantity,
+      );
+
+    if (quantity.lte(0)) {
+      throw new Error(
+        "Wastage quantity must be greater than zero.",
+      );
+    }
+
+    if (
+      material.currentQuantity.lt(
+        quantity,
+      )
+    ) {
+      throw new Error(
+        `Insufficient packaging material stock. Available: ${material.currentQuantity.toString()} pieces.`,
+      );
+    }
+
+    if (
+      material.currentQuantity.lte(0)
+    ) {
+      throw new Error(
+        "Packaging material has no available inventory.",
+      );
+    }
+
+    const unitCost =
+      material.weightedAverageCost;
+
+    const totalValue =
+      quantity.mul(unitCost);
+
+    const newQuantity =
+      material.currentQuantity.sub(
+        quantity,
+      );
+
+    const newValue =
+      material.currentValue.sub(
+        totalValue,
+      );
+
+    if (newValue.lt(0)) {
+      throw new Error(
+        "Wastage would produce a negative inventory value.",
+      );
+    }
+
+    const newWeightedAverageCost =
+      newQuantity.gt(0)
+        ? newValue.div(
+            newQuantity,
+          )
+        : new Prisma.Decimal(0);
+
+    const transaction =
+      await tx.packagingMaterialInventoryTransaction.create(
+        {
+          data: {
+            businessId,
+            packagingMaterialId:
+              input.packagingMaterialId,
+            type: "WASTAGE",
+            quantity,
+            unitCost,
+            totalValue,
+            notes: [
+              `Reason: ${input.reason}`,
+              input.notes
+                ? `Notes: ${input.notes}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" — "),
+          },
+        },
+      );
+
+    await tx.packagingMaterial.update({
+      where: {
+        id: material.id,
+      },
+      data: {
+        currentQuantity:
+          newQuantity,
+        currentValue:
+          newValue,
+        weightedAverageCost:
+          newWeightedAverageCost,
+      },
+    });
+
+    await tx.expense.create({
+      data: {
+        businessId,
+        expenseDate: new Date(),
+        category: "MATERIAL_WASTAGE",
+        description:
+          `Packaging material wastage — ${material.name}`,
+        amount: totalValue,
+        vendor: null,
+        paymentMethod: null,
+        isRecurring: false,
+        notes: [
+          `Reason: ${input.reason}`,
+          input.notes
+            ? `Notes: ${input.notes}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" — "),
+        isCashExpense: false,
+        sourceType:
+          "PACKAGING_MATERIAL_WASTAGE",
+        sourceId:
+          transaction.id,
+      },
+    });
+
+    const updated =
+      await tx.packagingMaterial.findUniqueOrThrow({
+        where: {
+          id: material.id,
+        },
+      });
+
+    return {
+      id: updated.id,
+      businessId:
+        updated.businessId,
+      name: updated.name,
+      category:
+        updated.category,
+      baseUnit:
+        updated.baseUnit,
+      supplier:
+        updated.supplier,
+      notes:
+        updated.notes,
+      currentQuantity:
+        toNumber(
+          updated.currentQuantity,
+        ),
+      currentValue:
+        toNumber(
+          updated.currentValue,
+        ),
+      weightedAverageCost:
+        toNumber(
+          updated.weightedAverageCost,
+        ),
+      createdAt:
+        updated.createdAt,
+      updatedAt:
+        updated.updatedAt,
+    };
+  });
+}
+
 export async function getPackagingMaterialInventoryHistory(
   businessId: string,
   packagingMaterialId: string,
@@ -760,6 +949,64 @@ export async function deletePackagingMaterialConsumption(
   );
 }
 
+/**
+ * Deletes a packaging-material wastage transaction
+ * and its linked non-cash expense.
+ */
+export async function deletePackagingMaterialWastage(
+  businessId: string,
+  transactionId: string,
+): Promise<void> {
+  await db.$transaction(
+    async (tx) => {
+      const transaction =
+        await tx.packagingMaterialInventoryTransaction.findFirst(
+          {
+            where: {
+              id: transactionId,
+              businessId,
+              type: "WASTAGE",
+            },
+            select: {
+              id: true,
+              packagingMaterialId:
+                true,
+            },
+          },
+        );
+
+      if (!transaction) {
+        throw new Error(
+          "Packaging material wastage not found.",
+        );
+      }
+
+      await tx.expense.deleteMany({
+        where: {
+          businessId,
+          sourceType:
+            "PACKAGING_MATERIAL_WASTAGE",
+          sourceId: transaction.id,
+        },
+      });
+
+      await tx.packagingMaterialInventoryTransaction.delete(
+        {
+          where: {
+            id: transaction.id,
+          },
+        },
+      );
+
+      await rebuildPackagingMaterialInventory(
+        tx,
+        businessId,
+        transaction.packagingMaterialId,
+      );
+    },
+  );
+}
+
 async function rebuildPackagingMaterialInventory(
   tx: Prisma.TransactionClient,
   businessId: string,
@@ -851,20 +1098,140 @@ async function rebuildPackagingMaterialInventory(
 }
 
 /** Permanently removes an unused packaging material and its linked purchase ledger/cash outflows. */
-export async function deletePackagingMaterial(businessId: string, packagingMaterialId: string): Promise<void> {
+export async function deletePackagingMaterial(
+  businessId: string,
+  packagingMaterialId: string,
+): Promise<void> {
   await db.$transaction(async (tx) => {
-    const material = await tx.packagingMaterial.findFirst({ where: { id: packagingMaterialId, businessId }, select: { id: true } });
-    if (!material) throw new Error("Packaging material not found.");
-    const [configuration, consumption] = await Promise.all([
-      tx.productPackagingConfigurationItem.findFirst({ where: { businessId, packagingMaterialId }, select: { id: true } }),
-      tx.productionBatchPackagingConsumption.findFirst({ where: { businessId, packagingMaterialId }, select: { id: true } }),
-    ]);
-    if (configuration || consumption) throw new Error("This packaging material is used in a product packaging configuration or production batch and cannot be deleted.");
-    const purchases = await tx.packagingMaterialPurchase.findMany({ where: { businessId, packagingMaterialId }, select: { id: true } });
-    const purchaseIds = purchases.map((p) => p.id);
-    if (purchaseIds.length) await tx.cashTransaction.deleteMany({ where: { businessId, sourceType: "PACKAGING_MATERIAL_PURCHASE", sourceId: { in: purchaseIds } } });
-    await tx.packagingMaterialInventoryTransaction.deleteMany({ where: { businessId, packagingMaterialId } });
-    await tx.packagingMaterialPurchase.deleteMany({ where: { businessId, packagingMaterialId } });
-    await tx.packagingMaterial.delete({ where: { id: material.id } });
+    const material =
+      await tx.packagingMaterial.findFirst({
+        where: {
+          id: packagingMaterialId,
+          businessId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    if (!material) {
+      throw new Error(
+        "Packaging material not found.",
+      );
+    }
+
+    const [configuration, consumption] =
+      await Promise.all([
+        tx.productPackagingConfigurationItem.findFirst(
+          {
+            where: {
+              businessId,
+              packagingMaterialId,
+            },
+            select: {
+              id: true,
+            },
+          },
+        ),
+        tx.productionBatchPackagingConsumption.findFirst(
+          {
+            where: {
+              businessId,
+              packagingMaterialId,
+            },
+            select: {
+              id: true,
+            },
+          },
+        ),
+      ]);
+
+    if (configuration || consumption) {
+      throw new Error(
+        "This packaging material is used in a product packaging configuration or production batch and cannot be deleted.",
+      );
+    }
+
+    const purchases =
+      await tx.packagingMaterialPurchase.findMany(
+        {
+          where: {
+            businessId,
+            packagingMaterialId,
+          },
+          select: {
+            id: true,
+          },
+        },
+      );
+
+    const purchaseIds =
+      purchases.map((p) => p.id);
+
+    if (purchaseIds.length) {
+      await tx.cashTransaction.deleteMany({
+        where: {
+          businessId,
+          sourceType:
+            "PACKAGING_MATERIAL_PURCHASE",
+          sourceId: {
+            in: purchaseIds,
+          },
+        },
+      });
+    }
+
+    const inventoryTransactions =
+      await tx.packagingMaterialInventoryTransaction.findMany({
+        where: {
+          businessId,
+          packagingMaterialId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    const inventoryTransactionIds =
+      inventoryTransactions.map(
+        (transaction) => transaction.id,
+      );
+
+    await tx.packagingMaterialInventoryTransaction.deleteMany(
+      {
+        where: {
+          businessId,
+          packagingMaterialId,
+        },
+      },
+    );
+
+    await tx.packagingMaterialPurchase.deleteMany(
+      {
+        where: {
+          businessId,
+          packagingMaterialId,
+        },
+      },
+    );
+
+    if (inventoryTransactionIds.length > 0) {
+      await tx.expense.deleteMany({
+        where: {
+          businessId,
+          sourceType:
+            "PACKAGING_MATERIAL_WASTAGE",
+          sourceId: {
+            in: inventoryTransactionIds,
+          },
+        },
+      });
+    }
+
+    await tx.packagingMaterial.delete({
+      where: {
+        id: material.id,
+      },
+    });
   });
 }

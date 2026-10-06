@@ -314,6 +314,7 @@ enum RawMaterialPurchaseUnit {
 enum RawMaterialInventoryTransactionType {
   PURCHASE
   CONSUMPTION
+  WASTAGE
   ADJUSTMENT_IN
   ADJUSTMENT_OUT
 }
@@ -412,6 +413,7 @@ enum PackagingMaterialPurchaseUnit {
 enum PackagingMaterialInventoryTransactionType {
   PURCHASE
   CONSUMPTION
+  WASTAGE
   ADJUSTMENT_IN
   ADJUSTMENT_OUT
 }
@@ -718,6 +720,7 @@ enum ExpenseCategory {
   WEBSITE_SOFTWARE
   LEGAL_COMPLIANCE
   OPERATIONS
+  MATERIAL_WASTAGE
   OTHER
 }
 
@@ -731,15 +734,21 @@ model Expense {
   vendor        String?
   paymentMethod String?
   isRecurring   Boolean         @default(false)
+  isCashExpense Boolean         @default(true)
   notes         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+
+  sourceType String?
+  sourceId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
   promotionalDispatch PromotionalDispatch? @relation("PromotionalDispatchExpense")
 
   @@index([businessId, expenseDate])
   @@index([businessId, category])
+  @@index([businessId, sourceType, sourceId])
 }
 
 enum CashTransactionType {

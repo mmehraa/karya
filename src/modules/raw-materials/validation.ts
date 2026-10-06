@@ -93,6 +93,35 @@ export const RecordRawMaterialConsumptionSchema = z.object({
   notes: nullableString(500).optional(),
 });
 
+/**
+ * Valid reasons for raw-material wastage.
+ *
+ * The reason is intentionally kept as a string enum at the
+ * validation layer so the UI can present a controlled list
+ * without changing the existing database transaction model.
+ */
+export const RawMaterialWastageReasonSchema = z.enum([
+  "PRODUCTION_WASTAGE",
+  "SPILLAGE",
+  "DAMAGED_MATERIAL",
+  "FAILED_BATCH",
+  "SAMPLING_TESTING",
+  "EXPIRED_MATERIAL",
+  "OTHER",
+]);
+
+export const RecordRawMaterialWastageSchema = z.object({
+  rawMaterialId: z.string().trim().min(1, "Raw material ID is required."),
+
+  quantity: positiveNumber(
+    "Wastage quantity must be greater than zero.",
+  ),
+
+  reason: RawMaterialWastageReasonSchema,
+
+  notes: nullableString(500).optional(),
+});
+
 export const RawMaterialIdSchema = z.object({
   id: z.string().trim().min(1, "Raw material ID is required."),
 });
@@ -117,7 +146,17 @@ export type RecordRawMaterialConsumptionInput = z.infer<
   typeof RecordRawMaterialConsumptionSchema
 >;
 
-export type RawMaterialIdInput = z.infer<typeof RawMaterialIdSchema>;
+export type RecordRawMaterialWastageInput = z.infer<
+  typeof RecordRawMaterialWastageSchema
+>;
+
+export type RawMaterialWastageReason = z.infer<
+  typeof RawMaterialWastageReasonSchema
+>;
+
+export type RawMaterialIdInput = z.infer<
+  typeof RawMaterialIdSchema
+>;
 
 export type RawMaterialPurchaseIdInput = z.infer<
   typeof RawMaterialPurchaseIdSchema
