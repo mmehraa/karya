@@ -814,94 +814,63 @@ export async function getPackagingMaterialInventoryHistory(
   );
 }
 
+
 export async function deletePackagingMaterialPurchase(
   businessId: string,
   purchaseId: string,
 ): Promise<void> {
-  await db.$transaction(
-    async (tx) => {
-      const purchase =
-        await tx.packagingMaterialPurchase.findFirst(
-          {
-            where: {
-              id: purchaseId,
-              businessId,
-            },
-            select: {
-              id: true,
-              packagingMaterialId:
-                true,
-            },
-          },
-        );
-
-      if (!purchase) {
-        throw new Error(
-          "Packaging material purchase not found.",
-        );
-      }
-
-      const nonPurchaseTransaction =
-        await tx.packagingMaterialInventoryTransaction.findFirst(
-          {
-            where: {
-              businessId,
-              packagingMaterialId:
-                purchase.packagingMaterialId,
-              type: {
-                not: "PURCHASE",
-              },
-            },
-            select: {
-              id: true,
-            },
-          },
-        );
-
-      if (nonPurchaseTransaction) {
-        throw new Error(
-          "This purchase cannot be deleted because this packaging material has consumption or adjustment history.",
-        );
-      }
-
-      await tx.packagingMaterialInventoryTransaction.deleteMany(
-        {
-          where: {
-            businessId,
-            purchaseId:
-              purchase.id,
-          },
-        },
-      );
-
-      /**
-       * Remove the cash transaction created
-       * by this packaging purchase.
-       */
-      await tx.cashTransaction.deleteMany({
+  await db.$transaction(async (tx) => {
+    const purchase =
+      await tx.packagingMaterialPurchase.findFirst({
         where: {
+          id: purchaseId,
           businessId,
-          sourceType:
-            "PACKAGING_MATERIAL_PURCHASE",
-          sourceId: purchase.id,
+        },
+        select: {
+          id: true,
+          packagingMaterialId: true,
         },
       });
 
-      await tx.packagingMaterialPurchase.delete(
-        {
-          where: {
-            id: purchase.id,
-          },
-        },
+    if (!purchase) {
+      throw new Error(
+        "Packaging material purchase not found.",
       );
+    }
 
-      await rebuildPackagingMaterialInventory(
-        tx,
+    // Remove the inventory entry linked to this purchase.
+    await tx.packagingMaterialInventoryTransaction.deleteMany({
+      where: {
         businessId,
-        purchase.packagingMaterialId,
-      );
-    },
-  );
+        purchaseId: purchase.id,
+      },
+    });
+
+    // Remove only the cash-flow entry linked to this purchase.
+    await tx.cashTransaction.deleteMany({
+      where: {
+        businessId,
+        sourceType: "PACKAGING_MATERIAL_PURCHASE",
+        sourceId: purchase.id,
+      },
+    });
+
+    // Remove the purchase record itself.
+    await tx.packagingMaterialPurchase.delete({
+      where: {
+        id: purchase.id,
+      },
+    });
+
+    // Rebuild the ledger. This validates that the resulting
+    // inventory quantity and value are not negative.
+    // If validation fails, the database transaction rolls back.
+    await rebuildPackagingMaterialInventory(
+      tx,
+      businessId,
+      purchase.packagingMaterialId,
+    );
+  });
 }
 
 export async function deletePackagingMaterialConsumption(

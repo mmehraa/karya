@@ -713,6 +713,7 @@ export async function getRawMaterialInventoryHistory(
  *
  * The associated cash transaction is also removed.
  */
+
 export async function deleteRawMaterialPurchase(
   businessId: string,
   purchaseId: string,
@@ -753,43 +754,17 @@ export async function deleteRawMaterialPurchase(
       );
     }
 
-    const nonPurchaseTransaction =
-      await tx.rawMaterialInventoryTransaction.findFirst(
-        {
-          where: {
-            businessId,
-            rawMaterialId:
-              purchase.rawMaterialId,
-            type: {
-              not: "PURCHASE",
-            },
-          },
-          select: {
-            id: true,
-          },
-        },
-      );
-
-    if (nonPurchaseTransaction) {
-      throw new Error(
-        "This purchase cannot be deleted after inventory has been consumed or adjusted.",
-      );
-    }
-
     const purchaseTransaction =
-      await tx.rawMaterialInventoryTransaction.findFirst(
-        {
-          where: {
-            businessId,
-            rawMaterialId:
-              purchase.rawMaterialId,
-            purchaseId: purchase.id,
-          },
-          select: {
-            id: true,
-          },
+      await tx.rawMaterialInventoryTransaction.findFirst({
+        where: {
+          businessId,
+          rawMaterialId: purchase.rawMaterialId,
+          purchaseId: purchase.id,
         },
-      );
+        select: {
+          id: true,
+        },
+      });
 
     if (!purchaseTransaction) {
       throw new Error(
@@ -797,60 +772,72 @@ export async function deleteRawMaterialPurchase(
       );
     }
 
-    await tx.rawMaterialInventoryTransaction.delete(
-      {
-        where: {
-          id: purchaseTransaction.id,
-        },
+    // Remove only the inventory entry linked to this purchase.
+    await tx.rawMaterialInventoryTransaction.delete({
+      where: {
+        id: purchaseTransaction.id,
       },
-    );
+    });
 
-    /**
-     * Remove the cash movement created by this
-     * purchase. It is scoped by businessId and source
-     * identity so another business can never be touched.
-     */
+    // Remove the linked cash-flow transaction.
     await tx.cashTransaction.deleteMany({
       where: {
         businessId,
-        sourceType:
-          "RAW_MATERIAL_PURCHASE",
+        sourceType: "RAW_MATERIAL_PURCHASE",
         sourceId: purchase.id,
       },
     });
 
+    // Remove the purchase record.
     await tx.rawMaterialPurchase.delete({
       where: {
         id: purchase.id,
       },
     });
 
-    const remaining =
-      await tx.rawMaterialPurchase.aggregate({
+    // Rebuild stock and value from the complete remaining ledger.
+    const movements =
+      await tx.rawMaterialInventoryTransaction.findMany({
         where: {
           businessId,
-          rawMaterialId:
-            purchase.rawMaterialId,
+          rawMaterialId: purchase.rawMaterialId,
         },
-        _sum: {
-          baseQuantity: true,
-          totalAmount: true,
+        orderBy: [
+          { createdAt: "asc" },
+          { id: "asc" },
+        ],
+        select: {
+          type: true,
+          quantity: true,
+          totalValue: true,
         },
       });
 
-    const remainingQuantity =
-      remaining._sum.baseQuantity ??
-      new Prisma.Decimal(0);
+    let quantity = new Prisma.Decimal(0);
+    let value = new Prisma.Decimal(0);
 
-    const remainingValue =
-      remaining._sum.totalAmount ??
-      new Prisma.Decimal(0);
+    for (const movement of movements) {
+      if (
+        movement.type === "PURCHASE" ||
+        movement.type === "ADJUSTMENT_IN"
+      ) {
+        quantity = quantity.add(movement.quantity);
+        value = value.add(movement.totalValue);
+      } else {
+        quantity = quantity.sub(movement.quantity);
+        value = value.sub(movement.totalValue);
+      }
+    }
 
-    const remainingWeightedAverageCost =
-      remainingQuantity.gt(0)
-        ? remainingValue.div(
-            remainingQuantity,
-          )
+    if (quantity.lt(0) || value.lt(0)) {
+      throw new Error(
+        "Deleting this purchase would leave raw-material inventory in an invalid state. No changes were saved.",
+      );
+    }
+
+    const weightedAverageCost =
+      quantity.gt(0)
+        ? value.div(quantity)
         : new Prisma.Decimal(0);
 
     await tx.rawMaterial.update({
@@ -858,12 +845,9 @@ export async function deleteRawMaterialPurchase(
         id: material.id,
       },
       data: {
-        currentQuantity:
-          remainingQuantity,
-        currentValue:
-          remainingValue,
-        weightedAverageCost:
-          remainingWeightedAverageCost,
+        currentQuantity: quantity,
+        currentValue: value,
+        weightedAverageCost,
       },
     });
   });
