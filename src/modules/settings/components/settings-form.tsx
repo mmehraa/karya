@@ -7,6 +7,8 @@ import {
   Check,
   ChevronRight,
   FileJson,
+  FileSpreadsheet,
+  AlertTriangle,
   Globe2,
   Mail,
   PackageSearch,
@@ -39,7 +41,8 @@ type SettingsSection =
   | "orders"
   | "inventory"
   | "support"
-  | "backup";
+  | "backup"
+  | "export";
 
 const MONTHS = [
   "January",
@@ -274,6 +277,13 @@ export function SettingsForm({
               active={activeSection === "backup"}
               onClick={() => setActiveSection("backup")}
             />
+
+            <SettingsNavItem
+              label="Export Business Data"
+              icon={FileSpreadsheet}
+              active={activeSection === "export"}
+              onClick={() => setActiveSection("export")}
+            />
           </nav>
         </aside>
 
@@ -317,6 +327,10 @@ export function SettingsForm({
 
           {activeSection === "backup" && (
             <BackupSection />
+          )}
+
+          {activeSection === "export" && (
+            <ExcelExportSection />
           )}
         </div>
       </div>
@@ -779,6 +793,157 @@ function BackupSection() {
             Download JSON Backup
           </a>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Excel Export                                                               */
+/* -------------------------------------------------------------------------- */
+
+const EXPORT_FALLBACK_FILENAME = "karya-export.xlsx";
+
+function getDownloadFilename(
+  contentDisposition: string | null,
+) {
+  const match = contentDisposition?.match(
+    /filename="([^"]+)"/,
+  );
+
+  return match?.[1] ?? EXPORT_FALLBACK_FILENAME;
+}
+
+async function getExportErrorMessage(
+  response: Response,
+) {
+  try {
+    const body = (await response.json()) as {
+      error?: string;
+    };
+
+    if (body.error) {
+      return body.error;
+    }
+  } catch {
+    // Fall through to the generic message.
+  }
+
+  return "Unable to generate the Excel export.";
+}
+
+function ExcelExportSection() {
+  const [isExporting, setIsExporting] =
+    useState(false);
+  const [exportError, setExportError] =
+    useState<string | null>(null);
+  const [exportedFile, setExportedFile] =
+    useState<string | null>(null);
+
+  async function handleExport() {
+    setIsExporting(true);
+    setExportError(null);
+    setExportedFile(null);
+
+    try {
+      const response = await fetch(
+        "/api/export/excel",
+        {
+          cache: "no-store",
+        },
+      );
+
+      if (!response.ok) {
+        setExportError(
+          await getExportErrorMessage(response),
+        );
+
+        return;
+      }
+
+      const filename = getDownloadFilename(
+        response.headers.get("Content-Disposition"),
+      );
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      setExportedFile(filename);
+    } catch {
+      setExportError(
+        "Unable to reach the server. Please check your connection and try again.",
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  return (
+    <section>
+      <SectionHeader
+        icon={<FileSpreadsheet className="h-4 w-4" />}
+        title="Export Business Data"
+        description="Download all business records as an Excel workbook."
+      />
+
+      <div className="space-y-4 px-6 py-6 sm:px-7">
+        <div className="rounded-xl border border-border bg-surface-muted p-5">
+          <p className="text-sm font-semibold text-text-primary">
+            Excel workbook export
+          </p>
+
+          <p className="mt-1 max-w-xl text-xs leading-5 text-text-secondary">
+            Downloads every record stored for the
+            currently selected business — products,
+            formulations, materials, inventory ledgers,
+            production, customers, orders, expenses,
+            cash flow, marketing, goals and more — as a
+            single .xlsx workbook with one worksheet per
+            record type and an export guide.
+          </p>
+
+          <div className="mt-4 flex max-w-xl items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-800">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+
+            <span>
+              The workbook contains sensitive financial
+              and customer information. Review it before
+              sharing it with anyone.
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting}
+            className="mt-5 inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-4 py-2.5 text-xs font-semibold text-text-secondary shadow-sm transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Download className="h-3.5 w-3.5" />
+            {isExporting
+              ? "Generating workbook..."
+              : "Export Excel Workbook"}
+          </button>
+        </div>
+
+        {exportError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs font-medium text-red-700">
+            {exportError}
+          </div>
+        )}
+
+        {exportedFile && !exportError && (
+          <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">
+            <Check className="h-3.5 w-3.5" />
+            Workbook downloaded: {exportedFile}
+          </div>
+        )}
       </div>
     </section>
   );
